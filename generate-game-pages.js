@@ -262,12 +262,12 @@ function titleToFilename(title) {
 games.forEach(game => {
     const filename = `game-${titleToFilename(game.title)}.html`;
     const filepath = path.join(__dirname, 'games', filename);
-    
+
     // Replace placeholders
     let content = template
         .replace(/\{\{GAME_TITLE\}\}/g, game.title)
         .replace(/\{\{GAME_EMBED\}\}/g, game.embed);
-    
+
     // Write file
     fs.writeFileSync(filepath, content, 'utf8');
     console.log(`Generated: ${filename}`);
@@ -278,10 +278,8 @@ console.log(`\nGenerated ${games.length} game pages!`);
 =======
 const fs = require('fs');
 const path = require('path');
-
 // Read the template
 const template = fs.readFileSync(path.join(__dirname, 'games', 'game-template.html'), 'utf8');
-
 // Games array from script.js (first 243 games)
 const games = [
     { title: 'Chess FreezeNova', embed: 'https://cloud.onlinegames.io/games/2025/unity3/chess/index-og.html' },
@@ -527,29 +525,23 @@ const games = [
     { title: 'Golf Hit', embed: 'https://game.azgame.io/golf-hit/' },
     { title: 'Geometry Dasher Lite', embed: 'https://files.rocketgames.io/uploads/games/g/geometry-dash-lite/files/f76f8e/index.html' }
 ];
-
 // Function to convert title to filename
 function titleToFilename(title) {
     return title.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
 }
-
 // Generate all game pages
 games.forEach(game => {
     const filename = `game-${titleToFilename(game.title)}.html`;
     const filepath = path.join(__dirname, 'games', filename);
-    
     // Replace placeholders
     let content = template
         .replace(/\{\{GAME_TITLE\}\}/g, game.title)
         .replace(/\{\{GAME_EMBED\}\}/g, game.embed);
-    
     // Write file
     fs.writeFileSync(filepath, content, 'utf8');
     console.log(`Generated: ${filename}`);
 });
-
 console.log(`\nGenerated ${games.length} game pages!`);
-
 >>>>>>> 4dc6f7c1eebb0225a85825bf311a9cd1ce826522

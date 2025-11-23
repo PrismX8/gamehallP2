@@ -19,10 +19,10 @@
         </a>
         <h1>Contact Us</h1>
     </header>
-    
+
     <main class="legal-page-content">
         <p>We'd love to hear from you! Whether you have questions, suggestions, or need support, we're here to help.</p>
-        
+
         <h2>Get in Touch</h2>
         <div class="contact-form">
             <form id="contactForm">
@@ -58,17 +58,17 @@
                 <p>Thank you for your message! We'll get back to you as soon as possible.</p>
             </div>
         </div>
-        
+
         <h2>Other Ways to Reach Us</h2>
         <ul>
             <li><strong>Community Chat:</strong> Join our live chat on the <a href="../index.html">main page</a> to connect with other users and moderators in real-time.</li>
             <li><strong>Feedback:</strong> Use the feedback features throughout the site to share your thoughts and suggestions.</li>
         </ul>
-        
+
         <h2>Response Time</h2>
         <p>We aim to respond to all inquiries within 24-48 hours. For urgent technical issues, please include "URGENT" in your subject line.</p>
     </main>
-    
+
     <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -113,7 +113,7 @@ const contactFormSuccess = document.getElementById('contactFormSuccess');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const formData = {
             name: document.getElementById('contactName').value,
             email: document.getElementById('contactEmail').value,
@@ -122,20 +122,20 @@ if (contactForm) {
             timestamp: Date.now(),
             date: new Date().toISOString()
         };
-        
+
         // Save to Firebase
         if (db) {
             try {
                 const messagesRef = db.ref('contactMessages');
                 await messagesRef.push(formData);
                 console.log('Contact message saved to Firebase');
-                
+
                 // Show success message
                 contactForm.style.display = 'none';
                 if (contactFormSuccess) {
                     contactFormSuccess.style.display = 'block';
                 }
-                
+
                 // Reset form after 5 seconds
                 setTimeout(() => {
                     contactForm.reset();
@@ -168,4 +168,3 @@ if (contactForm) {
 </script>
 </body>
 </html>
-

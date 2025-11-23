@@ -3,34 +3,27 @@
   let progress = 0;
   const progressFill = document.querySelector('.premium-progress-fill');
   const progressPercentage = document.querySelector('.premium-percentage');
-  
   function updateProgress(targetProgress) {
       const startProgress = progress;
       const duration = 600;
       const startTime = performance.now();
-      
       function animate(currentTime) {
           const elapsed = currentTime - startTime;
           const progressRatio = Math.min(elapsed / duration, 1);
-          const easeProgress = 1 - Math.pow(1 - progressRatio, 3); // Ease out cubic
-          
+          const easeProgress = 1 - Math.pow(1 - progressRatio, 3);  cubic
           progress = startProgress + (targetProgress - startProgress) * easeProgress;
-          
           if (progressFill) {
               progressFill.style.width = progress + '%';
           }
           if (progressPercentage) {
               progressPercentage.textContent = Math.round(progress) + '%';
           }
-          
           if (progressRatio < 1) {
               requestAnimationFrame(animate);
           }
       }
-      
       requestAnimationFrame(animate);
   }
-  
   function removeLoadingScreen() {
       const introScreen = document.getElementById('introScreen');
       if (introScreen) {
@@ -43,25 +36,17 @@
           }, 800);
       }
   }
-  
-  // Animate progress smoothly
   setTimeout(() => updateProgress(25), 300);
   setTimeout(() => updateProgress(50), 800);
   setTimeout(() => updateProgress(75), 1400);
   setTimeout(() => updateProgress(95), 2000);
   setTimeout(() => updateProgress(100), 2400);
-  
-  // Skip loading screen only when returning from other pages (like all-games.html)
-  // Always show loading animation on initial website load
-  const isReturningFromOtherPage = document.referrer && 
-      document.referrer.includes(window.location.hostname) && 
+  const isReturningFromOtherPage = document.referrer &&
+      document.referrer.includes(window.location.hostname) &&
       (document.referrer.includes('pages/') || document.referrer.includes('games/'));
-  
   if (isReturningFromOtherPage) {
-      // Skip loading animation when returning from other pages
       removeLoadingScreen();
   } else {
-      // Show loading animation on initial load
       if (document.readyState === 'complete' || document.readyState === 'interactive') {
           setTimeout(removeLoadingScreen, 3000);
       } else {
@@ -78,17 +63,11 @@ const firebaseConfig = {
   databaseURL: "https://shsproject-d60d0-default-rtdb.firebaseio.com",
   projectId: "shsproject-d60d0",
 };
-
 let db = null;
-
-// Initialize Firebase when SDK is ready
 let firebaseInitAttempts = 0;
-const MAX_FIREBASE_INIT_ATTEMPTS = 50; // 5 seconds max (50 * 100ms)
-
+const MAX_FIREBASE_INIT_ATTEMPTS = 50;
 function initializeFirebase() {
   firebaseInitAttempts++;
-  
-  // Check if Firebase SDK is loaded
   if (typeof firebase === 'undefined') {
     if (firebaseInitAttempts < MAX_FIREBASE_INIT_ATTEMPTS) {
       setTimeout(initializeFirebase, 100);
@@ -98,19 +77,12 @@ function initializeFirebase() {
     }
     return;
   }
-
   try {
-    // Check if Firebase is already initialized
-    if (firebase.apps.length === 0) {
-      firebase.initializeApp(firebaseConfig);
+    eConfig);
     }
     db = firebase.database();
     console.log('Firebase initialized successfully');
-    
-    // Test connection (only if db is available)
-    if (db) {
-      try {
-        db.ref('.info/connected').once('value', (snapshot) => {
+    e', (snapshot) => {
           if (snapshot.val() === true) {
             console.log('Firebase connected');
           } else {
@@ -130,14 +102,8 @@ function initializeFirebase() {
     db = null;
   }
 }
-
-// Start initialization
 initializeFirebase();
-
-// Generate a unique visitor ID (persistent across sessions)
-let visitorId = localStorage.getItem('visitorId');
-if (!visitorId) {
-  visitorId = 'visitor_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+0000);
   localStorage.setItem('visitorId', visitorId);
 }
 console.log('Visitor ID:', visitorId);
@@ -150,10 +116,7 @@ if (db) {
 }
 const visitorCounter = document.getElementById('visitorCounter');
 const INITIAL_VISITOR_COUNT = 127349;
-
-// Initialize visitor count to 127,349 if it doesn't exist or is less
-if (db) {
-  db.ref('totalVisitors').once('value').then(snap => {
+.then(snap => {
       const currentCount = snap.val() || 0;
       if (currentCount < INITIAL_VISITOR_COUNT) {
           db.ref('totalVisitors').set(INITIAL_VISITOR_COUNT).catch(error => {
@@ -164,13 +127,9 @@ if (db) {
       console.error('Error checking visitor count:', error);
   });
 }
-
-// Increment visitor count on every page load (including refreshes)
 if (db) {
   db.ref('totalVisitors').transaction(val => {
       const currentVal = val || INITIAL_VISITOR_COUNT;
-      // If count is less than initial, set to initial first
-      if (currentVal < INITIAL_VISITOR_COUNT) {
           return INITIAL_VISITOR_COUNT + 1;
       }
       return currentVal + 1;
@@ -178,31 +137,21 @@ if (db) {
       console.error('Error updating visitor count:', error);
     });
 }
-
 const totalRef = db ? db.ref('totalVisitors') : null;
 const onlineDbRef = db ? db.ref('online') : null;
-
-// Initialize games arrays early to avoid temporal dead zone issues
-let gameSites = [];
-let allGamesFromJSON = [];
-let categorizedGames = {};
+et categorizedGames = {};
 let gameStats = {};
 let gameStatsListener = null;
 let gameRatings = {};
 let gameRatingsListener = null;
-
-// Chat Moderation System
+ System
 let bannedUsers = {};
 let userMessageCounts = {}; // Track message frequency for spam detection
 let lastMessageTime = {}; // Track last message time per user
 const MAX_MESSAGES_PER_MINUTE = 5; // Rate limit
 const MIN_TIME_BETWEEN_MESSAGES = 2000; // 2 seconds minimum between messages
 const SPAM_DETECTION_WINDOW = 60000; // 1 minute window
-
-// Profanity filter - common words (you can expand this list)
-let PROFANITY_WORDS = [];
-let moderationSettings = {
-    profanityFilterEnabled: true,
+   profanityFilterEnabled: true,
     spamDetectionEnabled: true,
     rateLimitEnabled: true,
     maxCapsRatio: 0.7,
@@ -217,21 +166,15 @@ let moderationStats = {
     spamDetected: 0,
     activeUsers: 0
 };
-
-// Load moderation settings from Firebase
-if (db) {
-    db.ref('moderationSettings').on('value', (snapshot) => {
-        if (snapshot.exists()) {
+      if (snapshot.exists()) {
             moderationSettings = { ...moderationSettings, ...snapshot.val() };
             updateModerationUI();
         }
     });
-    
     db.ref('profanityWords').on('value', (snapshot) => {
         PROFANITY_WORDS = snapshot.val() || [];
         updateProfanityWordsList();
     });
-    
     db.ref('moderationStats').on('value', (snapshot) => {
         if (snapshot.exists()) {
             moderationStats = { ...moderationStats, ...snapshot.val() };
@@ -239,71 +182,53 @@ if (db) {
         }
     });
 }
-
-// Check if message contains profanity (case-insensitive)
-function containsProfanity(text) {
+(text) {
     if (!moderationSettings.profanityFilterEnabled) return false;
     const lowerText = text.toLowerCase().trim();
     return PROFANITY_WORDS.some(word => {
         const lowerWord = word.toLowerCase().trim();
         if (!lowerWord) return false;
-        // Check for whole word or as part of the text (case-insensitive)
+         or as part of the text (case-insensitive)
         return lowerText.includes(lowerWord);
     });
 }
-
-// Check for spam patterns
+ patterns
 function isSpam(text) {
     if (!moderationSettings.spamDetectionEnabled) return false;
-    
-    // Check for repeated characters
+     characters
     const repeatPattern = new RegExp(`(.)\\1{${moderationSettings.maxRepeatedChars},}`);
     if (repeatPattern.test(text)) return true;
-    
-    // Check for excessive caps
+     caps
     if (text.length > 10) {
         const capsRatio = (text.match(/[A-Z]/g) || []).length / text.length;
         if (capsRatio > moderationSettings.maxCapsRatio) return true;
     }
-    
-    // Check for excessive links
+     links
     const linkCount = (text.match(/https?:\/\//g) || []).length;
     if (linkCount > moderationSettings.maxLinksPerMessage) return true;
-    
     return false;
 }
-
-// Check rate limiting
 function checkRateLimit(uid) {
     if (!moderationSettings.rateLimitEnabled) return { allowed: true };
-    
     const now = Date.now();
     const userMessages = userMessageCounts[uid] || [];
-    
-    // Remove messages outside the time window
-    const recentMessages = userMessages.filter(time => now - time < SPAM_DETECTION_WINDOW);
+    ETECTION_WINDOW);
     userMessageCounts[uid] = recentMessages;
-    
-    // Check if user is sending too many messages
+     too many messages
     if (recentMessages.length >= moderationSettings.maxMessagesPerMinute) {
         return { allowed: false, reason: 'Too many messages. Please wait a moment.' };
     }
-    
-    // Check minimum time between messages
+     between messages
     const lastTime = lastMessageTime[uid] || 0;
     if (now - lastTime < moderationSettings.minTimeBetweenMessages) {
         return { allowed: false, reason: 'Please wait before sending another message.' };
     }
-    
     return { allowed: true };
 }
-
-// Check if user is banned
 function isUserBanned(uid) {
     if (!bannedUsers[uid]) return false;
     const banData = bannedUsers[uid];
-    
-    // Check if ban has expired
+     has expired
     if (banData.expiresAt && Date.now() > banData.expiresAt) {
         delete bannedUsers[uid];
         if (db) {
@@ -311,18 +236,15 @@ function isUserBanned(uid) {
         }
         return false;
     }
-    
     return true;
 }
-
-// Load banned users from Firebase
+ users from Firebase
 if (db) {
     db.ref('bannedUsers').on('value', (snapshot) => {
         bannedUsers = snapshot.val() || {};
     });
 }
-
-// Utils object - must be defined before background effects and other features
+ - must be defined before background effects and other features
 const Utils = {
   debounce: function(func, wait) {
       let timeout;
@@ -346,7 +268,6 @@ const Utils = {
       };
   }
 };
-
 function updateCounter() {
     if (!onlineDbRef || !totalRef) return;
     onlineDbRef.once('value').then(snap => {
@@ -365,22 +286,18 @@ function updateCounter() {
         console.error('Error updating counter:', error);
     });
 }
-
-// Format number with commas for display
+ with commas for display
 function formatNumber(num) {
   return num.toLocaleString();
 }
-
-// Update counter live when online users change
+ live when online users change
 if (onlineDbRef && totalRef) {
   onlineDbRef.on('value', updateCounter);
   totalRef.on('value', updateCounter);
 }
-
 let userProfileData = JSON.parse(localStorage.getItem('userProfile')) || { profileCreated: false };
 let username = (userProfileData.profileCreated && userProfileData.username) ? userProfileData.username : ('Guest' + Math.floor(Math.random()*1000));
 let userColor = ['#007bff','#ff4500','#32cd32','#ffa500','#9932cc'][Math.floor(Math.random()*5)];
-
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const typingIndicator = document.getElementById('typingIndicator');
@@ -403,15 +320,12 @@ function stopTyping(){
     typing = false;
     db.ref('chatTyping/'+visitorId).remove().catch(error => console.error('Error removing typing:', error));
 }
-
-// Send message with moderation
+ with moderation
 if (chatInput) {
     chatInput.addEventListener('keypress', e => {
         if (!db) return;
         if(e.key === 'Enter' && chatInput.value.trim() !== ''){
             const messageText = chatInput.value.trim();
-            
-            // Check if user is banned
             if (isUserBanned(visitorId)) {
                 if (typeof notifications !== 'undefined' && notifications.show) {
                     notifications.show('You are banned from chatting', 'error', 3000);
@@ -421,8 +335,6 @@ if (chatInput) {
                 chatInput.value = '';
                 return;
             }
-            
-            // Check rate limiting
             const rateLimitCheck = checkRateLimit(visitorId);
             if (!rateLimitCheck.allowed) {
                 if (typeof notifications !== 'undefined' && notifications.show) {
@@ -432,7 +344,6 @@ if (chatInput) {
                 }
                 return;
             }
-            
             // Check for profanity
             if (containsProfanity(messageText)) {
                 trackBlockedMessage('profanity');
@@ -444,8 +355,6 @@ if (chatInput) {
                 chatInput.value = '';
                 return;
             }
-            
-            // Check for spam
             if (isSpam(messageText)) {
                 trackBlockedMessage('spam');
                 if (typeof notifications !== 'undefined' && notifications.show) {
@@ -456,7 +365,6 @@ if (chatInput) {
                 chatInput.value = '';
                 return;
             }
-            
             // Update rate limiting tracking
             const now = Date.now();
             if (!userMessageCounts[visitorId]) {
@@ -464,7 +372,6 @@ if (chatInput) {
             }
             userMessageCounts[visitorId].push(now);
             lastMessageTime[visitorId] = now;
-            
             const msgData = {
                 user: username,
                 text: messageText,
@@ -508,7 +415,6 @@ function renderChatMessage(msg, msgId, snapshot) {
         avatarDiv.textContent = msg.avatar || '👤';
     }
     msgDiv.appendChild(avatarDiv);
-    
     const leftDiv = document.createElement('div');
     leftDiv.style.flex='1';
     let content = msg.text;
@@ -522,8 +428,7 @@ function renderChatMessage(msg, msgId, snapshot) {
     if(msg.link) {
         content = `${content}<br><a href="${msg.link}" target="_blank" rel="noopener noreferrer" style="color:#FFD700; text-decoration:underline;">${msg.link}</a>`;
     }
-    
-    leftDiv.innerHTML = `<span style="color:${msg.color}; font-weight:bold;">${msg.user}</span>: ${content} 
+    leftDiv.innerHTML = `<span style="color:${msg.color}; font-weight:bold;">${msg.user}</span>: ${content}
                          <small style="color:rgba(255,255,255,0.5); font-size:11px;">${new Date(msg.time).toLocaleTimeString()}</small>`;
     leftDiv.style.maxWidth='none';
     leftDiv.style.width='auto';
@@ -559,13 +464,11 @@ function renderChatMessage(msg, msgId, snapshot) {
       };
         leftDiv.appendChild(delBtn);
     }
-
     msgDiv.appendChild(leftDiv);
     const reactionsDiv = document.createElement('div');
     reactionsDiv.className = 'emoji-reactions';
     reactionsDiv.style.cssText = 'display:flex; gap:5px; margin-top:5px; flex-wrap:wrap; width:100%;';
     msgDiv.appendChild(reactionsDiv);
-    
     if (chatMessages) {
         chatMessages.appendChild(msgDiv);
         if(chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 50){
@@ -616,7 +519,6 @@ if (db && chatMessages) {
       });
   }
 }
-
 function updateMessageReactions(msgId, reactions) {
     const msgDiv = document.querySelector(`[data-msg-id="${msgId}"]`);
     if(!msgDiv) return;
@@ -627,10 +529,9 @@ function updateMessageReactions(msgId, reactions) {
         reactionsDiv.style.cssText = 'display:flex; gap:5px; margin-top:5px; flex-wrap:wrap; width:100%;';
         msgDiv.appendChild(reactionsDiv);
     }
-    reactionsDiv.innerHTML = Object.entries(reactions).map(([emoji, count]) => 
+    reactionsDiv.innerHTML = Object.entries(reactions).map(([emoji, count]) =>
         `<button class="reactBtn" data-msg="${msgId}" data-emoji="${emoji}" style="padding:4px 8px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:4px; color:#FFD700; cursor:pointer; font-size:12px;">${emoji} ${count}</button>`
     ).join('') + `<button class="addReactionBtn" data-msg="${msgId}" style="padding:4px 8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); border-radius:4px; color:rgba(255,255,255,0.7); cursor:pointer; font-size:12px;">+ React</button>`;
-    
     reactionsDiv.querySelectorAll('.reactBtn').forEach(btn => {
         btn.addEventListener('click', () => {
             if(db) {
@@ -638,7 +539,6 @@ function updateMessageReactions(msgId, reactions) {
             }
         });
     });
-    
     reactionsDiv.querySelector('.addReactionBtn')?.addEventListener('click', () => {
         const emoji = prompt('Enter emoji:');
         if(emoji && db) {
@@ -646,9 +546,8 @@ function updateMessageReactions(msgId, reactions) {
         }
     });
 }
-
-// Change Name/Color popup
-// Change name button (works for both regular and fullscreen)
+/Color popup
+ button (works for both regular and fullscreen)
 function openNameColorPopup() {
   const popup = document.getElementById('chatNameColorPopup');
   if (popup) {
@@ -661,15 +560,13 @@ function openNameColorPopup() {
       notifications.show('Name/Color popup not found', 'error', 2000);
   }
 }
-
-// Get popup elements
+ elements
 const chatNameColorPopup = document.getElementById('chatNameColorPopup');
 const chatPopupUsername = document.getElementById('chatPopupUsername');
 const chatPopupColor = document.getElementById('chatPopupColor');
 const chatSaveNameColor = document.getElementById('chatSaveNameColor');
 const changeNameBtn = document.getElementById('changeNameBtn');
-
-// Update openNameColorPopup function to use actual elements
+ function to use actual elements
 if (chatNameColorPopup && chatPopupUsername && chatPopupColor) {
   openNameColorPopup = function() {
     chatPopupUsername.value = username;
@@ -677,8 +574,7 @@ if (chatNameColorPopup && chatPopupUsername && chatPopupColor) {
     chatNameColorPopup.style.display = 'block';
   };
 }
-
-// Connect change name button (only once, remove duplicates)
+ name button (only once, remove duplicates)
 if (changeNameBtn) {
   // Remove any existing listeners by cloning
   const newBtn = changeNameBtn.cloneNode(true);
@@ -688,7 +584,7 @@ if (changeNameBtn) {
       updatedBtn.addEventListener('click', openNameColorPopup);
   }
 }
-// fullscreenNameBtn will be connected after it's declared (see line ~1244)
+ will be connected after it's declared (see line ~1244)
 if (chatSaveNameColor) {
     chatSaveNameColor.addEventListener('click', () => {
         if(chatPopupUsername.value.trim() !== '') username = chatPopupUsername.value.trim();
@@ -709,12 +605,10 @@ const extraBtn = document.getElementById('extraSiteBtn');
 const privacyBtn = document.getElementById('privacyBtn');
 let onExtra = false;
 let onPrivacy = false;
-
 const reloadBtn = document.getElementById('reloadBtn');
 if (reloadBtn && iframe) {
     reloadBtn.addEventListener('click', ()=>iframe.src = iframe.src);
 }
-
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 if (fullscreenBtn) {
     fullscreenBtn.addEventListener("click", () => {
@@ -724,47 +618,37 @@ if (fullscreenBtn) {
         }
     });
 }
-
 const zoomInBtn = document.getElementById('zoomInBtn');
 if (zoomInBtn && iframe) {
     zoomInBtn.addEventListener('click', ()=>{ zoomLevel += 0.1; iframe.style.transform = `scale(${zoomLevel})`; iframe.style.transformOrigin='top left'; });
 }
-
 const zoomOutBtn = document.getElementById('zoomOutBtn');
 if (zoomOutBtn && iframe) {
     zoomOutBtn.addEventListener('click', ()=>{ zoomLevel = Math.max(0.5, zoomLevel - 0.1); iframe.style.transform = `scale(${zoomLevel})`; iframe.style.transformOrigin='top left'; });
 }
-
 const hideIframeBtn = document.getElementById('hideIframeBtn');
 if (hideIframeBtn && iframe) {
     hideIframeBtn.addEventListener('click', ()=>iframe.style.display='none');
 }
-
 const showIframeBtn = document.getElementById('showIframeBtn');
 if (showIframeBtn && iframe) {
     showIframeBtn.addEventListener('click', ()=>iframe.style.display='block');
 }
-
 extraBtn.addEventListener('click', ()=>{
     const iframeContainer = document.getElementById('iframeContainer');
     const gamesGridContainer = document.getElementById('gamesGridContainer');
     const currentSiteTitle = document.getElementById('currentSiteTitle');
-    
     if(!onExtra){
-        // Show iframe container
+         container
         if (iframeContainer) iframeContainer.style.display = 'block';
         if (gamesGridContainer) gamesGridContainer.style.display = 'none';
         if (currentSiteTitle) currentSiteTitle.textContent = 'Extra Site';
-        
-        // Load the site
         iframe.src = 'about:blank';
         setTimeout(() => {
             iframe.src = 'https://funfrinew.neocities.org/';
         }, 50);
-        
         extraBtn.innerHTML='<i class="fas fa-arrow-left"></i> Go Back';
         onExtra=true;
-        
         // Scroll to iframe
         setTimeout(() => {
             if (iframeContainer) iframeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -778,27 +662,22 @@ extraBtn.addEventListener('click', ()=>{
         onExtra=false;
     }
 });
-
 privacyBtn.addEventListener('click', ()=>{
     const iframeContainer = document.getElementById('iframeContainer');
     const gamesGridContainer = document.getElementById('gamesGridContainer');
     const currentSiteTitle = document.getElementById('currentSiteTitle');
-    
     if(!onPrivacy){
-        // Show iframe container
+         container
         if (iframeContainer) iframeContainer.style.display = 'block';
         if (gamesGridContainer) gamesGridContainer.style.display = 'none';
         if (currentSiteTitle) currentSiteTitle.textContent = 'Browser';
-        
         // Load the browser
         iframe.src = 'about:blank';
         setTimeout(() => {
             iframe.src = "https://webtoppings.bar/browse?url=https://wikipedia.org&region=us-west&mode=privacy";
         }, 50);
-        
         privacyBtn.innerHTML='<i class="fas fa-arrow-left"></i> Go Back';
         onPrivacy=true;
-        
         // Scroll to iframe
         setTimeout(() => {
             if (iframeContainer) iframeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -825,14 +704,12 @@ let currentStep = 0;
 const overlay = document.getElementById('tutorialOverlay');
 const bubble = document.getElementById('tutorialBubble');
 const arrow = document.getElementById('tutorialArrow');
-
 function showStep(step){
     overlay.style.display='block';
     const s = steps[step];
     bubble.innerHTML = s.text + '<br>' +
         '<button id="nextTutorialBtn">Next</button> ' +
         '<button id="skipTutorialBtn">Skip</button>';
-
     // Next button
     document.getElementById('nextTutorialBtn').addEventListener('click', ()=>{
         currentStep++;
@@ -842,7 +719,6 @@ function showStep(step){
             showPopup();
         } else showStep(currentStep);
     });
-
     // Skip button
     document.getElementById('skipTutorialBtn').addEventListener('click', ()=>{
         overlay.style.display='none';
@@ -850,7 +726,6 @@ function showStep(step){
         localStorage.setItem('tutorialShown','true'); // mark tutorial as seen
         showPopup();
     });
-
     if(s.target){
         const rect = s.target.getBoundingClientRect();
         bubble.style.top = (rect.bottom + 20 + window.scrollY) + 'px';
@@ -863,43 +738,35 @@ function showStep(step){
         bubble.style.left='50%';
         arrow.style.display='none';
     }
-
     setTimeout(()=>bubble.classList.add('show'),50);
 }
-
 function startTutorial(){ currentStep=0; showStep(currentStep); localStorage.setItem('tutorialShown','true'); }
 document.getElementById('replayTutorialBtn').addEventListener('click', startTutorial);
-
 // YouTube Video Watcher
 const youtubeWatcherBtn = document.getElementById('youtubeWatcherBtn');
 const youtubeWatcherModal = document.getElementById('youtubeWatcherModal');
 const closeYoutubeWatcherBtn = document.getElementById('closeYoutubeWatcherBtn');
 const youtubeUrlInput = document.getElementById('youtubeUrlInput');
 const watchYoutubeBtn = document.getElementById('watchYoutubeBtn');
-
 // Open YouTube Watcher Modal
 youtubeWatcherBtn?.addEventListener('click', () => {
   youtubeWatcherModal.style.display = 'flex';
   youtubeUrlInput.focus();
 });
-
 // Close YouTube Watcher Modal
 closeYoutubeWatcherBtn?.addEventListener('click', () => {
   youtubeWatcherModal.style.display = 'none';
   youtubeUrlInput.value = '';
 });
-
 youtubeWatcherModal?.addEventListener('click', (e) => {
   if (e.target === youtubeWatcherModal) {
       youtubeWatcherModal.style.display = 'none';
       youtubeUrlInput.value = '';
   }
 });
-
 // Watch YouTube Video
 watchYoutubeBtn?.addEventListener('click', () => {
   let url = youtubeUrlInput.value.trim();
-  
   if (!url) {
       youtubeUrlInput.style.borderColor = '#ff0000';
       youtubeUrlInput.placeholder = 'Please enter a YouTube URL';
@@ -909,14 +776,12 @@ watchYoutubeBtn?.addEventListener('click', () => {
       }, 2000);
       return;
   }
-  
   // Extract video ID from various YouTube URL formats
   let videoId = '';
   const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
       /youtube\.com\/.*[?&]v=([^&\n?#]+)/
   ];
-  
   for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
@@ -924,7 +789,6 @@ watchYoutubeBtn?.addEventListener('click', () => {
           break;
       }
   }
-  
   if (!videoId) {
       youtubeUrlInput.style.borderColor = '#ff0000';
       youtubeUrlInput.value = '';
@@ -935,17 +799,13 @@ watchYoutubeBtn?.addEventListener('click', () => {
       }, 2000);
       return;
   }
-  
   // Transform URL: yout-ube.com instead of youtube.com
   const unblockedUrl = `https://www.yout-ube.com/watch?v=${videoId}`;
-  
   // Open in new tab
   window.open(unblockedUrl, '_blank');
-  
-  // Close modal and reset
+   and reset
   youtubeWatcherModal.style.display = 'none';
   youtubeUrlInput.value = '';
-  
   // Show success feedback
   watchYoutubeBtn.innerHTML = '<i class="fas fa-check" style="margin-right:10px;"></i>Opening...';
   watchYoutubeBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
@@ -954,14 +814,12 @@ watchYoutubeBtn?.addEventListener('click', () => {
       watchYoutubeBtn.style.background = 'linear-gradient(135deg, #ff0000, #cc0000)';
   }, 1500);
 });
-
 // Allow Enter key to submit
 youtubeUrlInput?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
       watchYoutubeBtn.click();
   }
 });
-
 // ---------------- Popup ----------------
 const popup = document.getElementById('fullscreenPopup');
 // Close when clicking the X button
@@ -978,7 +836,6 @@ if (popup) {
           }
 });
   }
-
 // Close when clicking anywhere on the popup (including the content)
 popup.addEventListener('click', (e) => {
     // Don't close if clicking the close button (it has its own handler)
@@ -991,7 +848,6 @@ popup.addEventListener('click', (e) => {
     }
 });
 }
-
 function showPopup(){
   if (popup) {
       try {
@@ -1001,7 +857,6 @@ function showPopup(){
       }
   }
 }
-
 const adminBtn = document.getElementById('adminBtn');
 const adminModal = document.getElementById('adminModal');
 const creditsBtn = document.getElementById('creditsBtn');
@@ -1016,34 +871,28 @@ const deleteChatHistoryBtn = document.getElementById('deleteChatHistoryBtn');
 const clearCanvasAdminBtn = document.getElementById('clearCanvasAdminBtn');
 const resetVisitorsBtn = document.getElementById('resetVisitorsBtn');
 const logoutAdminBtn = document.getElementById('logoutAdminBtn');
-
 const ADMIN_PASSWORD = '12344321';
 let isAdminAuthenticated = false;
-
 // Credits Modal
 creditsBtn?.addEventListener('click', () => {
     if (creditsModal) {
         creditsModal.style.display = 'flex';
     }
 });
-
 closeCreditsBtn?.addEventListener('click', () => {
     if (creditsModal) {
         creditsModal.style.display = 'none';
     }
 });
-
 creditsModal?.addEventListener('click', (e) => {
     if (e.target === creditsModal) {
         creditsModal.style.display = 'none';
     }
 });
-
 adminBtn.addEventListener('click', () => {
   adminModal.style.display = 'flex';
   adminPasswordInput.focus();
 });
-
 closeAdminBtn.addEventListener('click', () => {
   adminModal.style.display = 'none';
   isAdminAuthenticated = false;
@@ -1051,7 +900,6 @@ closeAdminBtn.addEventListener('click', () => {
   adminPassword.style.display = '';
   adminPasswordInput.value = '';
 });
-
 adminModal.addEventListener('click', (e) => {
   if(e.target === adminModal) {
     adminModal.style.display = 'none';
@@ -1061,7 +909,6 @@ adminModal.addEventListener('click', (e) => {
     adminPasswordInput.value = '';
   }
 });
-
 adminLoginBtn.addEventListener('click', () => {
   if(adminPasswordInput.value === ADMIN_PASSWORD) {
     isAdminAuthenticated = true;
@@ -1073,13 +920,11 @@ adminLoginBtn.addEventListener('click', () => {
     adminPasswordInput.value = '';
   }
 });
-
 adminPasswordInput.addEventListener('keypress', (e) => {
   if(e.key === 'Enter') {
     adminLoginBtn.click();
   }
 });
-
 deleteChatHistoryBtn.addEventListener('click', () => {
   if(confirm('Delete all chat history? This cannot be undone.')) {
     db.ref('chat').remove().then(() => {
@@ -1089,7 +934,6 @@ deleteChatHistoryBtn.addEventListener('click', () => {
     }).catch(err => alert('Error: ' + err.message));
   }
 });
-
 clearCanvasAdminBtn.addEventListener('click', () => {
   if(confirm('Clear the drawing canvas? This cannot be undone.')) {
     db.ref('canvas/strokes').remove().then(() => {
@@ -1099,7 +943,6 @@ clearCanvasAdminBtn.addEventListener('click', () => {
     }).catch(err => alert('Error: ' + err.message));
   }
 });
-
 resetVisitorsBtn.addEventListener('click', () => {
 if(confirm('Reset total visitors count to 127,349?')) {
   db.ref('totalVisitors').set(INITIAL_VISITOR_COUNT).then(() => {
@@ -1108,20 +951,16 @@ if(confirm('Reset total visitors count to 127,349?')) {
     }).catch(err => alert('Error: ' + err.message));
   }
 });
-
 // Refresh button for chat list
 const refreshChatListBtn = document.getElementById('refreshChatListBtn');
 refreshChatListBtn?.addEventListener('click', () => {
   loadAdminChatMessages();
 });
-
 // Load chat messages for admin panel (including voice messages)
 function loadAdminChatMessages() {
   const adminChatList = document.getElementById('adminChatList');
   if(!db || !adminChatList) return;
-  
   adminChatList.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5);">Loading chat messages...</p>';
-  
   // Load both regular chat messages and voice messages
   Promise.all([
     db.ref('chat').limitToLast(50).once('value'),
@@ -1129,10 +968,8 @@ function loadAdminChatMessages() {
   ]).then(([chatSnap, voiceSnap]) => {
     const chatMessages = chatSnap.val() || {};
     const voiceMessages = voiceSnap.val() || {};
-    
     // Combine all messages into one array
     const allMessages = [];
-    
     // Add regular chat messages
     Object.entries(chatMessages).forEach(([id, msg]) => {
       if(msg) {
@@ -1146,7 +983,6 @@ function loadAdminChatMessages() {
         });
       }
     });
-    
     // Add voice messages
     Object.entries(voiceMessages).forEach(([id, msg]) => {
       if(msg && msg.audio) {
@@ -1160,15 +996,12 @@ function loadAdminChatMessages() {
         });
       }
     });
-    
     // Sort by time (newest first)
     allMessages.sort((a, b) => b.time - a.time);
-    
     if(allMessages.length === 0) {
       adminChatList.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5);">No messages found.</p>';
       return;
     }
-    
     adminChatList.innerHTML = allMessages.map((item) => {
       const time = new Date(item.time).toLocaleString();
       const user = item.user;
@@ -1178,7 +1011,6 @@ function loadAdminChatMessages() {
       const borderColor = isVoice ? 'rgba(0,150,255,0.5)' : 'rgba(255,215,0,0.5)';
       const refPath = isVoice ? 'voiceMessages' : 'chat';
       const isBanned = bannedUsers[uid] ? ' (BANNED)' : '';
-      
       return `
         <div style="display:flex; align-items:center; gap:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:6px; margin-bottom:8px; border-left:3px solid ${borderColor};">
           <div style="flex:1; min-width:0;">
@@ -1195,14 +1027,12 @@ function loadAdminChatMessages() {
         </div>
       `;
     }).join('');
-    
     // Attach event listeners to ban buttons
     adminChatList.querySelectorAll('.adminBanUserBtn').forEach(btn => {
       btn.addEventListener('click', () => {
         const uid = btn.getAttribute('data-uid');
         const username = btn.getAttribute('data-username');
         const isCurrentlyBanned = bannedUsers[uid];
-        
         if (isCurrentlyBanned) {
           // Unban user
           if (confirm(`Unban ${username}?`)) {
@@ -1224,28 +1054,24 @@ function loadAdminChatMessages() {
         } else {
           // Ban user
           const banDuration = prompt(`Ban ${username}?\n\nEnter ban duration:\n- Leave empty for permanent ban\n- Enter number of hours (e.g., 24 for 24 hours)\n- Enter number of days (e.g., 7d for 7 days)`);
-          
           if (banDuration !== null) {
             let expiresAt = null;
             if (banDuration.trim() !== '') {
-              const hours = banDuration.toLowerCase().endsWith('d') 
-                ? parseFloat(banDuration) * 24 
+              const hours = banDuration.toLowerCase().endsWith('d')
+                ? parseFloat(banDuration) * 24
                 : parseFloat(banDuration);
               if (!isNaN(hours) && hours > 0) {
                 expiresAt = Date.now() + (hours * 60 * 60 * 1000);
               }
             }
-            
             const banData = {
               username: username,
               bannedAt: Date.now(),
               expiresAt: expiresAt,
               bannedBy: 'admin'
             };
-            
             bannedUsers[uid] = banData;
             moderationStats.totalBans = (moderationStats.totalBans || 0) + 1;
-            
             if (db) {
               db.ref(`bannedUsers/${uid}`).set(banData).then(() => {
                 db.ref('moderationStats').set(moderationStats);
@@ -1269,7 +1095,6 @@ function loadAdminChatMessages() {
         }
       });
     });
-    
     // Attach event listeners to delete buttons
     adminChatList.querySelectorAll('.adminDeleteChatBtn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1277,7 +1102,6 @@ function loadAdminChatMessages() {
         const msgType = btn.dataset.msgType;
         const refPath = btn.dataset.refPath;
         const msgTypeName = msgType === 'voice' ? 'voice message' : 'chat message';
-        
         if(msgId && refPath && confirm(`Delete this ${msgTypeName}?`)) {
           db.ref(`${refPath}/${msgId}`).remove().then(() => {
             // Remove from UI
@@ -1295,7 +1119,6 @@ function loadAdminChatMessages() {
     adminChatList.innerHTML = '<p style="text-align:center; color:rgba(255,0,0,0.7);">Error loading messages.</p>';
   });
 }
-
 logoutAdminBtn.addEventListener('click', () => {
   isAdminAuthenticated = false;
   adminContent.style.display = 'none';
@@ -1303,12 +1126,10 @@ logoutAdminBtn.addEventListener('click', () => {
   adminPasswordInput.value = '';
   alert('Logged out');
 });
-
 // Moderation Panel Functions
 const openModerationPanelBtn = document.getElementById('openModerationPanelBtn');
 const moderationPanelModal = document.getElementById('moderationPanelModal');
 const closeModerationPanelBtn = document.getElementById('closeModerationPanelBtn');
-
 openModerationPanelBtn?.addEventListener('click', () => {
   if (!isAdminAuthenticated) {
     alert('Please login as admin first');
@@ -1317,17 +1138,14 @@ openModerationPanelBtn?.addEventListener('click', () => {
   moderationPanelModal.style.display = 'flex';
   loadModerationPanel();
 });
-
 closeModerationPanelBtn?.addEventListener('click', () => {
   moderationPanelModal.style.display = 'none';
 });
-
 moderationPanelModal?.addEventListener('click', (e) => {
   if (e.target === moderationPanelModal) {
     moderationPanelModal.style.display = 'none';
   }
 });
-
 // Update moderation UI with current settings
 function updateModerationUI() {
   const profanityToggle = document.getElementById('profanityFilterToggle');
@@ -1338,7 +1156,6 @@ function updateModerationUI() {
   const maxRepeatsSlider = document.getElementById('maxRepeatsSlider');
   const messagesPerMinSlider = document.getElementById('messagesPerMinSlider');
   const minTimeSlider = document.getElementById('minTimeSlider');
-  
   if (profanityToggle) profanityToggle.checked = moderationSettings.profanityFilterEnabled;
   if (spamToggle) spamToggle.checked = moderationSettings.spamDetectionEnabled;
   if (rateLimitToggle) rateLimitToggle.checked = moderationSettings.rateLimitEnabled;
@@ -1363,22 +1180,18 @@ function updateModerationUI() {
     updateSliderValue('minTimeValue', minTimeSlider.value);
   }
 }
-
 function updateSliderValue(id, value) {
   const element = document.getElementById(id);
   if (element) element.textContent = value;
 }
-
 // Update profanity words list display
 function updateProfanityWordsList() {
   const list = document.getElementById('profanityWordsList');
   if (!list) return;
-  
   if (PROFANITY_WORDS.length === 0) {
     list.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5); margin:0; padding:20px;">No words added yet</p>';
     return;
   }
-  
   list.innerHTML = PROFANITY_WORDS.map(word => `
     <div style="background:rgba(156,39,176,0.2); border:1px solid rgba(156,39,176,0.4); padding:8px 12px; border-radius:8px; display:flex; align-items:center; gap:10px;">
       <span style="color:#ffffff; font-size:13px;">${word}</span>
@@ -1387,7 +1200,6 @@ function updateProfanityWordsList() {
       </button>
     </div>
   `).join('');
-  
   // Add remove listeners
   list.querySelectorAll('.removeProfanityWordBtn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1396,20 +1208,16 @@ function updateProfanityWordsList() {
     });
   });
 }
-
 // Add profanity word
 const addProfanityWordBtn = document.getElementById('addProfanityWordBtn');
 const addProfanityWordInput = document.getElementById('addProfanityWordInput');
-
 addProfanityWordBtn?.addEventListener('click', () => {
   const word = addProfanityWordInput?.value.trim().toLowerCase();
   if (!word) return;
-  
   if (PROFANITY_WORDS.includes(word)) {
     alert('Word already in list');
     return;
   }
-  
   PROFANITY_WORDS.push(word);
   if (db) {
     db.ref('profanityWords').set(PROFANITY_WORDS).then(() => {
@@ -1420,13 +1228,11 @@ addProfanityWordBtn?.addEventListener('click', () => {
     updateProfanityWordsList();
   }
 });
-
 addProfanityWordInput?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     addProfanityWordBtn?.click();
   }
 });
-
 // Remove profanity word
 function removeProfanityWord(word) {
   PROFANITY_WORDS = PROFANITY_WORDS.filter(w => w !== word);
@@ -1435,79 +1241,65 @@ function removeProfanityWord(word) {
   }
   updateProfanityWordsList();
 }
-
 // Settings toggles
 document.getElementById('profanityFilterToggle')?.addEventListener('change', (e) => {
   moderationSettings.profanityFilterEnabled = e.target.checked;
   saveModerationSettings();
 });
-
 document.getElementById('spamDetectionToggle')?.addEventListener('change', (e) => {
   moderationSettings.spamDetectionEnabled = e.target.checked;
   saveModerationSettings();
 });
-
 document.getElementById('rateLimitToggle')?.addEventListener('change', (e) => {
   moderationSettings.rateLimitEnabled = e.target.checked;
   saveModerationSettings();
 });
-
 // Sliders
 document.getElementById('capsRatioSlider')?.addEventListener('input', (e) => {
   moderationSettings.maxCapsRatio = e.target.value / 100;
   updateSliderValue('capsRatioValue', e.target.value);
   saveModerationSettings();
 });
-
 document.getElementById('maxLinksSlider')?.addEventListener('input', (e) => {
   moderationSettings.maxLinksPerMessage = parseInt(e.target.value);
   updateSliderValue('maxLinksValue', e.target.value);
   saveModerationSettings();
 });
-
 document.getElementById('maxRepeatsSlider')?.addEventListener('input', (e) => {
   moderationSettings.maxRepeatedChars = parseInt(e.target.value);
   updateSliderValue('maxRepeatsValue', e.target.value);
   saveModerationSettings();
 });
-
 document.getElementById('messagesPerMinSlider')?.addEventListener('input', (e) => {
   moderationSettings.maxMessagesPerMinute = parseInt(e.target.value);
   updateSliderValue('messagesPerMinValue', e.target.value);
   saveModerationSettings();
 });
-
 document.getElementById('minTimeSlider')?.addEventListener('input', (e) => {
   moderationSettings.minTimeBetweenMessages = parseInt(e.target.value) * 1000;
   updateSliderValue('minTimeValue', e.target.value);
   saveModerationSettings();
 });
-
 // Save moderation settings to Firebase
 function saveModerationSettings() {
   if (db) {
     db.ref('moderationSettings').set(moderationSettings);
   }
 }
-
 // Update banned users list
 function updateBannedUsersList() {
   const list = document.getElementById('bannedUsersList');
   const count = document.getElementById('bannedUsersCount');
   if (!list) return;
-  
   const bannedList = Object.entries(bannedUsers);
   if (count) count.textContent = bannedList.length;
-  
   if (bannedList.length === 0) {
     list.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5); margin:0; padding:20px;">No banned users</p>';
     return;
   }
-  
   list.innerHTML = bannedList.map(([uid, banData]) => {
     const expiresAt = banData.expiresAt ? new Date(banData.expiresAt).toLocaleString() : 'Permanent';
     const bannedAt = new Date(banData.bannedAt).toLocaleString();
-    
     return `
       <div style="background:rgba(220,53,69,0.1); border:1px solid rgba(220,53,69,0.3); padding:12px; border-radius:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -1525,7 +1317,6 @@ function updateBannedUsersList() {
       </div>
     `;
   }).join('');
-  
   // Add unban listeners
   list.querySelectorAll('.unbanUserBtn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1540,14 +1331,12 @@ function updateBannedUsersList() {
     });
   });
 }
-
 // Update moderation statistics
 function updateModerationStats() {
   const blockedCount = document.getElementById('blockedMessagesCount');
   const totalBans = document.getElementById('totalBansCount');
   const spamDetected = document.getElementById('spamDetectedCount');
   const activeUsers = document.getElementById('activeUsersCount');
-  
   if (blockedCount) blockedCount.textContent = moderationStats.blockedMessages || 0;
   if (totalBans) totalBans.textContent = moderationStats.totalBans || Object.keys(bannedUsers).length;
   if (spamDetected) spamDetected.textContent = moderationStats.spamDetected || 0;
@@ -1564,26 +1353,21 @@ function updateModerationStats() {
     activeUsers.textContent = recentUsers.size || 0;
   }
 }
-
 // Live chat monitor
 let liveChatMonitorListener = null;
 function startLiveChatMonitor() {
   const monitor = document.getElementById('liveChatMonitor');
   if (!monitor || !db) return;
-  
   // Clear existing listener
   if (liveChatMonitorListener) {
     db.ref('chat').off('child_added', liveChatMonitorListener);
   }
-  
   liveChatMonitorListener = db.ref('chat').limitToLast(10).on('child_added', (snapshot) => {
     const msg = snapshot.val();
     if (!msg) return;
-    
     const time = new Date(msg.time).toLocaleTimeString();
     const isBlocked = containsProfanity(msg.text) || isSpam(msg.text);
     const status = isBlocked ? '<span style="color:#dc3545;">⚠️ BLOCKED</span>' : '<span style="color:#28a745;">✓ Allowed</span>';
-    
     const entry = document.createElement('div');
     entry.style.cssText = 'padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; margin-bottom:6px; font-size:12px; border-left:3px solid ' + (isBlocked ? '#dc3545' : '#28a745') + ';';
     entry.innerHTML = `
@@ -1594,24 +1378,16 @@ function startLiveChatMonitor() {
       <div style="color:rgba(255,255,255,0.8); word-break:break-word;">${msg.text.substring(0, 60)}${msg.text.length > 60 ? '...' : ''}</div>
       <div style="color:rgba(255,255,255,0.5); font-size:10px; margin-top:4px;">${time}</div>
     `;
-    
     monitor.insertBefore(entry, monitor.firstChild);
-    
     // Keep only last 10 entries
     while (monitor.children.length > 10) {
       monitor.removeChild(monitor.lastChild);
     }
   });
 }
-
-// Load moderation panel
-function loadModerationPanel() {
-  updateModerationUI();
-  updateProfanityWordsList();
-  updateBannedUsersList();
+updateBannedUsersList();
   updateModerationStats();
   startLiveChatMonitor();
-  
   // Update banned users when they change
   if (db) {
     db.ref('bannedUsers').on('value', () => {
@@ -1619,7 +1395,6 @@ function loadModerationPanel() {
     });
   }
 }
-
 // Track blocked messages
 function trackBlockedMessage(reason) {
   moderationStats.blockedMessages = (moderationStats.blockedMessages || 0) + 1;
@@ -1631,47 +1406,38 @@ function trackBlockedMessage(reason) {
   }
   updateModerationStats();
 }
-
 // ---------------- Enhanced Sparkles ----------------
 function initSparkles() {
     const canvas = document.getElementById('sparkleCanvas');
     if (!canvas) return; // Sparkle canvas is in popup, may not exist yet
-    
     const ctx = canvas.getContext('2d');
     let sparkles = [];
     let ripples = [];
-
-    function resizeCanvas() { 
-        canvas.width = canvas.offsetWidth; 
-        canvas.height = canvas.offsetHeight; 
+    function resizeCanvas() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
     }
-  window.addEventListener('resize', Utils.debounce(resizeCanvas, 250)); 
+  window.addEventListener('resize', Utils.debounce(resizeCanvas, 250));
     resizeCanvas();
-
-function createSparkle() { 
-    return { 
-        x: Math.random() * canvas.width, 
-        y: Math.random() * canvas.height, 
-        r: Math.random() * 2 + 0.5, 
-        vx: (Math.random() - 0.5) * 0.8, 
-        vy: (Math.random() - 0.5) * 0.8, 
+function createSparkle() {
+    return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 0.5,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
         alpha: Math.random() * 0.5 + 0.3,
         baseAlpha: Math.random() * 0.5 + 0.3,
         color: ['#FFD700', '#FFFFFF', '#FFD700', '#FFFF99'][Math.floor(Math.random() * 4)],
         twinkle: Math.random() * 0.05 + 0.01
-    }; 
+    };
 }
-
-// Reduced particle count for better performance
 for(let i = 0; i < 50; i++) {
     sparkles.push(createSparkle());
 }
-
-// Add ripple effect on mouse move (throttled and limited)
 let lastRippleTime = 0;
 document.addEventListener('mousemove', (e) => {
   const now = Date.now();
-  // Throttle ripples to max 1 per second
   if (now - lastRippleTime > 1000 && Math.random() > 0.98 && ripples.length < 3) {
       lastRippleTime = now;
         ripples.push({
@@ -1684,31 +1450,22 @@ document.addEventListener('mousemove', (e) => {
         });
     }
 }, { passive: true });
-
-// Performance optimization: frame throttling
 let lastSparkleFrame = 0;
 let sparkleFrameSkip = 0;
-
 function animateSparkles() {
   const now = performance.now();
   const deltaTime = now - lastSparkleFrame;
-  
-  // Throttle to ~30fps for sparkles (less critical animation)
   if (deltaTime < 33) {
       requestAnimationFrame(animateSparkles);
       return;
   }
   lastSparkleFrame = now;
-  
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-  // Draw sparkles (optimized)
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   const time = Date.now();
     for(let s of sparkles) {
       // Twinkle effect (cached calculation)
       s.alpha = s.baseAlpha + Math.sin(time * s.twinkle) * 0.3;
         s.alpha = Math.max(0.1, Math.min(0.8, s.alpha));
-        
       // Mouse attraction (only calculate if close)
         const dx = mouseX - s.x;
         const dy = mouseY - s.y;
@@ -1718,55 +1475,41 @@ function animateSparkles() {
             s.vx += dx * 0.0001;
             s.vy += dy * 0.0001;
         }
-        
-        // Update position
         s.x += s.vx;
         s.y += s.vy;
-        
         // Bounce off edges
         if(s.x < 0 || s.x > canvas.width) s.vx *= -1;
         if(s.y < 0 || s.y > canvas.height) s.vy *= -1;
-        
         // Keep in bounds
         s.x = Math.max(0, Math.min(canvas.width, s.x));
         s.y = Math.max(0, Math.min(canvas.height, s.y));
-        
-      // Optimized drawing (reuse color strings)
-      const rgb = s.color === '#FFD700' ? '255, 215, 0' : 
+        const rgb = s.color === '#FFD700' ? '255, 215, 0' :
                   s.color === '#FFFF99' ? '255, 255, 153' : '255, 255, 255';
-      
-      // Simple fill instead of gradient for better performance
         ctx.beginPath();
       ctx.arc(s.x, s.y, s.r * 2, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(${rgb}, ${s.alpha * 0.5})`;
         ctx.fill();
-        
         // Core sparkle
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(${rgb}, ${s.alpha})`;
         ctx.fill();
     }
-    
-  // Draw and update ripples (limit to 5 max)
   if (ripples.length > 5) ripples = ripples.slice(-5);
     for (let i = ripples.length - 1; i >= 0; i--) {
         const ripple = ripples[i];
         ripple.radius += ripple.speed;
         ripple.alpha -= 0.02;
-        
         if (ripple.radius > ripple.maxRadius || ripple.alpha <= 0) {
             ripples.splice(i, 1);
             continue;
         }
-        
         ctx.strokeStyle = `rgba(255, 215, 0, ${ripple.alpha})`;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
         ctx.stroke();
     }
-    
     requestAnimationFrame(animateSparkles);
     }
     animateSparkles();
@@ -1780,13 +1523,10 @@ let mouseX = 0, mouseY = 0;
 let mouseTrail = [];
 let clickRipples = [];
 const maxTrailLength = 20;
-
 function initInteractiveBackground() {
     const interactiveBg = document.getElementById('interactiveBackground');
     if (!interactiveBg) return;
-    
     const bgCtx = interactiveBg.getContext('2d');
-    
     function resizeInteractiveBg() {
         interactiveBg.width = window.innerWidth;
         interactiveBg.height = window.innerHeight;
@@ -1796,7 +1536,6 @@ function initInteractiveBackground() {
   let mouseMoved = false;
   let lastBgFrame = 0;
   let animationRunning = true;
-
   const handleMouseMove = (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
@@ -1807,12 +1546,11 @@ function initInteractiveBackground() {
         }
   };
   document.addEventListener('mousemove', handleMouseMove, { passive: true, capture: true });
-  
   const handleClick = (e) => {
       if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('button') || e.target.closest('input')) {
           return;
       }
-      if (clickRipples.length < 3) { // Limit ripples
+      if (clickRipples.length < 3) {
         clickRipples.push({
             x: e.clientX,
             y: e.clientY,
@@ -1824,23 +1562,17 @@ function initInteractiveBackground() {
       }
   };
   document.addEventListener('click', handleClick, { passive: true, capture: true });
-
     function animateInteractiveBg() {
       if (!animationRunning) return;
-      
       const now = performance.now();
-      // Throttle to ~30fps for background
       if (now - lastBgFrame < 33) {
           requestAnimationFrame(animateInteractiveBg);
           return;
       }
       lastBgFrame = now;
-      
       try {
         bgCtx.clearRect(0, 0, interactiveBg.width, interactiveBg.height);
-        
-          // Only draw mouse glow if mouse has moved recently
-          if (mouseMoved) {
+        if (mouseMoved) {
         const gradient = bgCtx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 500);
               gradient.addColorStop(0, 'rgba(255, 215, 0, 0.08)');
               gradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.03)');
@@ -1849,34 +1581,27 @@ function initInteractiveBackground() {
         bgCtx.fillRect(0, 0, interactiveBg.width, interactiveBg.height);
               mouseMoved = false;
           }
-        
-          // Limit trail length and optimize drawing
-          const trailLimit = Math.min(mouseTrail.length, 15);
+        const trailLimit = Math.min(mouseTrail.length, 15);
           for (let i = 0; i < trailLimit; i++) {
             const point = mouseTrail[i];
             const age = Date.now() - point.time;
               if (age > 800) continue;
             const alpha = Math.max(0, 1 - age / 800);
               const size = 3 * alpha;
-            
             bgCtx.beginPath();
             bgCtx.arc(point.x, point.y, size, 0, Math.PI * 2);
               bgCtx.fillStyle = `rgba(255, 215, 0, ${alpha * 0.4})`;
             bgCtx.fill();
         }
-        
-          // Limit ripples to 3 max
-          if (clickRipples.length > 3) clickRipples = clickRipples.slice(-3);
+        if (clickRipples.length > 3) clickRipples = clickRipples.slice(-3);
         for (let i = clickRipples.length - 1; i >= 0; i--) {
             const ripple = clickRipples[i];
             ripple.radius += ripple.speed;
             ripple.alpha -= 0.015;
-            
             if (ripple.radius > ripple.maxRadius || ripple.alpha <= 0) {
                 clickRipples.splice(i, 1);
                 continue;
             }
-            
               // Simplified ripple drawing
             bgCtx.strokeStyle = `rgba(255, 215, 0, ${ripple.alpha})`;
               bgCtx.lineWidth = 2;
@@ -1884,16 +1609,13 @@ function initInteractiveBackground() {
             bgCtx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
             bgCtx.stroke();
           }
-          
           // Clean up old trail points
         mouseTrail = mouseTrail.filter(p => Date.now() - p.time < 800);
       } catch (err) {
           console.warn('Error in interactive background animation:', err);
       }
-        
         requestAnimationFrame(animateInteractiveBg);
     }
-  
     animateInteractiveBg();
 }
 if (document.readyState === 'loading') {
@@ -1901,11 +1623,9 @@ if (document.readyState === 'loading') {
 } else {
     initInteractiveBackground();
 }
-
 function initStars() {
     const starCanvas = document.getElementById('starCanvas');
     if (!starCanvas) return;
-    
     const starCtx = starCanvas.getContext('2d');
   let particles = [];
   let connectionFrame = 0; // Frame counter for connection updates
@@ -1913,22 +1633,18 @@ function initStars() {
   const mouseRepelRadius = 150;
   const mouseRepelStrength = 2.5;
             const particleCount = 60; // Reduced for better performance
-
     function resizeStarCanvas() {
       const oldWidth = starCanvas.width;
       const oldHeight = starCanvas.height;
         starCanvas.width = window.innerWidth;
         starCanvas.height = window.innerHeight;
-      
       // Scale existing particles to new canvas size
       const scaleX = starCanvas.width / oldWidth;
       const scaleY = starCanvas.height / oldHeight;
-      
       for (let i = 0; i < particles.length; i++) {
           particles[i].x *= scaleX;
           particles[i].y *= scaleY;
       }
-      
       // Add more particles if canvas got bigger
       const currentCount = particles.length;
       if (currentCount < particleCount) {
@@ -1939,7 +1655,6 @@ function initStars() {
   }
   window.addEventListener('resize', Utils.debounce(resizeStarCanvas, 250));
     resizeStarCanvas();
-
   function createParticle() {
         return {
             x: Math.random() * starCanvas.width,
@@ -1950,23 +1665,18 @@ function initStars() {
           connections: [] // Array of particle indices this particle is connected to
       };
   }
-
   function updateParticles() {
       if (!starCanvas || !particles || particles.length === 0) return;
-      
       const canvasWidth = starCanvas.width;
       const canvasHeight = starCanvas.height;
-      
       for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
           if (!p || typeof p.x !== 'number' || typeof p.y !== 'number') continue;
-          
-          // Mouse repulsion - stronger and more noticeable
+           - stronger and more noticeable
           const dx = mouseX - p.x;
           const dy = mouseY - p.y;
           const distSq = dx * dx + dy * dy;
           const dist = Math.sqrt(distSq);
-          
           if (dist < mouseRepelRadius && dist > 0 && isFinite(dist)) {
               const force = Math.pow((mouseRepelRadius - dist) / mouseRepelRadius, 1.5);
               const angle = Math.atan2(dy, dx);
@@ -1975,18 +1685,14 @@ function initStars() {
                   p.vy -= Math.sin(angle) * force * mouseRepelStrength;
               }
           }
-          
-          // Update position
           p.x += p.vx;
           p.y += p.vy;
-          
-          // Clamp to valid bounds first (prevent out of bounds)
+           valid bounds first (prevent out of bounds)
           const minX = p.radius;
           const maxX = canvasWidth - p.radius;
           const minY = p.radius;
           const maxY = canvasHeight - p.radius;
-          
-          // Boundary bouncing with validation
+           with validation
           if (p.x < minX || !isFinite(p.x)) {
               p.x = Math.max(minX, 0);
               p.vx = -p.vx * 0.8;
@@ -2003,17 +1709,14 @@ function initStars() {
               p.y = Math.min(maxY, canvasHeight);
               p.vy = -p.vy * 0.8;
           }
-          
           // Ensure values are finite
           if (!isFinite(p.x)) p.x = canvasWidth / 2;
           if (!isFinite(p.y)) p.y = canvasHeight / 2;
           if (!isFinite(p.vx)) p.vx = 0;
           if (!isFinite(p.vy)) p.vy = 0;
-          
           // Friction
           p.vx *= 0.99;
           p.vy *= 0.99;
-          
           // Limit velocity
           const maxVel = 4;
           const vel = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
@@ -2022,20 +1725,17 @@ function initStars() {
               p.vy = (p.vy / vel) * maxVel;
           }
       }
-      
       // Update connections - only check every other frame for performance
       connectionFrame++;
       if (connectionFrame % 2 === 0) {
           for (let i = 0; i < particles.length; i++) {
               const p1 = particles[i];
               p1.connections = [];
-              
               for (let j = i + 1; j < particles.length; j++) {
                   const p2 = particles[j];
                   const dx = p2.x - p1.x;
                   const dy = p2.y - p1.y;
                   const distSq = dx * dx + dy * dy;
-                  
                   // Skip sqrt calculation, compare squared distances
                   if (distSq < maxConnectionDistance * maxConnectionDistance) {
                       p1.connections.push(j);
@@ -2044,29 +1744,23 @@ function initStars() {
           }
       }
   }
-
   let lastStarFrame = 0;
   let animationRunning = true;
-
     function animateStars() {
       if (!animationRunning || !starCanvas || !starCtx) return;
-      
       const now = performance.now();
-      // Throttle to ~20fps for better performance
       if (now - lastStarFrame < 50) {
           requestAnimationFrame(animateStars);
           return;
       }
       lastStarFrame = now;
-      
       try {
-          // Validate canvas and context
+           and context
           if (!starCanvas || !starCtx || !starCanvas.parentNode) {
               animationRunning = false;
               return;
           }
-          
-          // Ensure canvas size matches window
+           size matches window
           const newWidth = window.innerWidth;
           const newHeight = window.innerHeight;
           if (starCanvas.width !== newWidth || starCanvas.height !== newHeight) {
@@ -2077,73 +1771,57 @@ function initStars() {
                   return;
               }
           }
-          
-          // Clear canvas with proper bounds checking
+           with proper bounds checking
           if (starCanvas.width > 0 && starCanvas.height > 0) {
         starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
           } else {
               requestAnimationFrame(animateStars);
               return;
           }
-          
-          // Update particles
           updateParticles();
-      
-      // Draw connections with validation
+       with validation
       starCtx.strokeStyle = 'rgba(255, 215, 0, 0.2)';
       starCtx.lineWidth = 1;
-      
       for (let i = 0; i < particles.length; i++) {
           const p1 = particles[i];
           if (!p1 || !isFinite(p1.x) || !isFinite(p1.y)) continue;
-          
           for (let j of p1.connections) {
               if (j >= particles.length || j < 0) continue;
               const p2 = particles[j];
               if (!p2 || !isFinite(p2.x) || !isFinite(p2.y)) continue;
-              
               const dx = p2.x - p1.x;
               const dy = p2.y - p1.y;
               const dist = Math.sqrt(dx * dx + dy * dy);
-              
               if (!isFinite(dist) || dist > maxConnectionDistance) continue;
-              
               // Opacity based on distance
               const opacity = Math.max(0, Math.min(1, 1 - (dist / maxConnectionDistance)));
               starCtx.strokeStyle = `rgba(255, 215, 0, ${opacity * 0.3})`;
-            
             starCtx.beginPath();
               starCtx.moveTo(p1.x, p1.y);
               starCtx.lineTo(p2.x, p2.y);
               starCtx.stroke();
           }
       }
-      
       // Draw particles with validation
       for (let p of particles) {
           if (!p || !isFinite(p.x) || !isFinite(p.y) || !isFinite(p.radius)) continue;
-          
           // Clamp position to canvas bounds
           const clampedX = Math.max(p.radius, Math.min(starCanvas.width - p.radius, p.x));
           const clampedY = Math.max(p.radius, Math.min(starCanvas.height - p.radius, p.y));
-          
           // Mouse proximity glow
           const dx = mouseX - clampedX;
           const dy = mouseY - clampedY;
           const distSq = dx * dx + dy * dy;
-          const mouseEffect = distSq < mouseRepelRadius * mouseRepelRadius 
-              ? Math.max(0, 1 - Math.sqrt(distSq) / mouseRepelRadius) 
+          const mouseEffect = distSq < mouseRepelRadius * mouseRepelRadius
+              ? Math.max(0, 1 - Math.sqrt(distSq) / mouseRepelRadius)
               : 0;
-          
           const glowSize = Math.max(0, Math.min(50, p.radius * (1 + mouseEffect * 0.5)));
           const brightness = Math.max(0, Math.min(1, 0.6 + mouseEffect * 0.4));
-          
           // Glow
           starCtx.beginPath();
           starCtx.arc(clampedX, clampedY, glowSize * 2, 0, Math.PI * 2);
           starCtx.fillStyle = `rgba(255, 215, 0, ${brightness * 0.2})`;
             starCtx.fill();
-            
           // Core particle
             starCtx.beginPath();
           starCtx.arc(clampedX, clampedY, p.radius, 0, Math.PI * 2);
@@ -2153,30 +1831,25 @@ function initStars() {
       } catch (err) {
           console.warn('Error in star animation:', err);
       }
-      
       if (animationRunning) {
         requestAnimationFrame(animateStars);
       }
     }
     animateStars();
 }
-
 // Initialize after DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initStars);
 } else {
   initStars();
 }
-
 // ================= Christmas Snow Animation =================
 function initSnow() {
     const snowCanvas = document.getElementById('snowCanvas');
     if (!snowCanvas) return;
-    
     const ctx = snowCanvas.getContext('2d');
     let snowflakes = [];
     const snowflakeCount = 40; // Reduced for better performance
-    
     function resizeSnowCanvas() {
         snowCanvas.width = window.innerWidth;
         snowCanvas.height = window.innerHeight;
@@ -2185,7 +1858,6 @@ function initSnow() {
             snowflakes.push(createSnowflake());
         }
     }
-    
     function createSnowflake() {
         return {
             x: Math.random() * snowCanvas.width,
@@ -2197,60 +1869,46 @@ function initSnow() {
             spinSpeed: (Math.random() - 0.5) * 0.1
         };
     }
-    
     let lastSnowFrame = 0;
     function animateSnow() {
         if (!snowCanvas || !ctx) return;
-        
         const now = performance.now();
-        // Throttle to ~20fps for better performance
         if (now - lastSnowFrame < 50) {
             requestAnimationFrame(animateSnow);
             return;
         }
         lastSnowFrame = now;
-        
         ctx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
-        
-        // Batch drawing operations - set shadow once
+         operations - set shadow once
         ctx.shadowBlur = 8;
         ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
-        
         for (let flake of snowflakes) {
             flake.y += flake.speed;
             flake.x += Math.sin(flake.angle) * 0.5;
             flake.angle += flake.spinSpeed;
-            
             if (flake.y > snowCanvas.height) {
                 flake.y = -10;
                 flake.x = Math.random() * snowCanvas.width;
             }
-            
             if (flake.x < 0) flake.x = snowCanvas.width;
             if (flake.x > snowCanvas.width) flake.x = 0;
-            
             ctx.beginPath();
             ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
             ctx.fill();
         }
-        
         ctx.shadowBlur = 0;
         requestAnimationFrame(animateSnow);
     }
-    
     window.addEventListener('resize', Utils.debounce(resizeSnowCanvas, 250));
     resizeSnowCanvas();
     animateSnow();
 }
-
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initSnow);
 } else {
     initSnow();
 }
-
-
 const contextMenu = document.createElement('div');
 contextMenu.id = 'customContextMenu';
 contextMenu.innerHTML = `
@@ -2260,7 +1918,6 @@ contextMenu.innerHTML = `
     <button class="menu-item" id="menuForward">➡️ Forward</button>
 `;
 document.body.appendChild(contextMenu);
-
 // Context menu event listeners
 document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
@@ -2268,31 +1925,24 @@ document.addEventListener('contextmenu', (e) => {
     contextMenu.style.top = e.clientY + 'px';
     contextMenu.style.display = 'block';
 });
-
 document.addEventListener('click', () => {
     contextMenu.style.display = 'none';
 });
-
 // Menu actions
 document.getElementById('menuHome').addEventListener('click', () => {
     window.location.href = window.location.origin + window.location.pathname;
 });
-
 document.getElementById('menuRefresh').addEventListener('click', () => {
     window.location.reload();
 });
-
 document.getElementById('menuBack').addEventListener('click', () => {
     window.history.back();
 });
-
 document.getElementById('menuForward').addEventListener('click', () => {
     window.history.forward();
 });
-
 const chatContainer = document.getElementById('chatContainer');
 const toggleChatBtn = document.getElementById('toggleChatBtn');
-
 toggleChatBtn.addEventListener('click', () => {
     if(chatContainer.style.display === 'none' || chatContainer.style.display === '') {
       chatContainer.style.display = 'flex';
@@ -2305,7 +1955,6 @@ toggleChatBtn.addEventListener('click', () => {
         chatContainer.style.display = 'none';
     }
 });
-
 // ================= Expandable Chat System =================
 const expandChatBtn = document.getElementById('expandChatBtn');
 const minimizeChatBtn = document.getElementById('minimizeChatBtn');
@@ -2323,21 +1972,17 @@ const fullscreenChatSearchInput = document.getElementById('fullscreenChatSearchI
 const fullscreenChatUsersBtn = document.getElementById('fullscreenChatUsersBtn');
 const fullscreenChatOnlineUsers = document.getElementById('fullscreenChatOnlineUsers');
 const onlineUsersCount = document.getElementById('onlineUsersCount');
-
 // Fullscreen chat buttons
 const fullscreenEmojiBtn = document.getElementById('fullscreenEmojiBtn');
 const fullscreenVoiceBtn = document.getElementById('fullscreenVoiceBtn');
 const fullscreenLinkBtn = document.getElementById('fullscreenLinkBtn');
 const fullscreenFileBtn = document.getElementById('fullscreenFileBtn');
 const fullscreenNameBtn = document.getElementById('fullscreenNameBtn');
-
 // Connect fullscreen name button now that it's declared
 fullscreenNameBtn?.addEventListener('click', openNameColorPopup);
-
 // Chat Settings Button
 const chatSettingsBtn = document.getElementById('chatSettingsBtn');
 const fullscreenChatSettingsBtn = document.getElementById('fullscreenChatSettingsBtn');
-
 function openChatSettings() {
   // Create or show settings modal
   let settingsModal = document.getElementById('chatSettingsModal');
@@ -2386,35 +2031,29 @@ function openChatSettings() {
           </div>
       `;
       document.body.appendChild(settingsModal);
-      
       // Close button
       document.getElementById('closeChatSettingsBtn')?.addEventListener('click', () => {
           settingsModal.style.display = 'none';
       });
-      
       // Close on backdrop click
       settingsModal.addEventListener('click', (e) => {
           if (e.target === settingsModal) {
               settingsModal.style.display = 'none';
           }
       });
-      
-      // Load saved settings
+       settings
       const soundEnabled = localStorage.getItem('chatSoundEnabled') !== 'false';
       const autoScroll = localStorage.getItem('chatAutoScroll') !== 'false';
       const showTimestamps = localStorage.getItem('chatShowTimestamps') === 'true';
       const messagesPerPage = localStorage.getItem('chatMessagesPerPage') || '100';
-      
       const soundCheckbox = document.getElementById('chatSoundEnabled');
       const autoScrollCheckbox = document.getElementById('chatAutoScroll');
       const timestampsCheckbox = document.getElementById('chatShowTimestamps');
       const messagesSelect = document.getElementById('chatMessagesPerPage');
-      
       if (soundCheckbox) soundCheckbox.checked = soundEnabled;
       if (autoScrollCheckbox) autoScrollCheckbox.checked = autoScroll;
       if (timestampsCheckbox) timestampsCheckbox.checked = showTimestamps;
       if (messagesSelect) messagesSelect.value = messagesPerPage;
-      
       // Save settings on change
       soundCheckbox?.addEventListener('change', (e) => {
           localStorage.setItem('chatSoundEnabled', e.target.checked);
@@ -2429,27 +2068,22 @@ function openChatSettings() {
           localStorage.setItem('chatMessagesPerPage', e.target.value);
       });
   }
-  
   settingsModal.style.display = 'flex';
 }
-
 chatSettingsBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
   openChatSettings();
 });
-
 fullscreenChatSettingsBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
   openChatSettings();
 });
-
 // Expand chat to full screen
 expandChatBtn?.addEventListener('click', () => {
   if (!fullScreenChatModal) {
       console.error('Fullscreen chat modal not found');
       return;
   }
-  
   try {
       fullScreenChatModal.style.display = 'block';
       // Sync messages
@@ -2467,7 +2101,6 @@ expandChatBtn?.addEventListener('click', () => {
       notifications.show('Error opening fullscreen chat', 'error', 2000);
   }
 });
-
 // Minimize from full screen
 minimizeChatBtn?.addEventListener('click', () => {
   try {
@@ -2478,7 +2111,6 @@ minimizeChatBtn?.addEventListener('click', () => {
       console.error('Error minimizing chat:', error);
   }
 });
-
 // Close full screen chat
 closeFullscreenChatBtn?.addEventListener('click', () => {
   try {
@@ -2489,7 +2121,6 @@ closeFullscreenChatBtn?.addEventListener('click', () => {
       console.error('Error closing fullscreen chat:', error);
   }
 });
-
 fullScreenChatModal?.addEventListener('click', (e) => {
   if (e.target === fullScreenChatModal) {
       try {
@@ -2499,8 +2130,7 @@ fullScreenChatModal?.addEventListener('click', (e) => {
       }
   }
 });
-
-// Escape key to close fullscreen chat
+ to close fullscreen chat
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && fullScreenChatModal && fullScreenChatModal.style.display !== 'none') {
       try {
@@ -2510,7 +2140,6 @@ document.addEventListener('keydown', (e) => {
       }
   }
 });
-
 // Toggle sidebar
 toggleSidebarBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -2534,7 +2163,6 @@ toggleSidebarBtn?.addEventListener('click', (e) => {
       }
   }
 });
-
 // Initialize sidebar state - open by default on desktop
 if (fullscreenChatSidebar && window.innerWidth > 768) {
   fullscreenChatSidebar.classList.add('open');
@@ -2544,7 +2172,6 @@ if (fullscreenChatSidebar && window.innerWidth > 768) {
       icon.classList.add('fa-chevron-right');
   }
 }
-
 // Toggle search bar
 fullscreenChatSearchBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -2564,7 +2191,6 @@ fullscreenChatSearchBtn?.addEventListener('click', (e) => {
       }
   }
 });
-
 closeSearchBtn?.addEventListener('click', () => {
   if (fullscreenChatSearchBar) {
       fullscreenChatSearchBar.style.display = 'none';
@@ -2573,7 +2199,6 @@ closeSearchBtn?.addEventListener('click', () => {
       }
   }
 });
-
 // Search functionality
 fullscreenChatSearchInput?.addEventListener('input', Utils.debounce((e) => {
   const query = e.target.value.toLowerCase().trim();
@@ -2581,7 +2206,6 @@ fullscreenChatSearchInput?.addEventListener('input', Utils.debounce((e) => {
       syncChatMessages();
       return;
   }
-  
   // Filter messages
   const messages = fullscreenChatMessages?.querySelectorAll('.chat-message');
   if (messages) {
@@ -2596,7 +2220,6 @@ fullscreenChatSearchInput?.addEventListener('input', Utils.debounce((e) => {
       });
   }
 }, 300));
-
 // Toggle online users sidebar
 fullscreenChatUsersBtn?.addEventListener('click', () => {
   if (fullscreenChatSidebar) {
@@ -2604,8 +2227,7 @@ fullscreenChatUsersBtn?.addEventListener('click', () => {
       loadOnlineUsers();
   }
 });
-
-// Send message function (works for both regular and fullscreen) with moderation
+ function (works for both regular and fullscreen) with moderation
 function sendChatMessage(inputElement) {
   if (!inputElement || !inputElement.value.trim()) return;
   if (!db) {
@@ -2614,10 +2236,7 @@ function sendChatMessage(inputElement) {
       }
       return;
   }
-  
   const messageText = inputElement.value.trim();
-  
-  // Check if user is banned
   if (isUserBanned(visitorId)) {
       if (typeof notifications !== 'undefined' && notifications.show) {
           notifications.show('You are banned from chatting', 'error', 3000);
@@ -2627,8 +2246,6 @@ function sendChatMessage(inputElement) {
       inputElement.value = '';
       return;
   }
-  
-  // Check rate limiting
   const rateLimitCheck = checkRateLimit(visitorId);
   if (!rateLimitCheck.allowed) {
       if (typeof notifications !== 'undefined' && notifications.show) {
@@ -2638,7 +2255,6 @@ function sendChatMessage(inputElement) {
       }
       return;
   }
-  
   // Check for profanity
   if (containsProfanity(messageText)) {
       trackBlockedMessage('profanity');
@@ -2650,8 +2266,6 @@ function sendChatMessage(inputElement) {
       inputElement.value = '';
       return;
   }
-  
-  // Check for spam
   if (isSpam(messageText)) {
       trackBlockedMessage('spam');
       if (typeof notifications !== 'undefined' && notifications.show) {
@@ -2662,14 +2276,11 @@ function sendChatMessage(inputElement) {
       inputElement.value = '';
       return;
   }
-  
   inputElement.value = '';
-  
   // Stop typing indicator
   if (db) {
       db.ref('chatTyping/' + visitorId).remove().catch(err => console.error('Error removing typing:', err));
   }
-  
   // Update rate limiting tracking
   const now = Date.now();
   if (!userMessageCounts[visitorId]) {
@@ -2677,8 +2288,6 @@ function sendChatMessage(inputElement) {
   }
   userMessageCounts[visitorId].push(now);
   lastMessageTime[visitorId] = now;
-  
-  // Send message
   const msgData = {
       user: username,
       text: messageText,
@@ -2688,14 +2297,12 @@ function sendChatMessage(inputElement) {
       avatar: userProfile.avatar || '👤',
       avatarImage: userProfile.avatarImage || null
   };
-  
   db.ref('chat').push(msgData).catch(error => {
       console.error('Error sending message:', error);
       if (typeof notifications !== 'undefined' && notifications.show) {
           notifications.show('Error sending message', 'error', 2000);
       }
   });
-  
   // Track activity
   if (typeof trackActivity === 'function') {
       trackActivity('chat', 1);
@@ -2704,36 +2311,29 @@ function sendChatMessage(inputElement) {
       addActivity('Sent a chat message');
   }
 }
-
 // Regular chat send
 const sendChatBtn = document.getElementById('sendChatBtn');
 sendChatBtn?.addEventListener('click', () => {
   const input = document.getElementById('chatInput');
   if (input) sendChatMessage(input);
 });
-
 // Fullscreen chat send
 fullscreenSendBtn?.addEventListener('click', () => {
   if (fullscreenChatInput) sendChatMessage(fullscreenChatInput);
 });
-
 // Enter key for both inputs
 fullscreenChatInput?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
       sendChatMessage(fullscreenChatInput);
   }
 });
-
 // Sync messages between regular and fullscreen chat
 function syncChatMessages() {
   const regularMessages = document.getElementById('chatMessages');
   const fullscreenMessages = fullscreenChatMessages;
-  
   if (!regularMessages || !fullscreenMessages) return;
-  
   // Copy messages from regular to fullscreen
   fullscreenMessages.innerHTML = regularMessages.innerHTML;
-  
   // Re-attach delete button handlers for fullscreen messages
   fullscreenMessages.querySelectorAll('[data-msg-id]').forEach(msgDiv => {
       const msgId = msgDiv.getAttribute('data-msg-id');
@@ -2753,25 +2353,20 @@ function syncChatMessages() {
           };
       }
   });
-  
   // Auto-scroll
   setTimeout(() => {
       fullscreenMessages.scrollTop = fullscreenMessages.scrollHeight;
   }, 50);
 }
-
 // Load online users
 function loadOnlineUsers() {
   if (!fullscreenChatOnlineUsers || !db) return;
-  
   db.ref('online').once('value').then(snap => {
       const online = snap.val() || {};
       const onlineIds = Object.keys(online);
-      
       if (onlineUsersCount) {
           onlineUsersCount.textContent = onlineIds.length;
       }
-      
       // Load profiles
       db.ref('profiles').once('value').then(profilesSnap => {
           const profiles = profilesSnap.val() || {};
@@ -2780,18 +2375,15 @@ function loadOnlineUsers() {
               profile: profiles[id] || {},
               timestamp: online[id]?.timestamp || Date.now()
           })).sort((a, b) => b.timestamp - a.timestamp);
-          
           if (users.length === 0) {
               fullscreenChatOnlineUsers.innerHTML = '<div class="empty-state">No users online</div>';
               return;
           }
-          
           fullscreenChatOnlineUsers.innerHTML = users.map(({id, profile}) => {
-              const avatarStyle = profile.avatarImage 
+              const avatarStyle = profile.avatarImage
                   ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
                   : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
               const avatarContent = profile.avatarImage ? '' : (profile.avatar || '👤');
-              
               return `
                   <div class="online-user-item">
                       <div class="online-user-avatar" style="${avatarStyle} display:flex; align-items:center; justify-content:center; font-size:24px;">
@@ -2810,86 +2402,69 @@ function loadOnlineUsers() {
       console.error('Error loading online users:', err);
   });
 }
-
 // Sync messages when regular chat updates
 const chatMessagesObserver = new MutationObserver(() => {
   if (fullScreenChatModal && fullScreenChatModal.style.display !== 'none') {
       syncChatMessages();
   }
 });
-
 const regularChatMessages = document.getElementById('chatMessages');
 if (regularChatMessages) {
   chatMessagesObserver.observe(regularChatMessages, { childList: true, subtree: true });
 }
-
 // Update online users count periodically
 if (db) {
   setInterval(loadOnlineUsers, 10000); // Every 10 seconds
 }
-
 const themeBtn = document.getElementById('themeBtn');
 const themeModal = document.getElementById('themeModal');
 const closeThemeBtn = document.getElementById('closeThemeBtn');
 const themeOptions = document.querySelectorAll('.theme-option');
 const seasonalThemes = document.querySelectorAll('.seasonal-theme');
-
 let currentTheme = localStorage.getItem('selectedTheme') || 'default';
 let currentSeasonal = localStorage.getItem('selectedSeasonal') || '';
-
 function applyTheme(theme) {
   // Remove all theme classes
   document.body.className = document.body.className.replace(/theme-\w+/g, '').trim();
   document.body.className = document.body.className.replace(/seasonal-\w+/g, '').trim();
-
   // Apply new theme
   if (theme !== 'default') {
     document.body.classList.add(`theme-${theme}`);
   }
-
   // Apply seasonal theme if exists
   if (currentSeasonal) {
     document.body.classList.add(`seasonal-${currentSeasonal}`);
   }
-
   localStorage.setItem('selectedTheme', theme);
 }
-
 function applySeasonal(season) {
   // Remove existing seasonal classes
   document.body.className = document.body.className.replace(/seasonal-\w+/g, '').trim();
-
   // Apply new seasonal theme
   if (season) {
     document.body.classList.add(`seasonal-${season}`);
   }
-
   currentSeasonal = season;
   localStorage.setItem('selectedSeasonal', season);
 }
-
 // Theme button click
 themeBtn.addEventListener('click', () => {
   themeModal.style.display = 'flex';
   themeModal.setAttribute('aria-hidden', 'false');
 });
-
 // Close theme modal
 closeThemeBtn.addEventListener('click', () => {
   themeModal.style.display = 'none';
   themeModal.setAttribute('aria-hidden', 'true');
 });
-
 // Theme selection
 themeOptions.forEach(option => {
   option.addEventListener('click', () => {
     const theme = option.dataset.theme;
     applyTheme(theme);
-
     themeOptions.forEach(opt => opt.style.borderColor = opt.dataset.theme === theme ? '#28a745' : '');
   });
 });
-
 // Seasonal theme selection
 seasonalThemes.forEach(theme => {
   theme.addEventListener('click', () => {
@@ -2898,14 +2473,11 @@ seasonalThemes.forEach(theme => {
     seasonalThemes.forEach(t => t.style.opacity = t.dataset.season === currentSeasonal ? '1' : '0.6');
   });
 });
-
 applyTheme(currentTheme);
 applySeasonal(currentSeasonal);
-
 const achievementsBtn = document.getElementById('achievementsBtn');
 const achievementsModal = document.getElementById('achievementsModal');
 const closeAchievementsBtn = document.getElementById('closeAchievementsBtn');
-
 let userStats = JSON.parse(localStorage.getItem('userStats')) || {
   chatMessages: 0,
   drawTime: 0,
@@ -2923,7 +2495,6 @@ if (now - lastReset > oneDay) {
   userStats.dailyMessages = 0;
   userStats.lastDailyReset = now;
 }
-
 function updateAchievements() {
   const chatProgress = Math.min((userStats.chatMessages / 10) * 100, 100);
   document.getElementById('chatProgress').style.width = chatProgress + '%';
@@ -2970,7 +2541,6 @@ function updateAchievements() {
   const dailyProgress = Math.min((userStats.dailyMessages / 5) * 100, 100);
   document.getElementById('dailyProgress').style.width = dailyProgress + '%';
   document.getElementById('dailyCount').textContent = userStats.dailyMessages + '/5';
-
   localStorage.setItem('userStats', JSON.stringify(userStats));
 }
 function trackActivity(type, value = 1) {
@@ -3006,7 +2576,6 @@ achievementsBtn.addEventListener('click', () => {
   achievementsModal.style.display = 'flex';
   achievementsModal.setAttribute('aria-hidden', 'false');
 });
-
 // Close achievements modal
 closeAchievementsBtn.addEventListener('click', () => {
   achievementsModal.style.display = 'none';
@@ -3049,7 +2618,6 @@ themeOptions.forEach(option => {
 updateAchievements();
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
   switch(e.key.toLowerCase()) {
     case 'r':
       if (e.ctrlKey || e.metaKey) {
@@ -3142,46 +2710,38 @@ setInterval(() => {
 const statsBtn = document.getElementById('statsBtn');
 const statsModal = document.getElementById('statsModal');
 const closeStatsBtn = document.getElementById('closeStatsBtn');
-
 function updateStatsDisplay() {
   document.getElementById('onlineTimeStat').textContent = Math.floor(userStats.onlineTime) + ' min';
   document.getElementById('chatMessagesStat').textContent = userStats.chatMessages;
   document.getElementById('gamingTimeStat').textContent = Math.floor(userStats.gameTime) + ' min';
   document.getElementById('drawingTimeStat').textContent = Math.floor(userStats.drawTime) + ' min';
-
   // Achievement progress bars
   const chatProgress = Math.min((userStats.chatMessages / 10) * 100, 100);
   document.getElementById('chatProgressBar').style.width = chatProgress + '%';
   document.getElementById('chatProgressText').textContent = userStats.chatMessages + '/10';
-
   const drawProgress = Math.min((userStats.drawTime / 30) * 100, 100);
   document.getElementById('drawProgressBar').style.width = drawProgress + '%';
   document.getElementById('drawProgressText').textContent = Math.floor(userStats.drawTime) + '/30 min';
-
   const gameProgress = Math.min((userStats.gameTime / 60) * 100, 100);
   document.getElementById('gameProgressBar').style.width = gameProgress + '%';
   document.getElementById('gameProgressText').textContent = Math.floor(userStats.gameTime) + '/60 min';
-
   // Daily stats
   document.getElementById('dailyMessagesStat').textContent = userStats.dailyMessages;
   document.getElementById('dailyOnlineStat').textContent = Math.floor(userStats.onlineTime) + ' min';
   document.getElementById('sitesVisitedStat').textContent = userStats.sitesVisited.length;
   document.getElementById('themesTriedStat').textContent = userStats.themesTried.length;
 }
-
 // Stats button
 statsBtn.addEventListener('click', () => {
   updateStatsDisplay();
   statsModal.style.display = 'flex';
   statsModal.setAttribute('aria-hidden', 'false');
 });
-
 // Close stats modal
 closeStatsBtn.addEventListener('click', () => {
   statsModal.style.display = 'none';
   statsModal.setAttribute('aria-hidden', 'true');
 });
-
 // ================= Drawing Modal =================
 const drawingModal = document.getElementById('drawingModal');
 const openDrawingBtn = document.getElementById('openDrawingBtn');
@@ -3201,7 +2761,6 @@ drawingModal.addEventListener('click', (e) => {
     drawingModal.setAttribute('aria-hidden','true');
   }
 });
-
 // ================= Shared Drawing Canvas Script =================
 (function(){
   const container = document.getElementById('sharedCanvasContainer');
@@ -3215,7 +2774,6 @@ drawingModal.addEventListener('click', (e) => {
   const clearBtn = document.getElementById('clearCanvasBtn');
   const brushToolBtn = document.getElementById('brushToolBtn');
   const eraserToolBtn = document.getElementById('eraserToolBtn');
-
   // Tool state
   let currentTool = 'brush'; // 'brush' or 'eraser' or 'rectangle' etc
   let drawing = false;
@@ -3234,7 +2792,6 @@ drawingModal.addEventListener('click', (e) => {
   const metaRef = db.ref('canvas/meta');
   const strokesCache = {}; // local cache of strokes by id to allow redraw on resize
   let initialLoadComplete = false; // Flag to prevent duplicate rendering during initial load
-
   // Tool switching
   function resetToolStyles() {
     const tools = ['brushToolBtn', 'eraserToolBtn', 'rectangleToolBtn', 'circleToolBtn', 'lineToolBtn', 'textToolBtn', 'eyedropperBtn'];
@@ -3245,7 +2802,6 @@ drawingModal.addEventListener('click', (e) => {
       btn.style.color = '#333';
     });
   }
-
   function selectTool(tool) {
     currentTool = tool;
     resetToolStyles();
@@ -3286,14 +2842,12 @@ drawingModal.addEventListener('click', (e) => {
       canvasEl.style.cursor = 'copy';
     }
   }
-
   function undoLast() {
     if(pushedStrokes.length > 0) {
       const lastKey = pushedStrokes.pop();
       strokesRef.child(lastKey).remove();
     }
   }
-
   function saveDrawing() {
     const dataURL = canvasEl.toDataURL('image/png');
     const a = document.createElement('a');
@@ -3301,7 +2855,6 @@ drawingModal.addEventListener('click', (e) => {
     a.download = 'drawing.png';
     a.click();
   }
-
   function loadDrawing() {
     const input = document.createElement('input');
     input.type = 'file';
@@ -3319,16 +2872,13 @@ drawingModal.addEventListener('click', (e) => {
     };
     input.click();
   }
-
   function applyZoom() {
     ctx2.setTransform(zoomLevel, 0, 0, zoomLevel, panX, panY);
     redrawAllStrokes();
   }
-
   function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
-
   brushToolBtn.addEventListener('click', () => selectTool('brush'));
   eraserToolBtn.addEventListener('click', () => selectTool('eraser'));
   document.getElementById('rectangleToolBtn').addEventListener('click', () => selectTool('rectangle'));
@@ -3344,7 +2894,6 @@ drawingModal.addEventListener('click', (e) => {
   document.getElementById('zoomInBtn').addEventListener('click', () => { zoomLevel *= 1.2; applyZoom(); });
   document.getElementById('zoomOutBtn').addEventListener('click', () => { zoomLevel /= 1.2; applyZoom(); });
   selectTool('brush');
-
   // Resize helper
   function resizeCanvasToDisplay() {
     const ratio = window.devicePixelRatio || 1;
@@ -3360,7 +2909,6 @@ drawingModal.addEventListener('click', (e) => {
   }
   window.addEventListener('resize', resizeCanvasToDisplay);
   resizeCanvasToDisplay();
-
   // Show/hide canvas area toggle
   toggleBtn.addEventListener('click', () => {
     if (canvasWrapper.style.display === 'none' || canvasWrapper.style.display === '') {
@@ -3372,11 +2920,9 @@ drawingModal.addEventListener('click', (e) => {
       toggleBtn.textContent = 'Open Canvas';
     }
   });
-
   // UI bindings
   colorPicker.addEventListener('input', (e) => brushColor = e.target.value);
   sizeSlider.addEventListener('input', (e) => { brushSize = parseInt(e.target.value,10); sizeLabel.textContent = brushSize; });
-
   // Convert screen coords to canvas coords
   function getCanvasPoint(e) {
     const rect = canvasEl.getBoundingClientRect();
@@ -3386,10 +2932,8 @@ drawingModal.addEventListener('click', (e) => {
     const y = clientY - rect.top;
     return { x: Math.round(x), y: Math.round(y) };
   }
-
   function drawStrokeLocally(stroke, opts={}) {
     if(!stroke || !stroke.points || stroke.points.length===0) return;
-    
     if(stroke.type === 'erase') {
       ctx2.save();
       ctx2.globalCompositeOperation = 'destination-out';
@@ -3463,7 +3007,6 @@ drawingModal.addEventListener('click', (e) => {
       ctx2.stroke();
     }
   }
-
   // Redraw all strokes from the in-memory cache (sorted by time)
   function redrawAllStrokes() {
     try {
@@ -3480,7 +3023,6 @@ drawingModal.addEventListener('click', (e) => {
       console.warn('redrawAllStrokes failed', err);
     }
   }
-
   // Pointer events
   canvasEl.addEventListener('pointerdown', (e) => {
     e.preventDefault();
@@ -3531,7 +3073,6 @@ drawingModal.addEventListener('click', (e) => {
       brushColor = hex;
     }
   });
-
   canvasEl.addEventListener('pointermove', (e) => {
     if(!drawing && !shapeStart) return;
     e.preventDefault();
@@ -3540,7 +3081,6 @@ drawingModal.addEventListener('click', (e) => {
       const last = currentStroke[currentStroke.length-1];
       if(!last || last.x !== p.x || last.y !== p.y) {
         currentStroke.push(p);
-
         if(currentTool === 'brush') {
           ctx2.globalAlpha = brushOpacity;
           ctx2.lineJoin = 'round';
@@ -3608,7 +3148,6 @@ drawingModal.addEventListener('click', (e) => {
       }
     }
   });
-
   canvasEl.addEventListener('pointerup', async (e) => {
     if(!drawing && !shapeStart) return;
     drawing = false;
@@ -3620,7 +3159,6 @@ drawingModal.addEventListener('click', (e) => {
           points: currentStroke,
           time: Date.now()
         };
-
         if(currentTool === 'brush') {
           strokeObj.color = brushColor;
           strokeObj.type = 'brush';
@@ -3628,7 +3166,6 @@ drawingModal.addEventListener('click', (e) => {
         } else if(currentTool === 'eraser') {
           strokeObj.type = 'erase';
         }
-
         try {
           const pushRef = await strokesRef.push(strokeObj);
           pushedStrokes.push(pushRef.key);
@@ -3665,9 +3202,7 @@ drawingModal.addEventListener('click', (e) => {
     }
     currentStroke = [];
   });
-
   canvasEl.addEventListener('pointercancel', () => { drawing=false; currentStroke=[]; });
-
   // Listen for strokes added by anyone (only new strokes after initial load)
   strokesRef.on('child_added', snapshot => {
     const strokeId = snapshot.key;
@@ -3681,14 +3216,12 @@ drawingModal.addEventListener('click', (e) => {
       drawnIds.add(strokeId);
     }
   });
-
   // When a stroke is removed (e.g., clear), update cache and redraw
   strokesRef.on('child_removed', snapshot => {
     const id = snapshot.key;
     if(id && strokesCache[id]) delete strokesCache[id];
     redrawAllStrokes();
   });
-
   // Listen for clear events
   metaRef.child('clear').on('value', snap => {
     const v = snap.val();
@@ -3699,7 +3232,6 @@ drawingModal.addEventListener('click', (e) => {
       for(const k in strokesCache) delete strokesCache[k];
     }
   });
-
   // Clear button
   clearBtn.addEventListener('click', async () => {
     try {
@@ -3713,20 +3245,17 @@ drawingModal.addEventListener('click', (e) => {
       console.warn('Failed to clear strokes', err);
     }
   });
-
   // Presence
   const userId = visitorId || ('anon_'+Date.now());
   const presenceRef = db.ref('canvas/presence/' + userId);
   presenceRef.set({online:true, color: colorPicker.value, lastSeen: Date.now()});
   presenceRef.onDisconnect().remove();
-
   // ================= Cursor Tracking =================
   const cursorOverlay = document.getElementById('cursorOverlay');
   const ctxCursor = cursorOverlay.getContext('2d');
   const cursorsRef = db.ref('canvas/cursors');
   let activeCursors = {}; // { userId: { x, y, color, username, timestamp } }
   const avatarImageCache = {}; // Cache for loaded avatar images
-  
   // Sync cursor overlay to main canvas size
   function syncCursorOverlay() {
     // Match the overlay to the main canvas device pixel dimensions
@@ -3745,7 +3274,6 @@ drawingModal.addEventListener('click', (e) => {
   }
   window.addEventListener('resize', syncCursorOverlay);
   syncCursorOverlay();
-
   // Track mouse movement and broadcast cursor
   let lastCursorUpdate = 0;
   canvasEl.addEventListener('pointermove', (e) => {
@@ -3764,34 +3292,27 @@ drawingModal.addEventListener('click', (e) => {
       lastCursorUpdate = now;
     }
   });
-
   // Listen for other users' cursors
   cursorsRef.on('value', snap => {
     const data = snap.val() || {};
     activeCursors = data;
   });
-
   // Draw cursors on overlay
   function drawCursorsFrame() {
     // Clear using device pixel dimensions — ctx transform is already scaled to device pixels
     ctxCursor.clearRect(0, 0, cursorOverlay.width, cursorOverlay.height);
-
     for(const uid in activeCursors) {
       if(uid === userId) continue; // Don't draw own cursor
       const cursor = activeCursors[uid];
       if(!cursor || (typeof cursor.x !== 'number') || (typeof cursor.y !== 'number')) continue;
-
       // Don't show stale cursors (older than 2 seconds)
       if(Date.now() - cursor.timestamp > 2000) continue;
-
       // cursor.x/y are stored in CSS pixels (getCanvasPoint uses boundingClientRect)
       // ctxCursor is scaled so drawing with CSS coordinates works correctly
       const x = cursor.x;
       const y = cursor.y;
       const color = cursor.color || '#00ffff';
-
       ctxCursor.save();
-      
       // Draw profile picture (small avatar)
       const avatarSize = 20;
       if(cursor.avatarImage) {
@@ -3802,7 +3323,6 @@ drawingModal.addEventListener('click', (e) => {
               avatarImageCache[cursor.avatarImage] = img;
           }
           const img = avatarImageCache[cursor.avatarImage];
-          
           if(img.complete && img.naturalWidth > 0) {
               // Draw circular avatar
               ctxCursor.beginPath();
@@ -3844,7 +3364,6 @@ drawingModal.addEventListener('click', (e) => {
           ctxCursor.fillStyle = '#000';
           ctxCursor.fillText(cursor.avatar || '👤', x, y);
       }
-
       // Draw cursor glow
       ctxCursor.strokeStyle = color;
       ctxCursor.lineWidth = 2;
@@ -3853,7 +3372,6 @@ drawingModal.addEventListener('click', (e) => {
       ctxCursor.arc(x, y, avatarSize/2 + 3, 0, Math.PI * 2);
       ctxCursor.stroke();
       ctxCursor.globalAlpha = 1;
-
       // Draw username label
       ctxCursor.fillStyle = color;
       ctxCursor.font = 'bold 11px Arial';
@@ -3864,20 +3382,16 @@ drawingModal.addEventListener('click', (e) => {
       ctxCursor.fillText(cursor.username, x + avatarSize/2 + 5, y + 2);
       ctxCursor.restore();
     }
-
     requestAnimationFrame(drawCursorsFrame);
   }
   drawCursorsFrame();
-
   // Clean up own cursor on canvas exit
   canvasEl.addEventListener('pointerleave', () => {
     cursorsRef.child(userId).remove().catch(err => console.warn('Cursor cleanup failed', err));
   });
-
   canvasEl.addEventListener('pointerenter', () => {
     presenceRef.update({lastSeen: Date.now()});
   });
-
   // Ensure presence and cursor entries are removed when the connection disconnects
   try {
     presenceRef.onDisconnect().remove();
@@ -3885,13 +3399,11 @@ drawingModal.addEventListener('click', (e) => {
   } catch (err) {
     console.warn('onDisconnect setup failed', err);
   }
-
   // Update presence color when user changes brush color
   colorPicker.addEventListener('input', (e) => {
     brushColor = e.target.value;
     try { presenceRef.update({ color: brushColor }); } catch (err) { /* ignore */ }
   });
-
   // Initial load of existing strokes - load ALL strokes to ensure persistence across sessions
   strokesRef.once('value').then(snap => {
     const data = snap.val();
@@ -3923,33 +3435,27 @@ drawingModal.addEventListener('click', (e) => {
     initialLoadComplete = true;
   });
 })();
-
 // Loading screen removal is now handled at the top of the script
-
 // ================= Page Initialization =================
 // Initialize tutorial/popup when page loads
 window.addEventListener('load', function() {
     console.log('Page fully loaded');
-    
     // Skip popup only when returning from other pages (like all-games.html)
     // Always show popup on initial website load
-    const isReturningFromOtherPage = document.referrer && 
-        document.referrer.includes(window.location.hostname) && 
+    const isReturningFromOtherPage = document.referrer &&
+        document.referrer.includes(window.location.hostname) &&
         (document.referrer.includes('pages/') || document.referrer.includes('games/'));
     const skipPopup = isReturningFromOtherPage;
-    
     if (skipPopup) {
         // Don't show popup when returning from other pages
         return;
     }
-    
     if(!localStorage.getItem('tutorialShown')) {
         startTutorial();
     } else {
         showPopup();
     }
 });
-
 // ================= Intro Screen Particles =================
 // Only initialize if the loading screen element exists
 const loadingParticlesContainer = document.querySelector('.loading-particles');
@@ -3959,7 +3465,6 @@ particleCanvas.width = window.innerWidth;
 particleCanvas.height = window.innerHeight;
     loadingParticlesContainer.appendChild(particleCanvas);
 const particleCtx = particleCanvas.getContext('2d');
-
 let particles = [];
 for(let i=0;i<100;i++){
     particles.push({
@@ -3971,7 +3476,6 @@ for(let i=0;i<100;i++){
         color:['#ffffff','#FFD700','#000000'][Math.floor(Math.random()*3)]
     });
 }
-
 function animateParticles(){
     particleCtx.clearRect(0,0,particleCanvas.width,particleCanvas.height);
     for(let p of particles){
@@ -3986,7 +3490,6 @@ function animateParticles(){
     requestAnimationFrame(animateParticles);
 }
 animateParticles();
-
     // Handle window resize
     window.addEventListener('resize', () => {
         // Check if canvas still exists (loading screen might have been removed)
@@ -3996,9 +3499,7 @@ animateParticles();
         }
 });
 }
-
 // ================= NEW FEATURES =================
-
 // ---------------- User Profiles ----------------
 let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
     avatar: '👤',
@@ -4008,7 +3509,6 @@ let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
     activity: [],
     profileCreated: false
 };
-
 const profileBtn = document.getElementById('profileBtn');
 const profileModal = document.getElementById('profileModal');
 const closeProfileBtn = document.getElementById('closeProfileBtn');
@@ -4022,10 +3522,8 @@ const uploadPfpBtn = document.getElementById('uploadPfpBtn');
 const removePfpBtn = document.getElementById('removePfpBtn');
 const saveProfileBtn = document.getElementById('saveProfileBtn');
 const profileModalTitle = document.getElementById('profileModalTitle');
-
 let isFirstVisit = !userProfile.profileCreated;
 let isProfileModalLocked = false; // Lock modal on first visit
-
 // Check if profile is created on first visit
 if (isFirstVisit) {
     // Lock the modal - user must create profile
@@ -4042,7 +3540,6 @@ if (isFirstVisit) {
         }
     }, 500);
 }
-
 profileBtn?.addEventListener('click', () => {
     isProfileModalLocked = false;
     profileModalTitle.textContent = 'My Profile';
@@ -4052,24 +3549,20 @@ profileBtn?.addEventListener('click', () => {
     profileModal.style.display = 'flex';
     updateProfileDisplay();
 });
-
 closeProfileBtn?.addEventListener('click', () => {
     if (!isProfileModalLocked) {
         profileModal.style.display = 'none';
     }
 });
-
 profileModal?.addEventListener('click', (e) => {
     if(e.target === profileModal && !isProfileModalLocked) {
         profileModal.style.display = 'none';
     }
 });
-
 // Handle profile picture upload
 uploadPfpBtn?.addEventListener('click', () => {
     profilePictureInput?.click();
 });
-
 profilePictureInput?.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -4086,7 +3579,6 @@ profilePictureInput?.addEventListener('change', (e) => {
         reader.readAsDataURL(file);
     }
 });
-
 // Handle remove profile picture
 removePfpBtn?.addEventListener('click', (e) => {
     e.stopPropagation(); // Prevent triggering avatar click
@@ -4094,30 +3586,25 @@ removePfpBtn?.addEventListener('click', (e) => {
     userProfile.avatar = '👤';
     updateProfileDisplay();
 });
-
 // Allow clicking avatar to upload
 profileAvatar?.addEventListener('click', () => {
     profilePictureInput?.click();
 });
-
 saveProfileBtn?.addEventListener('click', () => {
     const usernameValue = profileUsername?.value.trim();
     if (!usernameValue) {
         alert('Please enter a username');
         return;
     }
-    
     userProfile.username = usernameValue;
     userProfile.status = profileStatus?.value || '';
     userProfile.profileCreated = true;
-    
     // Update global username everywhere
     username = usernameValue;
     const chatPopupUsername = document.getElementById('chatPopupUsername');
     if (chatPopupUsername) {
         chatPopupUsername.value = usernameValue;
     }
-    
     // Save to Firebase
     if(db) {
         const profileData = {
@@ -4129,20 +3616,16 @@ saveProfileBtn?.addEventListener('click', () => {
         };
         db.ref('profiles/' + visitorId).update(profileData);
     }
-    
     saveProfile();
     addActivity('Profile created');
-    
     // Unlock modal after profile is created
     isProfileModalLocked = false;
     profileModalTitle.textContent = 'My Profile';
     if (closeProfileBtn) {
         closeProfileBtn.style.display = 'block';
     }
-    
     alert('Profile saved successfully!');
 });
-
 profileStatus?.addEventListener('change', () => {
     userProfile.status = profileStatus.value;
     if(db && userProfile.profileCreated) {
@@ -4156,7 +3639,6 @@ profileStatus?.addEventListener('change', () => {
     }
     saveProfile();
 });
-
 profileUsername?.addEventListener('change', () => {
     if (userProfile.profileCreated && profileUsername.value.trim()) {
         userProfile.username = profileUsername.value.trim();
@@ -4174,7 +3656,6 @@ profileUsername?.addEventListener('change', () => {
         saveProfile();
     }
 });
-
 function updateProfileDisplay() {
     if (profileAvatar) {
         if (userProfile.avatarImage) {
@@ -4199,26 +3680,23 @@ function updateProfileDisplay() {
         profileStatus.value = userProfile.status || '';
     }
     if (activityList) {
-        activityList.innerHTML = userProfile.activity.slice(-10).reverse().map(a => 
+        activityList.innerHTML = userProfile.activity.slice(-10).reverse().map(a =>
             `<div style="padding:8px; background:rgba(255,255,255,0.05); border-radius:6px; margin-bottom:8px; font-size:13px;">
                 <strong>${a.action}</strong> - ${new Date(a.time).toLocaleString()}
             </div>`
         ).join('') || '<p style="color:rgba(255,255,255,0.5);">No activity yet</p>';
     }
 }
-
 function saveProfile() {
     localStorage.setItem('userProfile', JSON.stringify(userProfile));
     updateProfileDisplay();
 }
-
 function addActivity(action) {
     userProfile.activity.push({ action, time: Date.now() });
     if(userProfile.activity.length > 50) userProfile.activity.shift();
     saveProfile();
     updateProfileDisplay();
 }
-
 // ---------------- Leaderboard ----------------
 const leaderboardBtn = document.getElementById('leaderboardBtn');
 const leaderboardModal = document.getElementById('leaderboardModal');
@@ -4226,20 +3704,16 @@ const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
 const leaderboardContent = document.getElementById('leaderboardContent');
 const leaderboardTabs = document.querySelectorAll('.leaderboardTab');
 let currentLeaderboardTab = 'chatters';
-
 leaderboardBtn?.addEventListener('click', () => {
     leaderboardModal.style.display = 'flex';
     loadLeaderboard('chatters');
 });
-
 closeLeaderboardBtn?.addEventListener('click', () => {
     leaderboardModal.style.display = 'none';
 });
-
 leaderboardModal?.addEventListener('click', (e) => {
     if(e.target === leaderboardModal) leaderboardModal.style.display = 'none';
 });
-
 leaderboardTabs.forEach(tab => {
     tab.addEventListener('click', () => {
         currentLeaderboardTab = tab.dataset.tab;
@@ -4252,12 +3726,9 @@ leaderboardTabs.forEach(tab => {
         loadLeaderboard(currentLeaderboardTab);
     });
 });
-
 function loadLeaderboard(type) {
     if(!db || !leaderboardContent) return;
-    
     leaderboardContent.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5);">Loading...</p>';
-    
     if(type === 'chatters') {
         // Load only recent messages (last 500) instead of all for better performance
         Promise.all([
@@ -4268,7 +3739,6 @@ function loadLeaderboard(type) {
             const profiles = profilesSnap.val() || {};
             const userCounts = {};
             const userProfiles = {}; // Store profile data for each user
-            
             // Count messages and get profiles from messages
             Object.values(messages).forEach(msg => {
                 if(msg && msg.user) {
@@ -4281,7 +3751,6 @@ function loadLeaderboard(type) {
                     }
                 }
             });
-            
             // Get profiles from profiles collection
             Object.values(profiles).forEach(profile => {
                 if(profile && profile.username && !userProfiles[profile.username]) {
@@ -4291,7 +3760,6 @@ function loadLeaderboard(type) {
                     };
                 }
             });
-            
             const sorted = Object.entries(userCounts).sort((a,b) => b[1] - a[1]).slice(0, 10);
             displayLeaderboard(sorted.map(([user, count], i) => ({
                 rank: i + 1,
@@ -4314,7 +3782,6 @@ function loadLeaderboard(type) {
             const online = onlineSnap.val() || {};
             const profiles = profilesSnap.val() || {};
             const sorted = Object.entries(online).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).slice(0, 10);
-            
             displayLeaderboard(sorted.map(([id, data], i) => {
                 const profile = profiles[id] || Object.values(profiles).find(p => p.username === (data.username || 'User')) || {};
                 return {
@@ -4350,11 +3817,10 @@ function loadLeaderboard(type) {
         leaderboardContent.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5);">Daily/Weekly stats coming soon!</p>';
     }
 }
-
 function displayLeaderboard(data) {
     if(!leaderboardContent) return;
     leaderboardContent.innerHTML = data.map(item => {
-        const avatarStyle = item.avatarImage 
+        const avatarStyle = item.avatarImage
             ? `background-image: url(${item.avatarImage}); background-size: cover; background-position: center;`
             : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
         const avatarContent = item.avatarImage ? '' : item.avatar || '👤';
@@ -4374,12 +3840,10 @@ function displayLeaderboard(data) {
     `;
     }).join('');
 }
-
 // ================= Modern Friends System =================
 const friendsBtn = document.getElementById('friendsBtn');
 const friendsModal = document.getElementById('friendsModal');
 const closeFriendsBtn = document.getElementById('closeFriendsBtn');
-
 // Friends data storage
 let friendsData = {
   friends: JSON.parse(localStorage.getItem('friends')) || [],
@@ -4389,34 +3853,27 @@ let friendsData = {
   },
   blocked: JSON.parse(localStorage.getItem('blockedUsers')) || []
 };
-
 // Cache for performance
 let profilesCache = {};
 let onlineCache = {};
 let cacheTimestamp = 0;
 const CACHE_DURATION = 10000; // 10 seconds
-
 // Initialize friends system
 function initFriendsSystem() {
   if (!db) return;
-  
   // Load friends data from Firebase if available
   loadFriendsFromFirebase();
-  
   // Set up real-time listeners
   setupFriendsRealtimeListeners();
-  
   // Initialize notification system
   initNotificationSystem();
 }
-
 // Load friends from Firebase (with localStorage fallback)
 function loadFriendsFromFirebase() {
   if (!db) {
       updateAllDisplays();
       return;
   }
-  
     Promise.all([
       db.ref(`friends/${visitorId}`).once('value'),
       db.ref(`friendRequests/${visitorId}`).once('value'),
@@ -4430,7 +3887,6 @@ function loadFriendsFromFirebase() {
           friendsData.friends = Object.keys(firebaseFriends);
           localStorage.setItem('friends', JSON.stringify(friendsData.friends));
       }
-      
       // Load requests
       const requests = requestsSnap.val() || {};
       friendsData.requests = {
@@ -4439,33 +3895,27 @@ function loadFriendsFromFirebase() {
       };
       localStorage.setItem('friendRequestsSent', JSON.stringify(friendsData.requests.sent));
       localStorage.setItem('friendRequestsReceived', JSON.stringify(friendsData.requests.received));
-      
       // Update notification badge
       updateNotificationBadge();
-      
       // Load blocked
       const blocked = blockedSnap.val();
       if (blocked) {
           friendsData.blocked = Object.keys(blocked);
           localStorage.setItem('blockedUsers', JSON.stringify(friendsData.blocked));
       }
-      
       // Cache profiles and online status
       profilesCache = profilesSnap.val() || {};
       onlineCache = onlineSnap.val() || {};
       cacheTimestamp = Date.now();
-      
       updateAllDisplays();
   }).catch(err => {
       console.error('Error loading friends from Firebase:', err);
       updateAllDisplays();
   });
 }
-
 // Setup real-time listeners
 function setupFriendsRealtimeListeners() {
   if (!db) return;
-  
   // Friends listener
   db.ref(`friends/${visitorId}`).on('value', (snap) => {
       const friends = snap.val();
@@ -4478,7 +3928,6 @@ function setupFriendsRealtimeListeners() {
           }
       }
   });
-  
   // Requests listener
   db.ref(`friendRequests/${visitorId}`).on('value', (snap) => {
       const requests = snap.val() || {};
@@ -4494,7 +3943,6 @@ function setupFriendsRealtimeListeners() {
           renderRequestsTab();
       }
   });
-  
   // Online status listener
   db.ref('online').on('value', (snap) => {
       onlineCache = snap.val() || {};
@@ -4503,55 +3951,45 @@ function setupFriendsRealtimeListeners() {
       }
   });
 }
-
 // Update count badges
 function updateCountBadges() {
   const friendsBadge = document.getElementById('friendsCountBadge');
   const requestsBadge = document.getElementById('requestsCountBadge');
   const blockedBadge = document.getElementById('blockedCountBadge');
-  
   if (friendsBadge) {
       friendsBadge.textContent = friendsData.friends.length;
       friendsBadge.style.display = friendsData.friends.length > 0 ? 'inline-block' : 'none';
   }
-  
   if (requestsBadge) {
       const count = friendsData.requests.received.length;
       requestsBadge.textContent = count;
       requestsBadge.style.display = count > 0 ? 'inline-block' : 'none';
   }
-  
   if (blockedBadge) {
       const count = friendsData.blocked.length;
       blockedBadge.textContent = count;
       blockedBadge.style.display = count > 0 ? 'inline-block' : 'none';
   }
 }
-
 // Update notification badge
 function updateNotificationBadge() {
   const notificationBadge = document.getElementById('notificationBadge');
   if (!notificationBadge) return;
-  
-  const count = (friendsData && friendsData.requests && friendsData.requests.received) 
-      ? friendsData.requests.received.length 
+  const count = (friendsData && friendsData.requests && friendsData.requests.received)
+      ? friendsData.requests.received.length
       : 0;
   notificationBadge.textContent = count > 99 ? '99+' : count;
   notificationBadge.style.display = count > 0 ? 'flex' : 'none';
-  
   // Update notification list
   updateNotificationList();
 }
-
 // Update notification list
 function updateNotificationList() {
   const notificationList = document.getElementById('notificationList');
   if (!notificationList) return;
-  
-  const receivedRequests = (friendsData && friendsData.requests && friendsData.requests.received) 
-      ? friendsData.requests.received 
+  const receivedRequests = (friendsData && friendsData.requests && friendsData.requests.received)
+      ? friendsData.requests.received
       : [];
-  
   if (receivedRequests.length === 0) {
       notificationList.innerHTML = `
           <div class="notification-empty">
@@ -4561,17 +3999,15 @@ function updateNotificationList() {
       `;
       return;
   }
-  
   // Load user profiles for notifications
   if (typeof loadUserProfiles === 'function') {
       loadUserProfiles(receivedRequests).then(users => {
           notificationList.innerHTML = users.map(({id, profile}) => {
-              const avatarStyle = profile.avatarImage 
+              const avatarStyle = profile.avatarImage
                   ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
                   : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
               const avatarContent = profile.avatarImage ? '' : (profile.avatar || '👤');
               const username = profile.username || 'Unknown User';
-              
               return `
                   <div class="notification-item" data-user-id="${id}">
                       <div class="notification-avatar" style="${avatarStyle} display:flex; align-items:center; justify-content:center; font-size:24px;">
@@ -4610,14 +4046,11 @@ function updateNotificationList() {
       `;
   }
 }
-
 // Toggle notification dropdown
 function toggleNotificationDropdown() {
   const dropdown = document.getElementById('notificationDropdown');
   if (!dropdown) return;
-  
   dropdown.classList.toggle('active');
-  
   // Close when clicking outside
   if (dropdown.classList.contains('active')) {
       setTimeout(() => {
@@ -4630,7 +4063,6 @@ function toggleNotificationDropdown() {
       }, 100);
   }
 }
-
 // Close notification dropdown
 function closeNotificationDropdown() {
   const dropdown = document.getElementById('notificationDropdown');
@@ -4638,19 +4070,16 @@ function closeNotificationDropdown() {
       dropdown.classList.remove('active');
   }
 }
-
 // Initialize notification system
 function initNotificationSystem() {
   const notificationBellBtn = document.getElementById('notificationBellBtn');
   const clearAllBtn = document.getElementById('clearAllNotificationsBtn');
-  
   if (notificationBellBtn) {
       notificationBellBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           toggleNotificationDropdown();
       });
   }
-  
   if (clearAllBtn) {
       clearAllBtn.addEventListener('click', () => {
           // Decline all friend requests
@@ -4664,31 +4093,25 @@ function initNotificationSystem() {
           closeNotificationDropdown();
       });
   }
-  
   // Initial update
   updateNotificationBadge();
 }
-
 // Tab navigation
 document.querySelectorAll('.friends-tab-btn').forEach(tab => {
   tab.addEventListener('click', () => {
       const targetTab = tab.dataset.tab;
-      
       // Update active state
       document.querySelectorAll('.friends-tab-btn').forEach(t => {
           t.classList.remove('active');
       });
       tab.classList.add('active');
-      
       // Show/hide panels
       document.querySelectorAll('.friends-tab-panel').forEach(panel => {
           panel.classList.remove('active');
       });
-      
       const targetPanel = document.getElementById(`${targetTab}TabContent`);
       if (targetPanel) {
           targetPanel.classList.add('active');
-          
           // Load data for active tab
           switch(targetTab) {
               case 'friends':
@@ -4707,12 +4130,10 @@ document.querySelectorAll('.friends-tab-btn').forEach(tab => {
       }
   });
 });
-
 // Render friends tab
 function renderFriendsTab() {
   const friendsList = document.getElementById('friendsList');
   if (!friendsList) return;
-  
   if (friendsData.friends.length === 0) {
       friendsList.innerHTML = `
           <div class="friends-empty-state">
@@ -4724,14 +4145,12 @@ function renderFriendsTab() {
       updateCountBadges();
       return;
   }
-  
   // Get friend data
   const friendsWithData = friendsData.friends.map(id => {
       const profile = profilesCache[id] || {};
       const isOnline = !!onlineCache[id];
       return { id, profile, isOnline };
   });
-  
   // Apply sorting
   const sortValue = document.getElementById('friendsSortSelect')?.value || 'online';
   friendsWithData.sort((a, b) => {
@@ -4743,21 +4162,18 @@ function renderFriendsTab() {
       }
       return 0;
   });
-  
   // Apply filter
   const filterValue = document.getElementById('filterFriendsInput')?.value.toLowerCase() || '';
-  const filtered = filterValue 
+  const filtered = filterValue
       ? friendsWithData.filter(f => (f.profile.username || '').toLowerCase().includes(filterValue))
       : friendsWithData;
-  
   // Render friend cards
   friendsList.innerHTML = filtered.map(({id, profile, isOnline}) => {
-                const avatarStyle = profile.avatarImage 
+                const avatarStyle = profile.avatarImage
                     ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
                     : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
                 const avatarContent = profile.avatarImage ? '' : (profile.avatar || '👤');
       const status = profile.status || '';
-      
       return `
           <div class="friend-card-modern ${isOnline ? 'online' : ''}">
               <div class="friend-card-header">
@@ -4787,15 +4203,12 @@ function renderFriendsTab() {
           </div>
       `;
   }).join('');
-  
   updateCountBadges();
 }
-
 // Render requests tab
 function renderRequestsTab() {
   const sentList = document.getElementById('sentRequestsList');
   const receivedList = document.getElementById('receivedRequestsList');
-  
   // Render sent requests
   if (sentList) {
       if (friendsData.requests.sent.length === 0) {
@@ -4803,11 +4216,10 @@ function renderRequestsTab() {
       } else {
           loadUserProfiles(friendsData.requests.sent).then(users => {
               sentList.innerHTML = users.map(({id, profile}) => {
-                  const avatarStyle = profile.avatarImage 
+                  const avatarStyle = profile.avatarImage
                       ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
                       : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
                   const avatarContent = profile.avatarImage ? '' : (profile.avatar || '👤');
-                  
                   return `
                       <div class="request-card-modern">
                           <div class="request-card-header">
@@ -4830,7 +4242,6 @@ function renderRequestsTab() {
           });
       }
   }
-  
   // Render received requests
   if (receivedList) {
       if (friendsData.requests.received.length === 0) {
@@ -4838,11 +4249,10 @@ function renderRequestsTab() {
       } else {
           loadUserProfiles(friendsData.requests.received).then(users => {
               receivedList.innerHTML = users.map(({id, profile}) => {
-                  const avatarStyle = profile.avatarImage 
+                  const avatarStyle = profile.avatarImage
                       ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
                       : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
                   const avatarContent = profile.avatarImage ? '' : (profile.avatar || '👤');
-                  
                   return `
                       <div class="request-card-modern">
                           <div class="request-card-header">
@@ -4868,15 +4278,12 @@ function renderRequestsTab() {
           });
       }
   }
-  
   updateCountBadges();
 }
-
 // Render blocked tab
 function renderBlockedTab() {
   const blockedList = document.getElementById('blockedList');
   if (!blockedList) return;
-  
   if (friendsData.blocked.length === 0) {
       blockedList.innerHTML = `
           <div class="friends-empty-state">
@@ -4888,14 +4295,12 @@ function renderBlockedTab() {
       updateCountBadges();
       return;
   }
-  
   loadUserProfiles(friendsData.blocked).then(users => {
       blockedList.innerHTML = users.map(({id, profile}) => {
-          const avatarStyle = profile.avatarImage 
+          const avatarStyle = profile.avatarImage
               ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
               : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
           const avatarContent = profile.avatarImage ? '' : (profile.avatar || '👤');
-          
           return `
               <div class="friend-card-modern" style="opacity:0.6;">
                   <div class="friend-card-header">
@@ -4916,10 +4321,8 @@ function renderBlockedTab() {
           `;
       }).join('');
   });
-  
   updateCountBadges();
 }
-
 // Helper function to load user profiles
 function loadUserProfiles(userIds) {
   if (!db) {
@@ -4928,7 +4331,6 @@ function loadUserProfiles(userIds) {
           profile: profilesCache[id] || {}
       })));
   }
-  
   const now = Date.now();
   if (now - cacheTimestamp < CACHE_DURATION && Object.keys(profilesCache).length > 0) {
       return Promise.resolve(userIds.map(id => ({
@@ -4936,7 +4338,6 @@ function loadUserProfiles(userIds) {
           profile: profilesCache[id] || {}
       })));
   }
-  
   return db.ref('profiles').once('value').then(snap => {
       profilesCache = snap.val() || {};
       cacheTimestamp = now;
@@ -4946,36 +4347,29 @@ function loadUserProfiles(userIds) {
       }));
   });
 }
-
 // Friend actions (global functions)
 window.viewFriendProfile = function(friendId) {
   const profile = profilesCache[friendId] || {};
   notifications.show(`Viewing ${profile.username || 'friend'}'s profile`, 'info', 2000);
 };
-
 window.removeFriend = function(friendId) {
   const profile = profilesCache[friendId] || {};
   if (!confirm(`Remove ${profile.username || 'this user'} from your friends?`)) return;
-  
   // Remove from friends
   friendsData.friends = friendsData.friends.filter(id => id !== friendId);
   localStorage.setItem('friends', JSON.stringify(friendsData.friends));
-  
   // Remove from Firebase if db exists
   if (db) {
       db.ref(`friends/${visitorId}/${friendId}`).remove();
       db.ref(`friends/${friendId}/${visitorId}`).remove();
   }
-  
   notifications.show('Friend removed', 'success', 2000);
   renderFriendsTab();
   updateCountBadges();
 };
-
 window.blockUser = function(userId) {
   const profile = profilesCache[userId] || {};
   if (!confirm(`Block ${profile.username || 'this user'}? They won't be able to see you or send you requests.`)) return;
-  
   // Remove from friends if they are friends
   if (friendsData.friends.includes(userId)) {
       friendsData.friends = friendsData.friends.filter(id => id !== userId);
@@ -4985,60 +4379,49 @@ window.blockUser = function(userId) {
           db.ref(`friends/${userId}/${visitorId}`).remove();
       }
   }
-  
   // Add to blocked
   if (!friendsData.blocked.includes(userId)) {
       friendsData.blocked.push(userId);
       localStorage.setItem('blockedUsers', JSON.stringify(friendsData.blocked));
   }
-  
   if (db) {
       db.ref(`blocked/${visitorId}/${userId}`).set(true);
   }
-  
   notifications.show('User blocked', 'success', 2000);
   renderFriendsTab();
   renderBlockedTab();
   updateCountBadges();
 };
-
 window.unblockUser = function(userId) {
   friendsData.blocked = friendsData.blocked.filter(id => id !== userId);
   localStorage.setItem('blockedUsers', JSON.stringify(friendsData.blocked));
-  
   if (db) {
       db.ref(`blocked/${visitorId}/${userId}`).remove();
   }
-  
   notifications.show('User removed from block list', 'success', 2000);
   renderBlockedTab();
   updateCountBadges();
 };
-
 window.sendFriendRequest = function(userId) {
   if (!db) {
       notifications.show('Database not available', 'error', 2000);
       return;
   }
-  
   // Check if already friends
   if (friendsData.friends.includes(userId)) {
       notifications.show('Already friends!', 'info', 2000);
       return;
   }
-  
   // Check if already sent
   if (friendsData.requests.sent.includes(userId)) {
       notifications.show('Request already sent', 'info', 2000);
       return;
   }
-  
   // Check if blocked
   if (friendsData.blocked.includes(userId)) {
       notifications.show('Cannot send request to blocked user', 'error', 2000);
       return;
   }
-  
   // Send request
   db.ref(`friendRequests/${userId}/received/${visitorId}`).set({
       from: visitorId,
@@ -5048,96 +4431,75 @@ window.sendFriendRequest = function(userId) {
       to: userId,
       timestamp: Date.now()
   });
-  
   friendsData.requests.sent.push(userId);
   localStorage.setItem('friendRequestsSent', JSON.stringify(friendsData.requests.sent));
-  
   notifications.show('Friend request sent!', 'success', 2000);
   renderRequestsTab();
   updateCountBadges();
 };
-
 window.acceptFriendRequest = function(userId) {
   if (!db) {
       notifications.show('Database not available', 'error', 2000);
       return;
   }
-  
   // Add to friends
   db.ref(`friends/${visitorId}/${userId}`).set(true);
   db.ref(`friends/${userId}/${visitorId}`).set(true);
-  
   // Remove from requests
   db.ref(`friendRequests/${visitorId}/received/${userId}`).remove();
   db.ref(`friendRequests/${userId}/sent/${visitorId}`).remove();
-  
   friendsData.friends.push(userId);
   friendsData.requests.received = friendsData.requests.received.filter(id => id !== userId);
   localStorage.setItem('friends', JSON.stringify(friendsData.friends));
   localStorage.setItem('friendRequestsReceived', JSON.stringify(friendsData.requests.received));
-  
   const profile = profilesCache[userId] || {};
   notifications.show(`You are now friends with ${profile.username || 'this user'}!`, 'success', 3000);
   renderFriendsTab();
   renderRequestsTab();
   updateCountBadges();
 };
-
 window.declineFriendRequest = function(userId) {
   if (!db) {
       notifications.show('Database not available', 'error', 2000);
       return;
   }
-  
   // Remove from requests
   db.ref(`friendRequests/${visitorId}/received/${userId}`).remove();
   db.ref(`friendRequests/${userId}/sent/${visitorId}`).remove();
-  
   friendsData.requests.received = friendsData.requests.received.filter(id => id !== userId);
   localStorage.setItem('friendRequestsReceived', JSON.stringify(friendsData.requests.received));
-  
   notifications.show('Friend request declined', 'info', 2000);
   renderRequestsTab();
   updateCountBadges();
 };
-
 window.cancelFriendRequest = function(userId) {
   if (!db) {
       notifications.show('Database not available', 'error', 2000);
       return;
   }
-  
   // Remove from requests
   db.ref(`friendRequests/${visitorId}/sent/${userId}`).remove();
   db.ref(`friendRequests/${userId}/received/${visitorId}`).remove();
-  
   friendsData.requests.sent = friendsData.requests.sent.filter(id => id !== userId);
   localStorage.setItem('friendRequestsSent', JSON.stringify(friendsData.requests.sent));
-  
   notifications.show('Friend request cancelled', 'info', 2000);
   renderRequestsTab();
   updateCountBadges();
 };
-
 // Search functionality
 const searchFriendsInput = document.getElementById('searchFriendsInput');
 const clearSearchBtn = document.getElementById('clearSearchBtn');
 const searchResults = document.getElementById('searchResults');
-
 searchFriendsInput?.addEventListener('input', Utils.debounce((e) => {
     const query = e.target.value.toLowerCase().trim();
-  
   if (clearSearchBtn) {
       clearSearchBtn.style.display = query.length > 0 ? 'flex' : 'none';
   }
-  
   if (!searchResults || !db) return;
-  
   if (query.length === 0) {
       searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-search"></i><h3>Start Searching</h3><p>Type a username to find friends</p></div>';
         return;
     }
-    
   // Load profiles if cache is stale
   const now = Date.now();
   if (now - cacheTimestamp > CACHE_DURATION || Object.keys(profilesCache).length === 0) {
@@ -5154,7 +4516,6 @@ searchFriendsInput?.addEventListener('input', Utils.debounce((e) => {
       performSearch(query);
   }
 }, 400));
-
 clearSearchBtn?.addEventListener('click', () => {
   if (searchFriendsInput) {
       searchFriendsInput.value = '';
@@ -5164,15 +4525,13 @@ clearSearchBtn?.addEventListener('click', () => {
       }
   }
 });
-
 function performSearch(query) {
   if (!searchResults) return;
-  
   const matches = Object.entries(profilesCache)
-            .filter(([id, profile]) => 
-                id !== visitorId && 
+            .filter(([id, profile]) =>
+                id !== visitorId &&
           !friendsData.blocked.includes(id) &&
-                profile.username && 
+                profile.username &&
                 profile.username.toLowerCase().includes(query)
             )
       .slice(0, 30)
@@ -5181,13 +4540,11 @@ function performSearch(query) {
           const isFriend = friendsData.friends.includes(id);
           const hasSentRequest = friendsData.requests.sent.includes(id);
           const hasReceivedRequest = friendsData.requests.received.includes(id);
-          
-                const avatarStyle = profile.avatarImage 
+                const avatarStyle = profile.avatarImage
                     ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
                     : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
                 const avatarContent = profile.avatarImage ? '' : (profile.avatar || '👤');
           const status = profile.status || '';
-          
           let actionButton = '';
           if (isFriend) {
               actionButton = '<button class="friend-action-btn-modern secondary" disabled><i class="fas fa-check"></i> Friends</button>';
@@ -5198,7 +4555,6 @@ function performSearch(query) {
           } else {
               actionButton = '<button class="friend-action-btn-modern primary" onclick="sendFriendRequest(\'' + id + '\')"><i class="fas fa-user-plus"></i> Add Friend</button>';
           }
-          
                 return `
               <div class="friend-card-modern ${isOnline ? 'online' : ''}">
                   <div class="friend-card-header">
@@ -5223,25 +4579,21 @@ function performSearch(query) {
                     </div>
                 `;
       });
-  
   if (matches.length === 0) {
       searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-search"></i><h3>No Users Found</h3><p>Try a different search term</p></div>';
   } else {
       searchResults.innerHTML = matches.join('');
   }
 }
-
 // Filter and sort handlers
 const filterFriendsInput = document.getElementById('filterFriendsInput');
 filterFriendsInput?.addEventListener('input', Utils.debounce(() => {
   renderFriendsTab();
 }, 300));
-
 const friendsSortSelect = document.getElementById('friendsSortSelect');
 friendsSortSelect?.addEventListener('change', () => {
   renderFriendsTab();
 });
-
 // Update all displays
 function updateAllDisplays() {
   updateCountBadges();
@@ -5260,28 +4612,23 @@ function updateAllDisplays() {
       }
   }
 }
-
 // Modal open/close
 closeFriendsBtn?.addEventListener('click', () => {
   friendsModal.style.display = 'none';
 });
-
 friendsModal?.addEventListener('click', (e) => {
   if (e.target === friendsModal) {
       friendsModal.style.display = 'none';
   }
 });
-
 friendsBtn?.addEventListener('click', () => {
   if (!friendsModal) {
       console.error('Friends modal not found');
       return;
   }
-  
   friendsModal.style.display = 'block';
   friendsModal.style.visibility = 'visible';
   friendsModal.style.opacity = '1';
-  
   // Load fresh data
   if (db) {
       Promise.all([
@@ -5295,7 +4642,6 @@ friendsBtn?.addEventListener('click', () => {
           console.error('Error loading friends data:', err);
       });
   }
-  
   // Activate friends tab by default
   setTimeout(() => {
       const friendsTab = document.querySelector('.friends-tab-btn[data-tab="friends"]');
@@ -5307,7 +4653,6 @@ friendsBtn?.addEventListener('click', () => {
       }
   }, 100);
 });
-
 // Initialize on page load
 if (db) {
   initFriendsSystem();
@@ -5317,7 +4662,6 @@ if (db) {
   // Initialize notification system even without db
   initNotificationSystem();
 }
-
 // Ensure friends modal is accessible and background effects are running
 document.addEventListener('DOMContentLoaded', () => {
   // Verify friends modal exists
@@ -5325,13 +4669,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!modal) {
       console.error('Friends modal not found in DOM');
   }
-  
   // Ensure background effects are initialized
   setTimeout(() => {
       const starCanvas = document.getElementById('starCanvas');
       const interactiveBg = document.getElementById('interactiveBackground');
       const sparkleCanvas = document.getElementById('sparkleCanvas');
-      
       if (!starCanvas) {
           console.warn('starCanvas not found - stars may not work');
       } else {
@@ -5342,7 +4684,6 @@ document.addEventListener('DOMContentLoaded', () => {
               console.error('Error initializing stars:', e);
           }
       }
-      
       if (!interactiveBg) {
           console.warn('interactiveBackground not found - interactive effects may not work');
       } else {
@@ -5353,14 +4694,11 @@ document.addEventListener('DOMContentLoaded', () => {
               console.error('Error initializing interactive background:', e);
           }
       }
-      
       if (!sparkleCanvas) {
           // Sparkle canvas is in popup, may not exist yet - that's ok
       }
   }, 500);
 });
-
-
 // ---------------- Polls/Voting ----------------
 const pollsBtn = document.getElementById('pollsBtn');
 const pollsModal = document.getElementById('pollsModal');
@@ -5372,24 +4710,19 @@ const pollOptions = document.getElementById('pollOptions');
 const addPollOptionBtn = document.getElementById('addPollOptionBtn');
 const submitPollBtn = document.getElementById('submitPollBtn');
 const cancelPollBtn = document.getElementById('cancelPollBtn');
-
 pollsBtn?.addEventListener('click', () => {
     pollsModal.style.display = 'flex';
     loadPolls();
 });
-
 closePollsBtn?.addEventListener('click', () => {
     pollsModal.style.display = 'none';
 });
-
 pollsModal?.addEventListener('click', (e) => {
     if(e.target === pollsModal) pollsModal.style.display = 'none';
 });
-
 createPollBtn?.addEventListener('click', () => {
     createPollForm.style.display = createPollForm.style.display === 'none' ? 'block' : 'none';
 });
-
 addPollOptionBtn?.addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'text';
@@ -5398,7 +4731,6 @@ addPollOptionBtn?.addEventListener('click', () => {
     input.style.cssText = 'width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;';
     pollOptions.appendChild(input);
 });
-
 cancelPollBtn?.addEventListener('click', () => {
     createPollForm.style.display = 'none';
     pollQuestion.value = '';
@@ -5407,7 +4739,6 @@ cancelPollBtn?.addEventListener('click', () => {
         <input type="text" class="pollOption" placeholder="Option 2" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;">
     `;
 });
-
 submitPollBtn?.addEventListener('click', () => {
     const question = pollQuestion.value.trim();
     const options = Array.from(pollOptions.querySelectorAll('.pollOption')).map(inp => inp.value.trim()).filter(v => v);
@@ -5425,7 +4756,6 @@ submitPollBtn?.addEventListener('click', () => {
         }
     }
 });
-
 function loadPolls() {
     if(!db || !pollsList) {
         if(pollsList) pollsList.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5);">Loading polls...</p>';
@@ -5464,7 +4794,6 @@ function loadPolls() {
                 </div>
             `;
         }).join('');
-        
         // Re-attach event listeners
         document.querySelectorAll('.voteBtn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -5489,7 +4818,6 @@ function loadPolls() {
         if(pollsList) pollsList.innerHTML = '<p style="text-align:center; color:rgba(255,0,0,0.7);">Error loading polls. Please try again.</p>';
     });
 }
-
 // ---------------- File Sharing ----------------
 const filesBtn = document.getElementById('filesBtn');
 const filesModal = document.getElementById('filesModal');
@@ -5497,24 +4825,19 @@ const closeFilesBtn = document.getElementById('closeFilesBtn');
 const filesList = document.getElementById('filesList');
 const fileUploadInput = document.getElementById('fileUploadInput');
 const uploadFileBtn = document.getElementById('uploadFileBtn');
-
 filesBtn?.addEventListener('click', () => {
     filesModal.style.display = 'flex';
     loadFiles();
 });
-
 closeFilesBtn?.addEventListener('click', () => {
     filesModal.style.display = 'none';
 });
-
 filesModal?.addEventListener('click', (e) => {
     if(e.target === filesModal) filesModal.style.display = 'none';
 });
-
 uploadFileBtn?.addEventListener('click', () => {
     fileUploadInput.click();
 });
-
 fileUploadInput?.addEventListener('change', (e) => {
     Array.from(e.target.files).forEach(file => {
         const reader = new FileReader();
@@ -5539,7 +4862,6 @@ fileUploadInput?.addEventListener('change', (e) => {
         }
     });
 });
-
 function loadFiles() {
     if(!db || !filesList) return;
     db.ref('files').limitToLast(20).once('value').then(snap => {
@@ -5569,38 +4891,31 @@ function loadFiles() {
         });
     });
 }
-
 // ---------------- Emoji Reactions ----------------
 const emojiBtn = document.getElementById('emojiBtn');
 const emojiPicker = document.getElementById('emojiPicker');
 const emojiOptions = document.querySelectorAll('.emoji-option');
-
 // Ensure emoji picker is hidden by default
 if (emojiPicker) {
     emojiPicker.style.display = 'none';
 }
-
 emojiBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
   if (emojiPicker) {
     emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
   }
 });
-
 document.addEventListener('click', (e) => {
   if (emojiPicker && !emojiPicker.contains(e.target) && e.target !== emojiBtn) {
         emojiPicker.style.display = 'none';
     }
 });
-
 // Emoji selection handler (works for both regular and fullscreen)
 function handleEmojiClick(emoji) {
   const regularInput = document.getElementById('chatInput');
   const fullscreenInput = document.getElementById('fullscreenChatInput');
-  
   // Determine which input is active
   const activeInput = document.activeElement === fullscreenInput ? fullscreenInput : regularInput;
-  
   if (activeInput) {
       activeInput.value += emoji.textContent;
       activeInput.focus();
@@ -5608,14 +4923,12 @@ function handleEmojiClick(emoji) {
       regularInput.value += emoji.textContent;
       regularInput.focus();
   }
-  
   // Hide both emoji pickers
   const regularPicker = document.getElementById('emojiPicker');
   const fullscreenPicker = document.getElementById('fullscreenEmojiPicker');
   if (regularPicker) regularPicker.style.display = 'none';
   if (fullscreenPicker) fullscreenPicker.style.display = 'none';
 }
-
 emojiOptions.forEach(emoji => {
   emoji.addEventListener('click', () => handleEmojiClick(emoji));
     emoji.addEventListener('mouseenter', () => {
@@ -5625,7 +4938,6 @@ emojiOptions.forEach(emoji => {
         emoji.style.background = 'transparent';
     });
 });
-
 // Fullscreen emoji button
 fullscreenEmojiBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -5634,23 +4946,18 @@ fullscreenEmojiBtn?.addEventListener('click', (e) => {
       fullscreenPicker.style.display = fullscreenPicker.style.display === 'none' ? 'block' : 'none';
   }
 });
-
-
 // File send button (works for both regular and fullscreen)
 const sendFileBtn = document.getElementById('sendFileBtn');
 const chatFileInput = document.createElement('input');
 chatFileInput.type = 'file';
 chatFileInput.style.display = 'none';
 document.body.appendChild(chatFileInput);
-
 sendFileBtn?.addEventListener('click', () => {
     chatFileInput.click();
 });
-
 fullscreenFileBtn?.addEventListener('click', () => {
   chatFileInput.click();
 });
-
 chatFileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if(file && db) {
@@ -5679,7 +4986,6 @@ chatFileInput.addEventListener('change', (e) => {
         chatFileInput.value = ''; // Reset input
     }
 });
-
 // ---------------- Attach Link (works for both regular and fullscreen) ----------------
 function attachLink() {
     const url = prompt('Enter a URL to share:');
@@ -5712,19 +5018,15 @@ function attachLink() {
         }
     }
 }
-
 attachLinkBtn?.addEventListener('click', attachLink);
 fullscreenLinkBtn?.addEventListener('click', attachLink);
-
 // ---------------- Voice Chat ----------------
 const voiceChatBtn = document.getElementById('voiceChatBtn');
 const voiceIndicator = document.getElementById('voiceIndicator');
 let mediaRecorder = null;
 let audioChunks = [];
-
 let isRecording = false;
 let recordingStream = null;
-
 async function startRecording(indicatorId = 'voiceIndicator') {
     if(isRecording) return;
     try {
@@ -5733,13 +5035,11 @@ async function startRecording(indicatorId = 'voiceIndicator') {
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         isRecording = true;
-        
         mediaRecorder.ondataavailable = (e) => {
             if(e.data.size > 0) {
                 audioChunks.push(e.data);
             }
         };
-        
         mediaRecorder.onstop = () => {
             if(audioChunks.length > 0) {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
@@ -5760,14 +5060,11 @@ async function startRecording(indicatorId = 'voiceIndicator') {
             }
           stopRecording(); // Use the centralized stop function
         };
-        
         mediaRecorder.onerror = (e) => {
             console.error('MediaRecorder error:', e);
           stopRecording(); // Use the centralized stop function
         };
-        
         mediaRecorder.start();
-      
       // Show indicator (check both regular and fullscreen)
       const indicator = document.getElementById(indicatorId);
       const fullscreenIndicator = document.getElementById('fullscreenVoiceIndicator');
@@ -5781,7 +5078,6 @@ async function startRecording(indicatorId = 'voiceIndicator') {
       stopRecording(); // Ensure state is reset
     }
 }
-
 function stopRecording() {
     if(mediaRecorder && mediaRecorder.state !== 'inactive' && isRecording) {
         mediaRecorder.stop();
@@ -5803,56 +5099,45 @@ function stopRecording() {
   }
   audioChunks = [];
 }
-
 // Voice recording handlers (works for both regular and fullscreen)
 function setupVoiceButton(button, indicatorId) {
   if (!button) return;
-  
   button.addEventListener('mousedown', (e) => {
     e.preventDefault();
       startRecording(indicatorId);
 });
-
   button.addEventListener('mouseup', (e) => {
     e.preventDefault();
     stopRecording();
 });
-
   button.addEventListener('mouseleave', (e) => {
     e.preventDefault();
     stopRecording();
 });
-
   button.addEventListener('touchstart', (e) => {
     e.preventDefault();
       startRecording(indicatorId);
 });
-
   button.addEventListener('touchend', (e) => {
     e.preventDefault();
     stopRecording();
 });
-
   button.addEventListener('touchcancel', (e) => {
     e.preventDefault();
     stopRecording();
 });
 }
-
 // Setup both voice buttons
 setupVoiceButton(voiceChatBtn, 'voiceIndicator');
 setupVoiceButton(fullscreenVoiceBtn, 'fullscreenVoiceIndicator');
-
 // Listen for voice messages
 if(db) {
     db.ref('voiceMessages').limitToLast(10).on('child_added', snapshot => {
         const voiceMsg = snapshot.val();
         if(!voiceMsg || !voiceMsg.audio) return;
-        
         const msgDiv = document.createElement('div');
         msgDiv.setAttribute('data-voice-msg-id', snapshot.key);
         msgDiv.style.cssText = 'display:flex; gap:10px; align-items:flex-start; padding:10px; background:rgba(255,215,0,0.1); border-radius:8px; margin-bottom:10px; position:relative;';
-        
         // Profile picture
         const avatarDiv = document.createElement('div');
         avatarDiv.style.width='32px';
@@ -5874,7 +5159,6 @@ if(db) {
             avatarDiv.textContent = voiceMsg.avatar || '👤';
         }
         msgDiv.appendChild(avatarDiv);
-        
         const contentDiv = document.createElement('div');
         contentDiv.style.flex='1';
         contentDiv.innerHTML = `
@@ -5884,7 +5168,6 @@ if(db) {
         const audioEl = contentDiv.querySelector('audio');
         audioEl.src = voiceMsg.audio;
         msgDiv.appendChild(contentDiv);
-        
         // Delete button if owner
         if(voiceMsg.uid === visitorId) {
             const delBtn = document.createElement('button');
@@ -5907,15 +5190,12 @@ if(db) {
             };
             msgDiv.appendChild(delBtn);
         }
-        
         chatMessages.appendChild(msgDiv);
-        
         // Auto-scroll if near bottom
         if(chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 50){
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
     });
-    
     // Handle voice message removal
     db.ref('voiceMessages').on('child_removed', snapshot => {
         const msgDiv = document.querySelector(`[data-voice-msg-id="${snapshot.key}"]`);
@@ -5924,7 +5204,6 @@ if(db) {
         }
     });
 }
-
 // Initialize profile on load
 if(document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -5951,23 +5230,19 @@ if(document.readyState === 'loading') {
         db.ref('profiles/' + visitorId).update(profileData);
     }
 }
-
 // ================= PROFESSIONAL ENHANCEMENTS =================
-
 // Professional Notification System
 class NotificationSystem {
   constructor() {
       this.container = null;
       this.init();
   }
-
   init() {
       this.container = document.createElement('div');
       this.container.id = 'notificationContainer';
       this.container.style.cssText = 'position:fixed; top:20px; right:20px; z-index:100000; display:flex; flex-direction:column; gap:12px; pointer-events:none;';
       document.body.appendChild(this.container);
   }
-
   show(message, type = 'info', duration = 5000) {
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -5986,45 +5261,36 @@ class NotificationSystem {
           align-items: center;
           gap: 12px;
       `;
-
       const icons = {
           success: '✓',
           error: '✕',
           info: 'ℹ',
           warning: '⚠'
       };
-
       const colors = {
           success: 'rgba(40, 167, 69, 0.3)',
           error: 'rgba(220, 53, 69, 0.3)',
           info: 'rgba(0, 123, 255, 0.3)',
           warning: 'rgba(255, 193, 7, 0.3)'
       };
-
       notification.style.borderColor = colors[type] || colors.info;
       notification.innerHTML = `
           <span style="font-size: 20px; font-weight: bold;">${icons[type] || icons.info}</span>
           <span style="flex: 1;">${message}</span>
           <button class="notification-close" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:18px; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center;">&times;</button>
       `;
-
       this.container.appendChild(notification);
-
       const closeBtn = notification.querySelector('.notification-close');
       const close = () => {
           notification.style.animation = 'fadeOutScale 0.3s ease-in';
           setTimeout(() => notification.remove(), 300);
       };
-
       closeBtn.addEventListener('click', close);
       setTimeout(close, duration);
-
       return notification;
   }
 }
-
 const notifications = new NotificationSystem();
-
 // Professional Animation Utilities
 const Animations = {
   fadeIn: (element, duration = 300) => {
@@ -6034,13 +5300,11 @@ const Animations = {
           element.style.opacity = '1';
       });
   },
-
   fadeOut: (element, duration = 300) => {
       element.style.transition = `opacity ${duration}ms ease`;
       element.style.opacity = '0';
       return new Promise(resolve => setTimeout(resolve, duration));
   },
-
   slideIn: (element, direction = 'up', duration = 300) => {
       const transforms = {
           up: 'translateY(30px)',
@@ -6056,7 +5320,6 @@ const Animations = {
           element.style.opacity = '1';
       });
   },
-
   scale: (element, from = 0.9, to = 1, duration = 300) => {
       element.style.transform = `scale(${from})`;
       element.style.opacity = '0';
@@ -6067,13 +5330,11 @@ const Animations = {
       });
   }
 };
-
 // Professional Loading State Manager
 class LoadingManager {
   constructor() {
       this.loaders = new Map();
   }
-
   show(element, text = 'Loading...') {
       const loaderId = `loader_${Date.now()}_${Math.random()}`;
       const loader = document.createElement('div');
@@ -6098,14 +5359,12 @@ class LoadingManager {
               <div style="color: white; font-size: 14px;">${text}</div>
           </div>
       `;
-      
       const parent = element.parentElement || document.body;
       parent.style.position = 'relative';
       parent.appendChild(loader);
       this.loaders.set(loaderId, loader);
       return loaderId;
   }
-
   hide(loaderId) {
       const loader = this.loaders.get(loaderId);
       if (loader) {
@@ -6114,15 +5373,12 @@ class LoadingManager {
       }
   }
 }
-
 const loadingManager = new LoadingManager();
-
 // Professional Form Validation
 class FormValidator {
   static validateEmail(email) {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
-
   static validateURL(url) {
       try {
           new URL(url);
@@ -6131,16 +5387,13 @@ class FormValidator {
           return false;
       }
   }
-
   static validateRequired(value) {
       return value && value.trim().length > 0;
   }
-
   static validateLength(value, min, max) {
       const len = value ? value.length : 0;
       return len >= min && len <= max;
   }
-
   static showError(input, message) {
       input.style.borderColor = 'rgba(220, 53, 69, 0.5)';
       const errorDiv = document.createElement('div');
@@ -6154,7 +5407,6 @@ class FormValidator {
       }, 5000);
   }
 }
-
 // Utils is already defined earlier in the file - adding additional methods here
 Utils.formatDate = (timestamp) => {
   const date = new Date(timestamp);
@@ -6164,20 +5416,17 @@ Utils.formatDate = (timestamp) => {
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
-
   if (seconds < 60) return 'just now';
   if (minutes < 60) return `${minutes}m ago`;
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
   return date.toLocaleDateString();
 };
-
 Utils.formatNumber = (num) => {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
   if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
   return num.toString();
 };
-
 Utils.copyToClipboard = async (text) => {
   try {
       await navigator.clipboard.writeText(text);
@@ -6193,12 +5442,10 @@ Utils.copyToClipboard = async (text) => {
       return false;
   }
 };
-
 // Professional Error Handler (only show notifications for critical errors)
 window.addEventListener('error', (event) => {
   // Prevent default error handling for filtered errors
   event.preventDefault();
-  
   // Ignore errors from extensions, scripts from other origins, AdSense, or expected errors
   if (event.filename && (
       event.filename.includes('chrome-extension://') ||
@@ -6211,7 +5458,6 @@ window.addEventListener('error', (event) => {
   )) {
       return; // Ignore these common non-critical errors
   }
-  
   if (event.message && (
       event.message.includes('Script error') ||
       event.message.includes('Non-Error promise rejection') ||
@@ -6223,7 +5469,6 @@ window.addEventListener('error', (event) => {
   )) {
       return; // Ignore these common non-critical errors
   }
-  
   // Ignore AdSense-related errors by URL
   if (event.target && event.target.src && (
       event.target.src.includes('googlesyndication.com') ||
@@ -6232,7 +5477,6 @@ window.addEventListener('error', (event) => {
   )) {
       return; // Ignore AdSense resource loading errors
   }
-  
   // Only show notification for actual JavaScript errors
   if (event.error && event.error instanceof Error) {
       console.error('Global error:', event.error);
@@ -6241,15 +5485,12 @@ window.addEventListener('error', (event) => {
       // notifications.show('An error occurred. Please check the console.', 'error');
   }
 });
-
 window.addEventListener('unhandledrejection', (event) => {
   // Prevent default error handling for filtered errors
   event.preventDefault();
-  
   const reason = event.reason;
   const reasonStr = reason?.toString() || '';
   const reasonMsg = reason?.message || '';
-  
   // Ignore AdSense-related promise rejections
   if (reasonStr.includes('googlesyndication.com') ||
       reasonStr.includes('doubleclick.net') ||
@@ -6264,7 +5505,6 @@ window.addEventListener('unhandledrejection', (event) => {
       reasonMsg.includes('TypeError: Failed to fetch')) {
       return; // Ignore AdSense-related promise rejections
   }
-  
   // Ignore common promise rejections that are expected
   if (reasonStr.includes('aborted') ||
       reasonStr.includes('cancelled') ||
@@ -6273,14 +5513,12 @@ window.addEventListener('unhandledrejection', (event) => {
       reasonMsg.includes('cancelled')) {
       return; // Ignore expected rejections
   }
-  
   // Only log actual errors (not filtered ones)
   if (reason && !reasonStr.includes('Failed to fetch')) {
       console.error('Unhandled promise rejection:', event.reason);
   }
   // Don't show notification for every rejection - only log it
 });
-
 // Suppress AdSense-related console errors (they're expected and harmless)
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
@@ -6302,7 +5540,6 @@ console.error = function(...args) {
   }
   originalConsoleError.apply(console, args);
 };
-
 // Suppress CSP violation warnings (they're just warnings and harmless)
 console.warn = function(...args) {
   const message = args.join(' ');
@@ -6322,10 +5559,8 @@ console.warn = function(...args) {
   }
   originalConsoleWarn.apply(console, args);
 };
-
 // Note: AdSense errors in the Network tab are normal and expected
 // They occur when ad blockers block ad requests or when the site isn't fully approved yet
-
 // Prevent text/element selection via double-click and drag
 document.addEventListener('selectstart', (e) => {
   // Allow selection in input fields and textareas
@@ -6335,7 +5570,6 @@ document.addEventListener('selectstart', (e) => {
   e.preventDefault();
   return false;
 });
-
 document.addEventListener('dragstart', (e) => {
   // Allow dragging of images and links if needed
   if (e.target.tagName === 'IMG' || e.target.tagName === 'A') {
@@ -6344,7 +5578,6 @@ document.addEventListener('dragstart', (e) => {
   e.preventDefault();
   return false;
 });
-
 // Prevent double-click selection
 document.addEventListener('mousedown', (e) => {
   if (e.detail > 1) { // Double-click
@@ -6352,10 +5585,8 @@ document.addEventListener('mousedown', (e) => {
       return false;
   }
 });
-
 // Note: Context menu is already handled by the custom context menu code above
 // The custom context menu will still work, but selection is disabled
-
 // Professional Performance Monitor
 class PerformanceMonitor {
   constructor() {
@@ -6366,7 +5597,6 @@ class PerformanceMonitor {
       };
       this.init();
   }
-
   init() {
       if (window.performance && window.performance.timing) {
           window.addEventListener('load', () => {
@@ -6377,7 +5607,6 @@ class PerformanceMonitor {
           });
       }
   }
-
   measure(name, fn) {
       const start = performance.now();
       const result = fn();
@@ -6386,15 +5615,12 @@ class PerformanceMonitor {
       return result;
   }
 }
-
 const perfMonitor = new PerformanceMonitor();
-
 // Professional Keyboard Navigation
 class KeyboardNavigation {
   constructor() {
       this.init();
   }
-
   init() {
       document.addEventListener('keydown', (e) => {
           // Escape to close modals
@@ -6406,7 +5632,6 @@ class KeyboardNavigation {
                   }
               });
           }
-
           // Ctrl/Cmd + K for search (if search exists)
           if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
               e.preventDefault();
@@ -6418,20 +5643,16 @@ class KeyboardNavigation {
       });
   }
 }
-
 new KeyboardNavigation();
-
 // Professional Smooth Scroll Enhancement
 const smoothScrollTo = (element, offset = 0) => {
   const elementPosition = element.getBoundingClientRect().top;
   const offsetPosition = elementPosition + window.pageYOffset - offset;
-
   window.scrollTo({
       top: offsetPosition,
       behavior: 'smooth'
   });
 };
-
 // Professional Intersection Observer for Animations
 const observeElements = () => {
   const observer = new IntersectionObserver((entries) => {
@@ -6442,19 +5663,16 @@ const observeElements = () => {
           }
       });
   }, { threshold: 0.1 });
-
   document.querySelectorAll('.animate-on-scroll').forEach(el => {
       observer.observe(el);
   });
 };
-
 // Initialize on DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', observeElements);
 } else {
   observeElements();
 }
-
 // Professional Image Lazy Loading
 const lazyLoadImages = () => {
   const imageObserver = new IntersectionObserver((entries, observer) => {
@@ -6469,19 +5687,15 @@ const lazyLoadImages = () => {
           }
       });
   });
-
   document.querySelectorAll('img[data-src]').forEach(img => {
       imageObserver.observe(img);
   });
 };
-
 lazyLoadImages();
-
 // Professional Toast Notification Helper
 const showToast = (message, type = 'info', duration = 3000) => {
   return notifications.show(message, type, duration);
 };
-
 // Professional Confirmation Dialog
 const confirmAction = (message, title = 'Confirm') => {
   return new Promise((resolve) => {
@@ -6499,7 +5713,6 @@ const confirmAction = (message, title = 'Confirm') => {
           justify-content: center;
           z-index: 100000;
       `;
-
       const dialog = document.createElement('div');
       dialog.style.cssText = `
           background: rgba(15, 15, 25, 0.95);
@@ -6510,7 +5723,6 @@ const confirmAction = (message, title = 'Confirm') => {
           max-width: 400px;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       `;
-
       dialog.innerHTML = `
           <h3 style="margin: 0 0 16px 0; color: #FFD700; font-size: 20px;">${title}</h3>
           <p style="margin: 0 0 24px 0; color: rgba(255, 255, 255, 0.9);">${message}</p>
@@ -6519,27 +5731,22 @@ const confirmAction = (message, title = 'Confirm') => {
               <button class="confirm-ok" style="padding: 10px 20px; background: rgba(255, 215, 0, 0.2); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 8px; color: #FFD700; cursor: pointer; font-weight: 600;">Confirm</button>
           </div>
       `;
-
       modal.appendChild(dialog);
       document.body.appendChild(modal);
-
       const close = (result) => {
           Animations.fadeOut(modal).then(() => {
               modal.remove();
               resolve(result);
           });
       };
-
       dialog.querySelector('.confirm-ok').addEventListener('click', () => close(true));
       dialog.querySelector('.confirm-cancel').addEventListener('click', () => close(false));
       modal.addEventListener('click', (e) => {
           if (e.target === modal) close(false);
       });
-
       Animations.fadeIn(modal);
   });
 };
-
 // Professional Local Storage Manager
 class StorageManager {
   static set(key, value, expiry = null) {
@@ -6549,11 +5756,9 @@ class StorageManager {
       };
       localStorage.setItem(key, JSON.stringify(item));
   }
-
   static get(key) {
       const itemStr = localStorage.getItem(key);
       if (!itemStr) return null;
-
       try {
           const item = JSON.parse(itemStr);
           if (item.expiry && Date.now() > item.expiry) {
@@ -6565,36 +5770,30 @@ class StorageManager {
           return null;
       }
   }
-
   static remove(key) {
       localStorage.removeItem(key);
   }
-
   static clear() {
       localStorage.clear();
   }
 }
-
 // Professional URL Parameter Handler
 const URLParams = {
   get: (key) => {
       const params = new URLSearchParams(window.location.search);
       return params.get(key);
   },
-
   set: (key, value) => {
       const url = new URL(window.location);
       url.searchParams.set(key, value);
       window.history.pushState({}, '', url);
   },
-
   remove: (key) => {
       const url = new URL(window.location);
       url.searchParams.delete(key);
       window.history.pushState({}, '', url);
   }
 };
-
 // Professional Viewport Utilities
 const Viewport = {
   isMobile: () => window.innerWidth < 768,
@@ -6603,7 +5802,6 @@ const Viewport = {
   width: () => window.innerWidth,
   height: () => window.innerHeight
 };
-
 // Professional Device Detection
 const Device = {
   isIOS: () => /iPad|iPhone|iPod/.test(navigator.userAgent),
@@ -6611,45 +5809,37 @@ const Device = {
   isMobile: () => /Mobile/.test(navigator.userAgent),
   isTouch: () => 'ontouchstart' in window || navigator.maxTouchPoints > 0
 };
-
 // Professional Network Status Monitor
 class NetworkMonitor {
   constructor() {
       this.online = navigator.onLine;
       this.init();
   }
-
   init() {
       window.addEventListener('online', () => {
           this.online = true;
           notifications.show('Connection restored', 'success');
       });
-
       window.addEventListener('offline', () => {
           this.online = false;
           notifications.show('Connection lost', 'error');
       });
   }
-
   isOnline() {
       return this.online;
   }
 }
-
 const networkMonitor = new NetworkMonitor();
-
 // Professional Theme Manager Enhancement
 class EnhancedThemeManager {
   constructor() {
       this.currentTheme = localStorage.getItem('selectedTheme') || 'default';
       this.init();
   }
-
   init() {
       this.applyTheme(this.currentTheme);
       this.addThemeToggle();
   }
-
   applyTheme(theme) {
       document.body.className = document.body.className.replace(/theme-\w+/g, '').trim();
       if (theme !== 'default') {
@@ -6658,28 +5848,23 @@ class EnhancedThemeManager {
       this.currentTheme = theme;
       localStorage.setItem('selectedTheme', theme);
   }
-
   addThemeToggle() {
       // Add quick theme switcher if needed
   }
 }
-
 // Professional Analytics (Privacy-friendly)
 class Analytics {
   static track(event, data = {}) {
       console.log('Event:', event, data);
-      // Add your analytics tracking here
+       tracking here
   }
-
   static pageView(page) {
       this.track('page_view', { page });
   }
-
   static userAction(action, details = {}) {
       this.track('user_action', { action, ...details });
   }
 }
-
 // Professional Accessibility Enhancements
 const Accessibility = {
   init: () => {
@@ -6704,7 +5889,6 @@ const Accessibility = {
           skipLink.style.top = '-40px';
       });
       document.body.insertBefore(skipLink, document.body.firstChild);
-
       // Add ARIA labels to interactive elements
       document.querySelectorAll('button:not([aria-label])').forEach(btn => {
           if (!btn.textContent.trim() && btn.title) {
@@ -6713,9 +5897,7 @@ const Accessibility = {
       });
   }
 };
-
 Accessibility.init();
-
 // Professional Performance Optimizations
 const Performance = {
   // Lazy load heavy components
@@ -6730,7 +5912,6 @@ const Performance = {
       });
       document.querySelectorAll(selector).forEach(el => observer.observe(el));
   },
-
   // Preload critical resources
   preload: (url, type = 'script') => {
       const link = document.createElement('link');
@@ -6739,7 +5920,6 @@ const Performance = {
       link.as = type;
       document.head.appendChild(link);
   },
-
   // Debounced resize handler
   onResize: (callback, delay = 250) => {
       let timeout;
@@ -6749,7 +5929,6 @@ const Performance = {
       });
   }
 };
-
 // Professional Console Styling
 if (console.log) {
   const originalLog = console.log;
@@ -6761,7 +5940,6 @@ if (console.log) {
       ]);
   };
 }
-
 // Professional Error Recovery
 const ErrorRecovery = {
   retry: async (fn, maxRetries = 3, delay = 1000) => {
@@ -6775,7 +5953,6 @@ const ErrorRecovery = {
       }
   }
 };
-
 // Professional Feature Detection
 const Features = {
   supports: {
@@ -6804,7 +5981,6 @@ const Features = {
       }
   }
 };
-
 // Professional Image Optimization
 const ImageOptimizer = {
   compress: (file, maxWidth = 1920, quality = 0.8) => {
@@ -6816,12 +5992,10 @@ const ImageOptimizer = {
                   const canvas = document.createElement('canvas');
                   let width = img.width;
                   let height = img.height;
-
                   if (width > maxWidth) {
                       height = (height * maxWidth) / width;
                       width = maxWidth;
                   }
-
                   canvas.width = width;
                   canvas.height = height;
                   const ctx = canvas.getContext('2d');
@@ -6834,7 +6008,6 @@ const ImageOptimizer = {
       });
   }
 };
-
 // Professional Color Utilities
 const ColorUtils = {
   hexToRgb: (hex) => {
@@ -6845,11 +6018,9 @@ const ColorUtils = {
           b: parseInt(result[3], 16)
       } : null;
   },
-
   rgbToHex: (r, g, b) => {
       return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   },
-
   lighten: (hex, percent) => {
       const rgb = this.hexToRgb(hex);
       if (!rgb) return hex;
@@ -6860,7 +6031,6 @@ const ColorUtils = {
           Math.min(255, Math.floor(rgb.b * factor))
       );
   },
-
   darken: (hex, percent) => {
       const rgb = this.hexToRgb(hex);
       if (!rgb) return hex;
@@ -6872,17 +6042,14 @@ const ColorUtils = {
       );
   }
 };
-
 // Professional String Utilities
 const StringUtils = {
   truncate: (str, length, suffix = '...') => {
       return str.length > length ? str.substring(0, length) + suffix : str;
   },
-
   capitalize: (str) => {
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   },
-
   slugify: (str) => {
       return str.toLowerCase()
           .trim()
@@ -6890,14 +6057,12 @@ const StringUtils = {
           .replace(/[\s_-]+/g, '-')
           .replace(/^-+|-+$/g, '');
   },
-
   escapeHtml: (str) => {
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
   }
 };
-
 // Professional Array Utilities
 const ArrayUtils = {
   shuffle: (array) => {
@@ -6908,7 +6073,6 @@ const ArrayUtils = {
       }
       return arr;
   },
-
   chunk: (array, size) => {
       const chunks = [];
       for (let i = 0; i < array.length; i += size) {
@@ -6916,27 +6080,22 @@ const ArrayUtils = {
       }
       return chunks;
   },
-
   unique: (array) => {
       return [...new Set(array)];
   }
 };
-
 // Professional Object Utilities
 const ObjectUtils = {
   deepClone: (obj) => {
       return JSON.parse(JSON.stringify(obj));
   },
-
   merge: (...objects) => {
       return Object.assign({}, ...objects);
   },
-
   isEmpty: (obj) => {
       return Object.keys(obj).length === 0;
   }
 };
-
 // Professional Date Utilities
 const DateUtils = {
   format: (date, format = 'YYYY-MM-DD') => {
@@ -6947,7 +6106,6 @@ const DateUtils = {
       const hours = String(d.getHours()).padStart(2, '0');
       const minutes = String(d.getMinutes()).padStart(2, '0');
       const seconds = String(d.getSeconds()).padStart(2, '0');
-
       return format
           .replace('YYYY', year)
           .replace('MM', month)
@@ -6956,12 +6114,10 @@ const DateUtils = {
           .replace('mm', minutes)
           .replace('ss', seconds);
   },
-
   timeAgo: (date) => {
       return Utils.formatDate(new Date(date).getTime());
   }
 };
-
 // Professional DOM Utilities
 const DOMUtils = {
   createElement: (tag, props = {}, children = []) => {
@@ -6986,7 +6142,6 @@ const DOMUtils = {
       });
       return el;
   },
-
   ready: (fn) => {
       if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', fn);
@@ -6995,47 +6150,38 @@ const DOMUtils = {
       }
   }
 };
-
 // Professional Event Emitter
 class EventEmitter {
   constructor() {
       this.events = {};
   }
-
   on(event, callback) {
       if (!this.events[event]) {
           this.events[event] = [];
       }
       this.events[event].push(callback);
   }
-
   off(event, callback) {
       if (this.events[event]) {
           this.events[event] = this.events[event].filter(cb => cb !== callback);
       }
   }
-
   emit(event, data) {
       if (this.events[event]) {
           this.events[event].forEach(callback => callback(data));
       }
   }
 }
-
 const appEvents = new EventEmitter();
-
-
 // Professional Modal Manager
 class ModalManager {
   constructor() {
       this.modals = new Map();
       this.activeModal = null;
   }
-
   register(id, element) {
       this.modals.set(id, element);
   }
-
   open(id) {
       const modal = this.modals.get(id);
       if (modal) {
@@ -7047,7 +6193,6 @@ class ModalManager {
           this.activeModal = { id, element: modal };
       }
   }
-
   close(id) {
       const modal = this.modals.get(id);
       if (modal) {
@@ -7060,22 +6205,18 @@ class ModalManager {
       }
   }
 }
-
 const modalManager = new ModalManager();
-
 // Professional Tooltip System
 class TooltipSystem {
   constructor() {
       this.tooltips = new Map();
       this.init();
   }
-
   init() {
       document.querySelectorAll('[data-tooltip]').forEach(el => {
           this.createTooltip(el);
       });
   }
-
   createTooltip(element) {
       const text = element.dataset.tooltip;
       const tooltip = document.createElement('div');
@@ -7094,24 +6235,17 @@ class TooltipSystem {
           transition: opacity 0.2s;
           white-space: nowrap;
       `;
-
       element.style.position = 'relative';
       element.appendChild(tooltip);
-
       element.addEventListener('mouseenter', () => {
           tooltip.style.opacity = '1';
       });
-
       element.addEventListener('mouseleave', () => {
           tooltip.style.opacity = '0';
       });
   }
 }
-
 new TooltipSystem();
-
-
-
 // Professional Console Commands (Easter eggs)
 window.gameHallCommands = {
   help: () => {
@@ -7121,50 +6255,41 @@ window.gameHallCommands = {
       console.log('  - gameHallCommands.notify(message) - Show notification');
       console.log('  - gameHallCommands.stats() - Show performance stats');
   },
-
   theme: (name) => {
       if (typeof applyTheme === 'function') {
           applyTheme(name);
           console.log(`Theme changed to: ${name}`);
       }
   },
-
   notify: (message) => {
       notifications.show(message);
   },
-
   stats: () => {
       console.table(perfMonitor.metrics);
   }
 };
-
 // Dynamic tooltip positioning to prevent clipping
 function setupTooltips() {
   document.querySelectorAll('[title]').forEach(el => {
       if (el.hasAttribute('data-tooltip-setup')) return;
       el.setAttribute('data-tooltip-setup', 'true');
-      
       el.addEventListener('mouseenter', function(e) {
           const tooltip = this.getAttribute('title');
           if (!tooltip) return;
-          
           // Remove title temporarily to prevent default tooltip
           const originalTitle = this.getAttribute('title');
           this.setAttribute('data-original-title', originalTitle);
           this.removeAttribute('title');
-          
           // Create custom tooltip
           const tooltipEl = document.createElement('div');
           tooltipEl.className = 'custom-tooltip';
           tooltipEl.textContent = tooltip;
           document.body.appendChild(tooltipEl);
-          
           // Position tooltip
           const rect = this.getBoundingClientRect();
           const tooltipRect = tooltipEl.getBoundingClientRect();
           let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
           let top = rect.top - tooltipRect.height - 12;
-          
           // Keep tooltip in viewport
           if (left < 10) left = 10;
           if (left + tooltipRect.width > window.innerWidth - 10) {
@@ -7174,14 +6299,11 @@ function setupTooltips() {
               top = rect.bottom + 12;
               tooltipEl.classList.add('tooltip-below');
           }
-          
           tooltipEl.style.left = left + 'px';
           tooltipEl.style.top = top + 'px';
-          
           // Store reference for cleanup
           this._tooltipEl = tooltipEl;
       });
-      
       el.addEventListener('mouseleave', function() {
           if (this._tooltipEl) {
               this._tooltipEl.remove();
@@ -7195,26 +6317,21 @@ function setupTooltips() {
       });
   });
 }
-
 // Initialize professional enhancements
 DOMUtils.ready(() => {
   console.log('%c✨ Professional enhancements loaded!', 'font-size: 16px; font-weight: bold; color: #FFD700;');
-  
   // Add smooth animations to modals
   document.querySelectorAll('[id$="Modal"]').forEach(modal => {
       modalManager.register(modal.id, modal);
   });
-
   // Initialize tooltips
   new TooltipSystem();
   setupTooltips();
-  
   // Re-setup tooltips for dynamically added elements
   const observer = new MutationObserver(() => {
       setupTooltips();
   });
   observer.observe(document.body, { childList: true, subtree: true });
-
   // Add loading states to buttons
   document.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', function() {
@@ -7223,7 +6340,6 @@ DOMUtils.ready(() => {
               this.dataset.loading = 'true';
               this.disabled = true;
               this.innerHTML = '<span class="spinner spinner-small"></span> Loading...';
-              
               setTimeout(() => {
                   this.innerHTML = originalText;
                   this.disabled = false;
@@ -7232,7 +6348,6 @@ DOMUtils.ready(() => {
           }
       });
   });
-
   // Add professional hover effects
   document.querySelectorAll('.card, .modalInner').forEach(el => {
       el.addEventListener('mouseenter', function() {
@@ -7245,7 +6360,6 @@ DOMUtils.ready(() => {
       });
   });
 });
-
 // Professional Export for global use
 window.ProfessionalUtils = {
   notifications,
@@ -7269,13 +6383,9 @@ window.ProfessionalUtils = {
   appEvents,
   modalManager
 };
-
 console.log('%c🚀 All professional enhancements are ready!', 'font-size: 14px; color: #28a745;');
-
 // ================= Games Grid System =================
-// Initialize gameSites array with default games (will be merged with JSON data)
-gameSites = [
-    { title: 'Chess FreezeNova', embed: 'https://cloud.onlinegames.io/games/2025/unity3/chess/index-og.html', image: 'https://www.onlinegames.io/media/posts/1116/responsive/chess-freezenova-xs.webp' },
+eezeNova', embed: 'https://cloud.onlinegames.io/games/2025/unity3/chess/index-og.html', image: 'https://www.onlinegames.io/media/posts/1116/responsive/chess-freezenova-xs.webp' },
     { title: 'Davo', embed: 'https://cloud.onlinegames.io/games/2025/construct/302/davo/index-og.html', image: 'https://www.onlinegames.io/media/posts/1115/responsive/davo-xs.webp' },
     { title: 'Fast Food Manager', embed: 'https://cloud.onlinegames.io/games/2025/unity4/fast-food-manager/index-og.html', image: 'https://www.onlinegames.io/media/posts/1114/responsive/fast-food-manager-xs.webp' },
     { title: 'Block Builder Survival', embed: 'https://cloud.onlinegames.io/games/2025/unity4/cubecraft-survival/index-og.html', image: 'https://www.onlinegames.io/media/posts/1113/responsive/cubecraft-survival-xs.webp' },
@@ -7519,17 +6629,13 @@ gameSites = [
     { title: 'Geometry Dash Lite', embed: 'https://files.rocketgames.io/uploads/games/g/geometry-dash-lite/files/f76f8e/index.html', image: 'https://www.onlinegames.io/media/posts/510/responsive/Geometry-Dash-FreezeNova-xs.jpg' },
     { title: 'Slope Rider', embed: 'https://game.azgame.io/slope-rider/', image: 'https://azgames.io/upload/cache/upload/imgs/sloperider4-m180x180.png' }
 ];
-
-
 // Fuzzy search function for game titles
 function fuzzySearch(query, text) {
     if (!query) return true;
     query = query.toLowerCase();
     text = text.toLowerCase();
-    
     // Exact match gets highest priority
     if (text.includes(query)) return true;
-    
     // Check if all characters in query appear in order in text
     let queryIndex = 0;
     for (let i = 0; i < text.length && queryIndex < query.length; i++) {
@@ -7539,16 +6645,13 @@ function fuzzySearch(query, text) {
     }
     return queryIndex === query.length;
 }
-
 // Calculate similarity score for sorting
 function calculateSimilarity(query, text) {
     query = query.toLowerCase();
     text = text.toLowerCase();
-    
     if (text === query) return 100;
     if (text.startsWith(query)) return 90;
     if (text.includes(query)) return 80;
-    
     // Count matching characters in order
     let matches = 0;
     let queryIndex = 0;
@@ -7558,17 +6661,13 @@ function calculateSimilarity(query, text) {
             queryIndex++;
         }
     }
-    
     return (matches / query.length) * 70;
 }
-
 // Filter and render games
 // Render games in a specific container (for search results on main page)
 function renderGamesGridInContainer(filteredGames = null, container) {
     if (!container) return;
-    
     const gamesToRender = filteredGames || gameSites;
-    
     container.innerHTML = gamesToRender.map((site, index) => {
         const title = site.title || 'Game';
         const embed = site.embed || '';
@@ -7579,7 +6678,6 @@ function renderGamesGridInContainer(filteredGames = null, container) {
         const avgRating = ratingData.average || 0;
         const isSlopeRider = title.toLowerCase().includes('slope rider');
         const cubeClass = isSlopeRider ? 'game-cube festive-game-cube' : 'game-cube';
-        
         return `
             <div class="${cubeClass}" data-embed="${embed}" data-index="${index}" style="animation-delay: ${index * 0.03}s;">
                 <div class="game-cube-inner">
@@ -7589,12 +6687,12 @@ function renderGamesGridInContainer(filteredGames = null, container) {
                     <div class="game-cube-rating" data-embed="${embed}" data-game-key="${gameKey}">
                         <div class="game-cube-stars">
                             ${[1, 2, 3, 4, 5].map(star => `
-                                <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}" 
+                                <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}"
                                    data-rating="${star}"></i>
                             `).join('')}
                         </div>
                         <div class="game-cube-rating-text">
-                            ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'} 
+                            ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'}
                             ${ratingData.count > 0 ? `(${ratingData.count})` : ''}
                         </div>
                     </div>
@@ -7603,20 +6701,17 @@ function renderGamesGridInContainer(filteredGames = null, container) {
             </div>
         `;
     }).join('');
-    
     // Helper function to convert title to filename
     function titleToFilename(title) {
         return title.toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '');
     }
-    
     // Helper function to get correct games path based on current location
     function getGamesPath(filename) {
         const isInPagesFolder = window.location.pathname.includes('/pages/');
         return isInPagesFolder ? `../games/${filename}` : `games/${filename}`;
     }
-    
     // Add click handlers - navigate to game detail page
     container.querySelectorAll('.game-cube').forEach(cube => {
         cube.addEventListener('click', (e) => {
@@ -7630,7 +6725,6 @@ function renderGamesGridInContainer(filteredGames = null, container) {
             window.location.href = getGamesPath(filename);
         });
     });
-    
     // Add rating click handlers
     container.querySelectorAll('.game-cube-stars .fa-star').forEach(star => {
         star.addEventListener('click', (e) => {
@@ -7643,24 +6737,19 @@ function renderGamesGridInContainer(filteredGames = null, container) {
         });
     });
 }
-
 function renderGamesGrid(filteredGames = null) {
     const gamesGrid = document.getElementById('gamesGrid');
     if (!gamesGrid) {
         console.warn('gamesGrid element not found in DOM');
         return;
     }
-    
     const gamesToRender = filteredGames || gameSites;
-    
     if (!gamesToRender || gamesToRender.length === 0) {
         console.warn('No games to render');
         gamesGrid.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 40px;">No games found. Please try refreshing the page.</p>';
         return;
     }
-    
     console.log('Rendering', gamesToRender.length, 'games');
-    
     gamesGrid.innerHTML = gamesToRender.map((site, index) => {
         const title = site.title || 'Game';
         const embed = site.embed || '';
@@ -7671,7 +6760,6 @@ function renderGamesGrid(filteredGames = null) {
         const avgRating = ratingData.average || 0;
         const isSlopeRider = title.toLowerCase().includes('slope rider');
         const cubeClass = isSlopeRider ? 'game-cube festive-game-cube' : 'game-cube';
-        
         return `
             <div class="${cubeClass}" data-embed="${embed}" data-index="${index}" style="animation-delay: ${index * 0.03}s;">
                 <div class="game-cube-inner">
@@ -7681,12 +6769,12 @@ function renderGamesGrid(filteredGames = null) {
                     <div class="game-cube-rating" data-embed="${embed}" data-game-key="${gameKey}">
                         <div class="game-cube-stars">
                             ${[1, 2, 3, 4, 5].map(star => `
-                                <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}" 
+                                <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}"
                                    data-rating="${star}"></i>
                             `).join('')}
                         </div>
                         <div class="game-cube-rating-text">
-                            ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'} 
+                            ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'}
                             ${ratingData.count > 0 ? `(${ratingData.count})` : ''}
                         </div>
                     </div>
@@ -7695,20 +6783,17 @@ function renderGamesGrid(filteredGames = null) {
             </div>
         `;
     }).join('');
-    
     // Helper function to convert title to filename
     function titleToFilename(title) {
         return title.toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-|-$/g, '');
     }
-    
     // Helper function to get correct games path based on current location
     function getGamesPath(filename) {
         const isInPagesFolder = window.location.pathname.includes('/pages/');
         return isInPagesFolder ? `../games/${filename}` : `games/${filename}`;
     }
-    
     // Add click handlers - navigate to game detail page
     gamesGrid.querySelectorAll('.game-cube').forEach(cube => {
         cube.addEventListener('click', (e) => {
@@ -7722,7 +6807,6 @@ function renderGamesGrid(filteredGames = null) {
             window.location.href = getGamesPath(filename);
         });
     });
-    
     // Add rating click handlers
     gamesGrid.querySelectorAll('.game-cube-stars .fa-star').forEach(star => {
         star.addEventListener('click', (e) => {
@@ -7735,10 +6819,8 @@ function renderGamesGrid(filteredGames = null) {
         });
     });
 }
-
 // Load games from JSON and categorize
 // Note: allGamesFromJSON and categorizedGames are already declared at the top of the file
-
 async function loadGamesFromJSON() {
     try {
         // Determine the correct path based on current page location
@@ -7747,7 +6829,6 @@ async function loadGamesFromJSON() {
         const response = await fetch(gamesJsonPath);
         const loadedGames = await response.json();
         allGamesFromJSON = loadedGames;
-        
         // Convert to gameSites format and merge with existing
         const jsonGames = loadedGames.map(game => ({
             title: game.title,
@@ -7756,7 +6837,6 @@ async function loadGamesFromJSON() {
             tags: game.tags || '',
             description: game.description || ''
         }));
-        
         // Merge with existing gameSites (prioritize JSON data)
         const existingEmbeds = new Set(jsonGames.map(g => g.embed));
         const additionalGames = gameSites.filter(g => !existingEmbeds.has(g.embed));
@@ -7764,7 +6844,6 @@ async function loadGamesFromJSON() {
         const additionalGamesWithTags = additionalGames.map(game => {
             const title = (game.title || '').toLowerCase();
             let tags = '';
-            
             // Infer tags from title
             if (title.includes('race') || title.includes('drift') || title.includes('car') || title.includes('driving')) {
                 tags += 'racing,car,driving,';
@@ -7787,18 +6866,14 @@ async function loadGamesFromJSON() {
             if (title.includes('basketball') || title.includes('football') || title.includes('soccer')) {
                 tags += 'sports,basketball,football,';
             }
-            
             return {
                 ...game,
                 tags: tags || 'free,game'
             };
         });
-        
         gameSites = [...jsonGames, ...additionalGamesWithTags];
-        
         // Categorize games
         categorizeAllGames();
-        
         // Initialize featured sections on homepage
         if (document.getElementById('featuredGamesSections')) {
             renderFeaturedSections();
@@ -7808,7 +6883,6 @@ async function loadGamesFromJSON() {
             // Fallback to old system if featured sections don't exist
             filterGamesByCategory('trending');
         }
-        
         return Promise.resolve();
     } catch (error) {
         console.error('Error loading games from JSON:', error);
@@ -7819,7 +6893,6 @@ async function loadGamesFromJSON() {
             if (!game.tags) {
                 const title = (game.title || '').toLowerCase();
                 let tags = '';
-                
                 // Infer tags from title
                 if (title.includes('race') || title.includes('drift') || title.includes('car') || title.includes('driving')) {
                     tags += 'racing,car,driving,';
@@ -7842,7 +6915,6 @@ async function loadGamesFromJSON() {
                 if (title.includes('basketball') || title.includes('football') || title.includes('soccer')) {
                     tags += 'sports,basketball,football,';
                 }
-                
                 return {
                     ...game,
                     tags: tags || 'free,game'
@@ -7850,7 +6922,6 @@ async function loadGamesFromJSON() {
             }
             return game;
         });
-        
         if (document.getElementById('featuredGamesSections')) {
             categorizeAllGames();
             renderFeaturedSections();
@@ -7872,11 +6943,9 @@ async function loadGamesFromJSON() {
                 }
             }
         }
-        
         return Promise.resolve();
     }
 }
-
 function categorizeAllGames() {
     categorizedGames = {
         racing: [],
@@ -7889,13 +6958,11 @@ function categorizeAllGames() {
         simulation: [],
         new: []
     };
-    
     gameSites.forEach((game, index) => {
         const tags = (game.tags || '').toLowerCase();
         const stats = getGameStats(game.embed);
         const gameKey = getGameKey(game.embed);
         const ratingData = gameRatings[gameKey] || { average: 0, count: 0 };
-        
         const gameWithData = {
             ...game,
             clicks: stats ? stats.clicks : 0,
@@ -7903,7 +6970,6 @@ function categorizeAllGames() {
             ratingCount: ratingData.count || 0,
             index: index
         };
-        
         // Categorize by tags
         if (tags.includes('racing') || tags.includes('drift') || tags.includes('driving') || tags.includes('car')) {
             categorizedGames.racing.push(gameWithData);
@@ -7929,13 +6995,11 @@ function categorizeAllGames() {
         if (tags.includes('simulator') || tags.includes('simulation') || tags.includes('tycoon')) {
             categorizedGames.simulation.push(gameWithData);
         }
-        
         // New games (recently added or no clicks)
         if (!stats || stats.clicks === 0) {
             categorizedGames.new.push(gameWithData);
         }
     });
-    
     // Sort each category
     categorizedGames.racing.sort((a, b) => (b.rating * b.ratingCount) - (a.rating * a.ratingCount));
     categorizedGames.puzzle.sort((a, b) => (b.rating * b.ratingCount) - (a.rating * a.ratingCount));
@@ -7947,11 +7011,9 @@ function categorizeAllGames() {
     categorizedGames.simulation.sort((a, b) => b.clicks - a.clicks);
     categorizedGames.new.sort((a, b) => b.index - a.index); // Newest first
 }
-
 function renderFeaturedSections() {
     const container = document.getElementById('featuredGamesSections');
     if (!container) return;
-    
     // Featured sections configuration
     const sections = [
         {
@@ -7983,17 +7045,14 @@ function renderFeaturedSections() {
             link: 'pages/games-action.html'
         }
     ];
-    
     container.innerHTML = sections.map(section => {
         if (section.games.length === 0) return '';
-        
         const gamesHTML = section.games.map((game, index) => {
             const gameKey = getGameKey(game.embed);
             const ratingData = gameRatings[gameKey] || { average: 0, count: 0 };
             const avgRating = ratingData.average || 0;
             const description = game.description || 'Experience this exciting game with engaging gameplay and stunning graphics. Perfect for players looking for fun and challenge.';
             const filename = `game-${game.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.html`;
-            
             return `
                 <div class="game-cube" data-embed="${game.embed}" style="animation-delay: ${index * 0.03}s;">
                     <div class="game-cube-inner">
@@ -8003,12 +7062,12 @@ function renderFeaturedSections() {
                         <div class="game-cube-rating" data-embed="${game.embed}" data-game-key="${gameKey}">
                             <div class="game-cube-stars">
                                 ${[1, 2, 3, 4, 5].map(star => `
-                                    <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}" 
+                                    <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}"
                                        data-rating="${star}"></i>
                                 `).join('')}
                             </div>
                             <div class="game-cube-rating-text">
-                                ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'} 
+                                ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'}
                                 ${ratingData.count > 0 ? `(${ratingData.count})` : ''}
                             </div>
                         </div>
@@ -8017,7 +7076,6 @@ function renderFeaturedSections() {
                 </div>
             `;
         }).join('');
-        
         return `
             <div class="featured-section">
                 <div class="featured-section-header">
@@ -8030,13 +7088,11 @@ function renderFeaturedSections() {
             </div>
         `;
     }).join('');
-    
     // Helper function to get correct games path based on current location
     function getGamesPath(filename) {
         const isInPagesFolder = window.location.pathname.includes('/pages/');
         return isInPagesFolder ? `../games/${filename}` : `games/${filename}`;
     }
-    
     // Add click handlers
     container.querySelectorAll('.game-cube').forEach(cube => {
         cube.addEventListener('click', (e) => {
@@ -8047,7 +7103,6 @@ function renderFeaturedSections() {
             window.location.href = getGamesPath(filename);
         });
     });
-    
     // Add rating handlers
     container.querySelectorAll('.game-cube-stars .fa-star').forEach(star => {
         star.addEventListener('click', (e) => {
@@ -8060,7 +7115,6 @@ function renderFeaturedSections() {
         });
     });
 }
-
 // Render Slope Rider Center Card
 function renderSlopeRiderCenterCard() {
     const container = document.getElementById('slopeRiderCenterCard');
@@ -8068,14 +7122,12 @@ function renderSlopeRiderCenterCard() {
         console.warn('slopeRiderCenterCard container not found');
         return;
     }
-    
     // Wait for gameSites to be populated
     if (!gameSites || gameSites.length === 0) {
         console.log('gameSites not loaded yet, retrying...');
         setTimeout(() => renderSlopeRiderCenterCard(), 500);
         return;
     }
-    
     // Find Slope Rider game
     const slopeRider = gameSites.find(game => game.title && game.title.toLowerCase().includes('slope rider'));
     if (!slopeRider) {
@@ -8083,19 +7135,15 @@ function renderSlopeRiderCenterCard() {
         container.style.display = 'none';
         return;
     }
-    
     container.style.display = 'flex';
-    
     const gameKey = getGameKey(slopeRider.embed);
     const ratingData = gameRatings[gameKey] || { average: 0, count: 0 };
     const avgRating = ratingData.average || 0;
     const filename = `game-${slopeRider.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.html`;
-    
     function getGamesPath(filename) {
         const isInPagesFolder = window.location.pathname.includes('/pages/');
         return isInPagesFolder ? `../games/${filename}` : `games/${filename}`;
     }
-    
     container.innerHTML = `
         <div class="slope-rider-center-card festive-game-cube game-cube">
             <div class="game-cube-inner">
@@ -8105,12 +7153,12 @@ function renderSlopeRiderCenterCard() {
                 <div class="game-cube-rating" data-embed="${slopeRider.embed}" data-game-key="${gameKey}">
                     <div class="game-cube-stars">
                         ${[1, 2, 3, 4, 5].map(star => `
-                            <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}" 
+                            <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}"
                                data-rating="${star}"></i>
                         `).join('')}
                     </div>
                     <div class="game-cube-rating-text">
-                        ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'} 
+                        ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'}
                         ${ratingData.count > 0 ? `(${ratingData.count})` : ''}
                     </div>
                 </div>
@@ -8118,7 +7166,6 @@ function renderSlopeRiderCenterCard() {
             </div>
         </div>
     `;
-    
     // Add click handler
     const card = container.querySelector('.slope-rider-center-card');
     if (card) {
@@ -8127,7 +7174,6 @@ function renderSlopeRiderCenterCard() {
             window.location.href = getGamesPath(filename);
         });
     }
-    
     // Add rating handlers
     container.querySelectorAll('.game-cube-stars .fa-star').forEach(star => {
         star.addEventListener('click', (e) => {
@@ -8139,33 +7185,27 @@ function renderSlopeRiderCenterCard() {
             submitGameRating(gameKey, embed, rating);
         });
     });
-    
     console.log('Slope Rider center card rendered successfully');
 }
-
 // Render Game of the Season
 function renderGameOfSeason() {
     const container = document.getElementById('gameOfSeasonCard');
     if (!container) return;
-    
     // Find Slope Rider game
     const slopeRider = gameSites.find(game => game.title && game.title.toLowerCase().includes('slope rider'));
     if (!slopeRider) {
         container.style.display = 'none';
         return;
     }
-    
     const gameKey = getGameKey(slopeRider.embed);
     const ratingData = gameRatings[gameKey] || { average: 0, count: 0 };
     const avgRating = ratingData.average || 0;
     const description = slopeRider.description || 'Slope Rider is an exhilarating 3D endless racing game that challenges your reflexes and precision. Navigate a ball down a treacherous slope filled with obstacles, gaps, and sharp turns. The game features stunning graphics, smooth controls, and increasingly difficult levels that will test your skills. Master the art of balance and speed as you try to achieve the highest score possible. With its addictive gameplay and challenging mechanics, Slope Rider offers hours of entertainment for players of all skill levels.';
     const filename = `game-${slopeRider.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.html`;
-    
     function getGamesPath(filename) {
         const isInPagesFolder = window.location.pathname.includes('/pages/');
         return isInPagesFolder ? `../games/${filename}` : `games/${filename}`;
     }
-    
     container.innerHTML = `
         <div class="festive-game-card">
             <div class="festive-badge">
@@ -8179,12 +7219,12 @@ function renderGameOfSeason() {
                     <div class="festive-game-rating" data-embed="${slopeRider.embed}" data-game-key="${gameKey}">
                         <div class="festive-game-stars">
                             ${[1, 2, 3, 4, 5].map(star => `
-                                <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}" 
+                                <i class="fas fa-star ${star <= Math.round(avgRating) ? 'active' : ''}"
                                    data-rating="${star}"></i>
                             `).join('')}
                         </div>
                         <div class="festive-rating-text">
-                            ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'} 
+                            ${avgRating > 0 ? avgRating.toFixed(1) : 'No ratings'}
                             ${ratingData.count > 0 ? `(${ratingData.count} ratings)` : ''}
                         </div>
                     </div>
@@ -8196,7 +7236,6 @@ function renderGameOfSeason() {
             <div class="festive-particles"></div>
         </div>
     `;
-    
     // Add click handler for rating
     container.querySelectorAll('.festive-game-stars .fa-star').forEach(star => {
         star.addEventListener('click', (e) => {
@@ -8209,40 +7248,31 @@ function renderGameOfSeason() {
         });
     });
 }
-
-// Initialize games grid
-function initGamesGrid() {
-    // Ensure games grid is visible
-    const gamesGridContainer = document.getElementById('gamesGridContainer');
+ = document.getElementById('gamesGridContainer');
     if (gamesGridContainer) {
         gamesGridContainer.style.display = 'block';
     }
-    
     // Load games from JSON and render featured sections
     // If on a category page, wait for games to load before filtering
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryFromUrl = window.location.pathname.includes('games-') ? 
+    const categoryFromUrl = window.location.pathname.includes('games-') ?
         window.location.pathname.split('games-')[1]?.replace('.html', '') : null;
-    
     // Check if we're on all-games page (multiple ways to detect)
-    const isAllGamesPage = window.location.pathname.includes('all-games.html') || 
+    const isAllGamesPage = window.location.pathname.includes('all-games.html') ||
                           window.location.pathname.endsWith('all-games.html') ||
                           window.location.pathname.includes('/pages/all-games') ||
                           window.location.href.includes('all-games.html');
-    
     // Function to render games on all-games page
     function renderAllGames() {
         if (!gameSites || gameSites.length === 0) {
             console.warn('No games available to render');
             return;
         }
-        
         const gamesGrid = document.getElementById('gamesGrid');
         if (!gamesGrid) {
             console.warn('gamesGrid element not found');
             return;
         }
-        
         if (typeof filterGamesByCategory === 'function') {
             filterGamesByCategory('all');
         } else if (typeof renderGamesGrid === 'function') {
@@ -8251,7 +7281,6 @@ function initGamesGrid() {
             console.error('Neither filterGamesByCategory nor renderGamesGrid functions available');
         }
     }
-    
     loadGamesFromJSON().then(() => {
         // Ensure games are loaded before filtering
         if (!gameSites || gameSites.length === 0) {
@@ -8269,7 +7298,6 @@ function initGamesGrid() {
             }, 500);
             return;
         }
-        
         // If we're on a category page, filter by that category
         if (categoryFromUrl && typeof filterGamesByCategory === 'function') {
             filterGamesByCategory(categoryFromUrl);
@@ -8301,11 +7329,9 @@ function initGamesGrid() {
             }, 1000);
         }
     });
-    
     // Setup search functionality
     const searchInput = document.getElementById('gamesSearchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
-    
     if (searchInput) {
         // Debounce search for real-time updates
         let searchTimeout;
@@ -8313,14 +7339,12 @@ function initGamesGrid() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 const query = e.target.value.trim();
-                
                 if (query === '') {
                     // If no search query, hide search results and show normal view
                     const searchResultsGrid = document.getElementById('searchResultsGrid');
                     const featuredSections = document.getElementById('featuredGamesSections');
                     if (searchResultsGrid) searchResultsGrid.style.display = 'none';
                     if (featuredSections) featuredSections.style.display = 'block';
-                    
                     // If on all-games page, apply category filter
                     const activeCategory = document.querySelector('.category-btn.active');
                     if (activeCategory) {
@@ -8335,26 +7359,21 @@ function initGamesGrid() {
                     if (clearSearchBtn) clearSearchBtn.style.display = 'none';
                     return;
                 }
-                
                 // Show clear button
                 if (clearSearchBtn) clearSearchBtn.style.display = 'flex';
-                
                 // Hide featured sections and show search results on main page
                 const featuredSections = document.getElementById('featuredGamesSections');
                 const searchResultsGrid = document.getElementById('searchResultsGrid');
                 if (featuredSections) featuredSections.style.display = 'none';
                 if (searchResultsGrid) searchResultsGrid.style.display = 'grid';
-                
                 // Get current category filter
                 const activeCategory = document.querySelector('.category-btn.active');
                 const category = activeCategory ? activeCategory.getAttribute('data-category') : 'all';
-                
                 // Check if we're on all-games page
-                const isAllGamesPage = window.location.pathname.includes('all-games.html') || 
+                const isAllGamesPage = window.location.pathname.includes('all-games.html') ||
                                       window.location.pathname.endsWith('all-games.html') ||
                                       window.location.pathname.includes('/pages/all-games') ||
                                       window.location.href.includes('all-games.html');
-                
                 // When searching on all-games page, always search through ALL games regardless of category
                 // Start with ALL games from gameSites
                 // Ensure games are loaded before searching
@@ -8368,9 +7387,7 @@ function initGamesGrid() {
                     }, 500);
                     return;
                 }
-                
                 let gamesToSearch = [...gameSites];
-                
                 // Add stats and ratings to all games for filtering/sorting
                 gamesToSearch = gamesToSearch.map(site => {
                     const stats = getGameStats(site.embed);
@@ -8385,7 +7402,6 @@ function initGamesGrid() {
                         ratingCount: ratingData.count || 0
                     };
                 });
-                
                 // When searching, always search through ALL games regardless of category
                 // Only apply category filter when NOT searching (query is empty)
                 // On all-games page, when searching, always search through ALL games
@@ -8432,7 +7448,6 @@ function initGamesGrid() {
                         });
                     }
                 }
-                
                 // Then apply search filter
                 const filtered = gamesToSearch
                     .map(site => ({
@@ -8448,7 +7463,6 @@ function initGamesGrid() {
                         return matches;
                     })
                     .sort((a, b) => b.similarity - a.similarity);
-                
                 // Render in appropriate container
                 const gamesGrid = document.getElementById('gamesGrid');
                 if (gamesGrid) {
@@ -8461,7 +7475,6 @@ function initGamesGrid() {
             }, 150);
         });
     }
-    
     // Clear search button
     if (clearSearchBtn) {
         clearSearchBtn.addEventListener('click', () => {
@@ -8472,7 +7485,6 @@ function initGamesGrid() {
             clearSearchBtn.style.display = 'none';
         });
     }
-    
     // Default game button
     const defaultGameBtn = document.getElementById('defaultGameBtn');
     if (defaultGameBtn) {
@@ -8481,7 +7493,6 @@ function initGamesGrid() {
             loadGameSite('https://slopeonline.online/', 'Descent Runner - Default Game');
         });
     }
-    
     // Category buttons
     const categoryButtons = document.querySelectorAll('.category-btn');
     categoryButtons.forEach(btn => {
@@ -8490,11 +7501,9 @@ function initGamesGrid() {
             categoryButtons.forEach(b => b.classList.remove('active'));
             // Add active class to clicked button
             btn.classList.add('active');
-            
             // Filter games by category
             const category = btn.getAttribute('data-category');
             filterGamesByCategory(category);
-            
             // Clear search when changing category
             if (searchInput) {
                 searchInput.value = '';
@@ -8502,20 +7511,15 @@ function initGamesGrid() {
             }
         });
     });
-    
     // Initialize game stats tracking
     initGameStats();
-    
     // Initialize game ratings tracking
     initGameRatings();
 }
-
 // Game stats tracking
 // Note: gameStats and gameStatsListener are already declared at the top of the file
-
 // Game ratings tracking
 // Note: gameRatings and gameRatingsListener are already declared at the top of the file
-
 // Generate consistent game key from embed URL
 function getGameKey(embed) {
     if (!embed) return null;
@@ -8537,7 +7541,6 @@ function getGameKey(embed) {
         return 'game_' + btoa(embed).replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
     }
 }
-
 // Get game stats for a specific embed URL
 function getGameStats(embed) {
     if (!embed || !gameStats) return null;
@@ -8545,7 +7548,6 @@ function getGameStats(embed) {
     if (!gameKey) return null;
     return gameStats[gameKey] || null;
 }
-
 // Filter games by category
 function filterGamesByCategory(category) {
     try {
@@ -8560,16 +7562,13 @@ function filterGamesByCategory(category) {
             }
             return;
         }
-        
         let filtered = [...gameSites];
-        
         if (category === 'all') {
             // Show all games
             console.log('Filtering all games, total:', filtered.length);
             renderGamesGrid(filtered);
             return;
         }
-        
         // Filter by game tags/category (only if category is tag-based)
         if (category === 'racing') {
             filtered = filtered.filter(game => {
@@ -8625,13 +7624,11 @@ function filterGamesByCategory(category) {
                        title.includes('simulator') || title.includes('simulation');
             });
         }
-        
         // If no games match, show all games with a warning
         if (filtered.length === 0) {
             console.warn(`No games found for category: ${category}, showing all games`);
             filtered = [...gameSites];
         }
-        
         // Add stats and ratings to each game (with error handling)
         filtered = filtered.map(site => {
             try {
@@ -8660,7 +7657,6 @@ function filterGamesByCategory(category) {
                 };
             }
         });
-    
     if (category === 'popular') {
         // Sort by highest star rating and most reviews (most popular)
         filtered.sort((a, b) => {
@@ -8679,16 +7675,13 @@ function filterGamesByCategory(category) {
         // Sort by recent activity (last 24-48 hours weighted heavily)
         const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
         const twoDaysAgo = Date.now() - (48 * 60 * 60 * 1000);
-        
         // Calculate trending scores for all games
         const allGamesWithScores = filtered.map(game => {
             const now = Date.now();
             let trendingScore = 0;
-            
             if (game.clicks > 0) {
                 // Base score from total clicks (logarithmic to prevent old games from dominating)
                 const baseScore = Math.log10(game.clicks + 1) * 10;
-                
                 // Recent activity boost
                 if (game.lastClicked > oneDayAgo) {
                     // Very recent (last 24 hours) - high boost
@@ -8700,21 +7693,17 @@ function filterGamesByCategory(category) {
                     // Older - lower score
                     trendingScore = baseScore * 0.5;
                 }
-                
                 // Add recency decay factor
                 const hoursSinceLastClick = (now - game.lastClicked) / (1000 * 60 * 60);
                 const recencyFactor = Math.max(0, 1 - (hoursSinceLastClick / 72)); // Decay over 3 days
                 trendingScore *= (1 + recencyFactor);
             }
-            
             return { ...game, trendingScore: trendingScore };
         });
-        
         // Separate trending games (with clicks) from non-trending games
         const trendingGames = allGamesWithScores
             .filter(game => game.clicks > 0)
             .sort((a, b) => b.trendingScore - a.trendingScore);
-        
         // Get non-trending games (games with 0 clicks or very low scores)
         const nonTrendingGames = allGamesWithScores
             .filter(game => game.clicks === 0 || game.trendingScore < 1)
@@ -8726,7 +7715,6 @@ function filterGamesByCategory(category) {
                 const indexB = gameSites.findIndex(s => s.embed === b.embed);
                 return indexB - indexA;
             });
-        
         // Combine: trending games first, then fill with other games
         filtered = [...trendingGames, ...nonTrendingGames];
     } else if (category === 'new') {
@@ -8747,7 +7735,6 @@ function filterGamesByCategory(category) {
             return firstB - firstA;
         });
     }
-    
         renderGamesGrid(filtered);
     } catch (e) {
         console.error('Error filtering games:', e);
@@ -8759,13 +7746,10 @@ function filterGamesByCategory(category) {
         }
     }
 }
-
 // Initialize game stats listener
 function initGameStats() {
     if (!db) return;
-    
     const statsRef = db.ref('gameStats');
-    
     // Make Descent Runner popular by initializing it with clicks
     const slopeRiderEmbed = 'https://game.azgame.io/slope-rider/';
     const slopeRiderKey = getGameKey(slopeRiderEmbed);
@@ -8784,12 +7768,10 @@ function initGameStats() {
             }
         });
     }
-    
     // Listen for real-time updates
     gameStatsListener = statsRef.on('value', (snapshot) => {
         const stats = snapshot.val() || {};
         gameStats = stats;
-        
         // Update UI if category is active
         const activeCategory = document.querySelector('.category-btn.active');
         if (activeCategory) {
@@ -8800,18 +7782,14 @@ function initGameStats() {
         console.error('Error loading game stats:', error);
     });
 }
-
 // Initialize game ratings listener
 function initGameRatings() {
     if (!db) return;
-    
     const ratingsRef = db.ref('gameRatings');
-    
     // Listen for real-time updates
     gameRatingsListener = ratingsRef.on('value', (snapshot) => {
         const ratings = snapshot.val() || {};
         gameRatings = ratings;
-        
         // Update UI if games grid is visible
         const gamesGrid = document.getElementById('gamesGrid');
         if (gamesGrid && gamesGrid.children.length > 0) {
@@ -8827,20 +7805,16 @@ function initGameRatings() {
         console.error('Error loading game ratings:', error);
     });
 }
-
 // Submit game rating
 function submitGameRating(gameKey, embed, rating) {
     if (!db || !gameKey) return;
-    
     // Get user identifier (use localStorage to track per-user ratings)
     let userId = localStorage.getItem('userId');
     if (!userId) {
         userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
     }
-    
     const gameRatingRef = db.ref(`gameRatings/${gameKey}`);
-    
     gameRatingRef.transaction((current) => {
         const ratingData = current || {
             embed: embed,
@@ -8849,13 +7823,10 @@ function submitGameRating(gameKey, embed, rating) {
             count: 0,
             average: 0
         };
-        
         // Check if user already rated
         const previousRating = ratingData.ratings[userId];
-        
         // Update or add rating
         ratingData.ratings[userId] = rating;
-        
         // Recalculate average
         if (previousRating) {
             // User is updating their rating
@@ -8865,12 +7836,10 @@ function submitGameRating(gameKey, embed, rating) {
             ratingData.total = (ratingData.total || 0) + rating;
             ratingData.count = (ratingData.count || 0) + 1;
         }
-        
         // Calculate average from total and count
         const ratingCount = Object.keys(ratingData.ratings).length;
         ratingData.average = ratingCount > 0 ? ratingData.total / ratingCount : 0;
         ratingData.count = ratingCount;
-        
         return ratingData;
     }, (error, committed, snapshot) => {
         if (error) {
@@ -8881,16 +7850,12 @@ function submitGameRating(gameKey, embed, rating) {
         }
     });
 }
-
 // Track game click
 function trackGameClick(embed, title) {
     if (!db) return;
-    
     const gameKey = getGameKey(embed);
     if (!gameKey) return;
-    
     const gameRef = db.ref(`gameStats/${gameKey}`);
-    
     gameRef.transaction((current) => {
         const now = Date.now();
         const stats = current || {
@@ -8900,52 +7865,40 @@ function trackGameClick(embed, title) {
             lastClicked: now,
             firstClicked: now
         };
-        
         stats.clicks = (stats.clicks || 0) + 1;
         stats.lastClicked = now;
         if (!stats.firstClicked) stats.firstClicked = now;
         if (!stats.embed) stats.embed = embed;
         if (!stats.title) stats.title = title;
-        
         return stats;
     });
 }
-
 // Load game site in iframe
 function loadGameSite(embed, title) {
     const iframeContainer = document.getElementById('iframeContainer');
     const gamesGridContainer = document.getElementById('gamesGridContainer');
     const embeddedSite = document.getElementById('embeddedSite');
     const currentSiteTitle = document.getElementById('currentSiteTitle');
-    
     if (!iframeContainer || !embeddedSite) {
         console.error('Iframe container or embedded site not found');
         return;
     }
-    
     // Find the game in the array to check for custom embed
     const game = gameSites.find(site => site.embed === embed);
-    
     // Track the game click
     trackGameClick(embed, title);
-    
     // Hide games grid if it exists
     if (gamesGridContainer) {
         gamesGridContainer.style.display = 'none';
     }
-    
-    // Show iframe
     iframeContainer.style.display = 'block';
-    
     // Set title
     if (currentSiteTitle) {
         currentSiteTitle.textContent = title;
     }
-    
     // Clear any existing content
     embeddedSite.removeAttribute('srcdoc');
     embeddedSite.src = 'about:blank';
-    
     // Load site - use custom HTML if available, otherwise use src
     setTimeout(() => {
         if (game && game.customEmbed && game.customHTML) {
@@ -8955,37 +7908,30 @@ function loadGameSite(embed, title) {
             // Use regular src
             embeddedSite.src = embed;
         }
-        
         // Scroll to iframe
         setTimeout(() => {
             iframeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
     }, 100);
 }
-
 // Back to games button
 document.addEventListener('DOMContentLoaded', () => {
     initGamesGrid();
-    
     const backToGamesBtn = document.getElementById('backToGamesBtn');
     if (backToGamesBtn) {
         backToGamesBtn.addEventListener('click', () => {
             const iframeContainer = document.getElementById('iframeContainer');
             const gamesGridContainer = document.getElementById('gamesGridContainer');
             const embeddedSite = document.getElementById('embeddedSite');
-            
             if (iframeContainer && gamesGridContainer) {
                 // Hide iframe
                 iframeContainer.style.display = 'none';
-                
                 // Show games grid
                 gamesGridContainer.style.display = 'block';
-                
                 // Clear iframe src
                 if (embeddedSite) {
                     embeddedSite.src = '';
                 }
-                
                 // Scroll to games grid
                 setTimeout(() => {
                     gamesGridContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -8994,10 +7940,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
 // ================= Back to Top Button =================
 const backToTopBtn = document.getElementById('backToTopBtn');
-
 // Show/hide button based on scroll position
 function handleScroll() {
     if (window.pageYOffset > 300) {
@@ -9006,7 +7950,6 @@ function handleScroll() {
         backToTopBtn?.classList.remove('show');
     }
 }
-
 // Scroll to top when button is clicked
 backToTopBtn?.addEventListener('click', () => {
     window.scrollTo({
@@ -9014,16 +7957,13 @@ backToTopBtn?.addEventListener('click', () => {
         behavior: 'smooth'
     });
 });
-
 // Listen for scroll events
 window.addEventListener('scroll', Utils.throttle(handleScroll, 100));
-
 // Check initial scroll position
 handleScroll();
-
-// Navigation button handlers
+ handlers
 document.addEventListener('DOMContentLoaded', () => {
-    // Chat button in navigation
+     in navigation
     const navChatBtn = document.getElementById('navChatBtn');
     if (navChatBtn) {
         navChatBtn.addEventListener('click', () => {
@@ -9031,8 +7971,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (toggleChatBtn) toggleChatBtn.click();
         });
     }
-    
-    // Profile button in navigation
+     in navigation
     const navProfileBtn = document.getElementById('navProfileBtn');
     if (navProfileBtn) {
         navProfileBtn.addEventListener('click', () => {
@@ -9040,8 +7979,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (profileBtn) profileBtn.click();
         });
     }
-    
-    // Leaderboard button in navigation
+     in navigation
     const navLeaderboardBtn = document.getElementById('navLeaderboardBtn');
     if (navLeaderboardBtn) {
         navLeaderboardBtn.addEventListener('click', () => {
@@ -9049,8 +7987,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (leaderboardBtn) leaderboardBtn.click();
         });
     }
-    
-    // Friends button in navigation
+     in navigation
     const navFriendsBtn = document.getElementById('navFriendsBtn');
     if (navFriendsBtn) {
         navFriendsBtn.addEventListener('click', () => {
@@ -9058,8 +7995,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (friendsBtn) friendsBtn.click();
         });
     }
-    
-    // Drawing button in navigation
+     in navigation
     const navDrawingBtn = document.getElementById('navDrawingBtn');
     if (navDrawingBtn) {
         navDrawingBtn.addEventListener('click', () => {
@@ -9067,16 +8003,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (openDrawingBtn) openDrawingBtn.click();
         });
     }
-    
-    // Footer Legal Pages
+     in navigation
+    const navYouTubeBtn = document.getElementById('navYouTubeBtn');
+    if (navYouTubeBtn) {
+        navYouTubeBtn.addEventListener('click', () => {
+            const youtubeWatcherBtn = document.getElementById('youtubeWatcherBtn');
+            if (youtubeWatcherBtn) youtubeWatcherBtn.click();
+        });
+    }
+     Pages
     const privacyPolicyBtn = document.getElementById('privacyPolicyBtn');
     const aboutUsBtn = document.getElementById('aboutUsBtn');
     const contactUsBtn = document.getElementById('contactUsBtn');
     const privacyPolicyModal = document.getElementById('privacyPolicyModal');
     const aboutUsModal = document.getElementById('aboutUsModal');
     const contactUsModal = document.getElementById('contactUsModal');
-    
-    // Open Privacy Policy
+     Policy
     if (privacyPolicyBtn) {
         privacyPolicyBtn.addEventListener('click', () => {
             if (privacyPolicyModal) {
@@ -9085,7 +8027,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
     // Open About Us
     if (aboutUsBtn) {
         aboutUsBtn.addEventListener('click', () => {
@@ -9095,7 +8036,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
     // Open Contact Us
     if (contactUsBtn) {
         contactUsBtn.addEventListener('click', () => {
@@ -9105,8 +8045,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // Close modals
+    s
     const legalModalCloses = document.querySelectorAll('.legal-modal-close');
     legalModalCloses.forEach(closeBtn => {
         closeBtn.addEventListener('click', () => {
@@ -9117,8 +8056,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
-    // Close modals when clicking outside
+    s when clicking outside
     [privacyPolicyModal, aboutUsModal, contactUsModal].forEach(modal => {
         if (modal) {
             modal.addEventListener('click', (e) => {
@@ -9129,14 +8067,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-    
     // Contact form submission (for modal on index.html)
     const contactForm = document.getElementById('contactForm');
     const contactFormSuccess = document.getElementById('contactFormSuccess');
     if (contactForm) {
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const formData = {
                 name: document.getElementById('contactName').value,
                 email: document.getElementById('contactEmail').value,
@@ -9145,20 +8081,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: Date.now(),
                 date: new Date().toISOString()
             };
-            
             // Save to Firebase
             if (db) {
                 try {
                     const messagesRef = db.ref('contactMessages');
                     await messagesRef.push(formData);
                     console.log('Contact message saved to Firebase');
-                    
                     // Show success message
                     contactForm.style.display = 'none';
                     if (contactFormSuccess) {
                         contactFormSuccess.style.display = 'block';
                     }
-                    
                     // Reset form after 5 seconds
                     setTimeout(() => {
                         contactForm.reset();
@@ -9187,11 +8120,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
     // Links from within modals
     const contactFromPrivacyBtn = document.getElementById('contactFromPrivacyBtn');
     const contactFromAboutBtn = document.getElementById('contactFromAboutBtn');
-    
     if (contactFromPrivacyBtn) {
         contactFromPrivacyBtn.addEventListener('click', () => {
             if (privacyPolicyModal) privacyPolicyModal.classList.remove('active');
@@ -9200,7 +8131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
     if (contactFromAboutBtn) {
         contactFromAboutBtn.addEventListener('click', () => {
             if (aboutUsModal) aboutUsModal.classList.remove('active');
@@ -9209,40 +8139,33 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
     // Footer quick links
     const footerGamesBtn = document.getElementById('footerGamesBtn');
     const footerLeaderboardBtn = document.getElementById('footerLeaderboardBtn');
     const footerChatBtn = document.getElementById('footerChatBtn');
-    
     if (footerGamesBtn) {
         footerGamesBtn.addEventListener('click', () => {
             document.getElementById('gamesGridContainer')?.scrollIntoView({ behavior: 'smooth' });
         });
     }
-    
     if (footerLeaderboardBtn) {
         footerLeaderboardBtn.addEventListener('click', () => {
             const leaderboardBtn = document.getElementById('leaderboardBtn');
             if (leaderboardBtn) leaderboardBtn.click();
         });
     }
-    
     if (footerChatBtn) {
         footerChatBtn.addEventListener('click', () => {
             const toggleChatBtn = document.getElementById('toggleChatBtn');
             if (toggleChatBtn) toggleChatBtn.click();
         });
     }
-    
     // Footer scroll behavior - show on scroll down, hide on scroll up
     let lastScrollTop = 0;
     const footer = document.querySelector('.site-footer');
-    
     if (footer) {
         const handleFooterScroll = Utils.throttle(() => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
             // Only trigger if scrolled more than 5px difference
             if (Math.abs(scrollTop - lastScrollTop) > 5) {
                 if (scrollTop > lastScrollTop && scrollTop > 100) {
@@ -9252,26 +8175,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Scrolling up - hide footer
                     footer.classList.remove('visible');
                 }
-                
                 lastScrollTop = scrollTop;
             }
-            
             // Hide footer if at the very top
             if (scrollTop < 50) {
                 footer.classList.remove('visible');
             }
         }, 100);
-        
         window.addEventListener('scroll', handleFooterScroll, { passive: true });
-        
         // Check initial position
         handleFooterScroll();
     }
-    
     // ========================================
-    // COOKIE CONSENT MANAGEMENT
     // ========================================
-    
     const cookieConsent = document.getElementById('cookieConsent');
     const cookieSettingsModal = document.getElementById('cookieSettingsModal');
     const cookieAcceptBtn = document.getElementById('cookieAcceptBtn');
@@ -9280,23 +8196,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeCookieSettingsBtn = document.getElementById('closeCookieSettingsBtn');
     const cookieSaveSettingsBtn = document.getElementById('cookieSaveSettingsBtn');
     const cookieAcceptAllModalBtn = document.getElementById('cookieAcceptAllModalBtn');
-    
-    // Cookie preference keys
+     keys
     const COOKIE_CONSENT_KEY = 'cookie_consent';
     const COOKIE_ANALYTICS_KEY = 'cookie_analytics';
     const COOKIE_ADVERTISING_KEY = 'cookie_advertising';
     const COOKIE_FUNCTIONAL_KEY = 'cookie_functional';
-    
-    // Cookie utility functions
+     functions
     const CookieManager = {
-        // Set a cookie
         setCookie: function(name, value, days) {
             const expires = new Date();
             expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
             document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
         },
-        
-        // Get a cookie
         getCookie: function(name) {
             const nameEQ = name + "=";
             const ca = document.cookie.split(';');
@@ -9307,18 +8218,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return null;
         },
-        
-        // Delete a cookie
         deleteCookie: function(name) {
             document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
         },
-        
-        // Check if consent has been given
+         has been given
         hasConsent: function() {
             return this.getCookie(COOKIE_CONSENT_KEY) !== null;
         },
-        
-        // Get consent preferences
+         preferences
         getPreferences: function() {
             return {
                 consent: this.getCookie(COOKIE_CONSENT_KEY) === 'true',
@@ -9327,51 +8234,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 functional: this.getCookie(COOKIE_FUNCTIONAL_KEY) === 'true'
             };
         },
-        
-        // Save preferences
         savePreferences: function(preferences) {
             this.setCookie(COOKIE_CONSENT_KEY, preferences.consent ? 'true' : 'false', 365);
             this.setCookie(COOKIE_ANALYTICS_KEY, preferences.analytics ? 'true' : 'false', 365);
             this.setCookie(COOKIE_ADVERTISING_KEY, preferences.advertising ? 'true' : 'false', 365);
             this.setCookie(COOKIE_FUNCTIONAL_KEY, preferences.functional ? 'true' : 'false', 365);
-            
-            // Apply preferences
             this.applyPreferences(preferences);
         },
-        
-        // Apply preferences (enable/disable features)
+         (enable/disable features)
         applyPreferences: function(preferences) {
-            // Analytics cookies
             if (preferences.analytics) {
-                // Enable analytics tracking
+                 tracking
                 console.log('Analytics cookies enabled');
-                // Add your analytics code here (e.g., Google Analytics)
+                 code here (e.g., Google Analytics)
             } else {
-                // Disable analytics
                 console.log('Analytics cookies disabled');
             }
-            
-            // Advertising cookies
             if (preferences.advertising) {
-                // Enable advertising
                 console.log('Advertising cookies enabled');
-                // Google AdSense is already loaded, but you can control it here
+                 is already loaded, but you can control it here
             } else {
-                // Disable advertising
                 console.log('Advertising cookies disabled');
             }
-            
-            // Functional cookies
             if (preferences.functional) {
-                // Enable functional features
+                 features
                 console.log('Functional cookies enabled');
             } else {
-                // Disable functional features
+                 features
                 console.log('Functional cookies disabled');
             }
         },
-        
-        // Accept all cookies
+         cookies
         acceptAll: function() {
             const preferences = {
                 consent: true,
@@ -9382,8 +8275,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.savePreferences(preferences);
             this.hideBanner();
         },
-        
-        // Reject all cookies (except essential)
+         cookies (except essential)
         rejectAll: function() {
             const preferences = {
                 consent: true,
@@ -9394,8 +8286,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.savePreferences(preferences);
             this.hideBanner();
         },
-        
-        // Show banner
         showBanner: function() {
             if (cookieConsent) {
                 cookieConsent.style.display = 'block';
@@ -9405,8 +8295,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 10);
             }
         },
-        
-        // Hide banner
         hideBanner: function() {
             if (cookieConsent) {
                 cookieConsent.style.animation = 'cookieSlideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -9415,20 +8303,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 500);
             }
         },
-        
-        // Load saved preferences into modal
+         preferences into modal
         loadPreferencesToModal: function() {
             const prefs = this.getPreferences();
             const analyticsCheckbox = document.getElementById('analyticsCookies');
             const advertisingCheckbox = document.getElementById('advertisingCookies');
             const functionalCheckbox = document.getElementById('functionalCookies');
-            
             if (analyticsCheckbox) analyticsCheckbox.checked = prefs.analytics;
             if (advertisingCheckbox) advertisingCheckbox.checked = prefs.advertising;
             if (functionalCheckbox) functionalCheckbox.checked = prefs.functional;
         }
     };
-    
     // Add slide down animation
     const style = document.createElement('style');
     style.textContent = `
@@ -9444,20 +8329,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     `;
     document.head.appendChild(style);
-    
-    // Event listeners
     if (cookieAcceptBtn) {
         cookieAcceptBtn.addEventListener('click', () => {
             CookieManager.acceptAll();
         });
     }
-    
     if (cookieRejectBtn) {
         cookieRejectBtn.addEventListener('click', () => {
             CookieManager.rejectAll();
         });
     }
-    
     if (cookieSettingsBtn) {
         cookieSettingsBtn.addEventListener('click', () => {
             CookieManager.loadPreferencesToModal();
@@ -9466,7 +8347,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
     if (closeCookieSettingsBtn) {
         closeCookieSettingsBtn.addEventListener('click', () => {
             if (cookieSettingsModal) {
@@ -9474,8 +8354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // Close modal when clicking outside
+     when clicking outside
     if (cookieSettingsModal) {
         cookieSettingsModal.addEventListener('click', (e) => {
             if (e.target === cookieSettingsModal) {
@@ -9483,7 +8362,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
     if (cookieSaveSettingsBtn) {
         cookieSaveSettingsBtn.addEventListener('click', () => {
             const preferences = {
@@ -9492,17 +8370,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 advertising: document.getElementById('advertisingCookies')?.checked || false,
                 functional: document.getElementById('functionalCookies')?.checked || false
             };
-            
             CookieManager.savePreferences(preferences);
-            
             if (cookieSettingsModal) {
                 cookieSettingsModal.style.display = 'none';
             }
-            
             CookieManager.hideBanner();
         });
     }
-    
     if (cookieAcceptAllModalBtn) {
         cookieAcceptAllModalBtn.addEventListener('click', () => {
             CookieManager.acceptAll();
@@ -9511,24 +8385,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // Check if consent has been given on page load
+     has been given on page load
     if (!CookieManager.hasConsent()) {
-        // Show banner after a short delay for better UX
+         after a short delay for better UX
         setTimeout(() => {
             CookieManager.showBanner();
         }, 1000);
     } else {
-        // Load and apply saved preferences
+         saved preferences
         const savedPrefs = CookieManager.getPreferences();
         CookieManager.applyPreferences(savedPrefs);
     }
-    
-    // Escape key to close modal
+     to close modal
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && cookieSettingsModal && cookieSettingsModal.style.display === 'flex') {
             cookieSettingsModal.style.display = 'none';
         }
     });
-});
-
+});

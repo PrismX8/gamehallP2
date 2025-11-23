@@ -19,7 +19,7 @@
         </a>
         <h1><i class="fas fa-star"></i> New Games</h1>
     </header>
-    
+
     <div id="gamesGridContainer" class="games-grid-container">
         <div class="games-search-container">
             <div class="games-search-wrapper">
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof initGamesGrid === 'function') {
         initGamesGrid();
     }
-    
+
     // Wait for games to load and filter
     function waitAndFilter() {
         if (typeof gameSites !== 'undefined' && gameSites.length > 0) {
@@ -83,11 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     // Start waiting after script loads
     setTimeout(waitAndFilter, 500);
 });
 </script>
 </body>
 </html>
-
