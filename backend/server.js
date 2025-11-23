@@ -27,8 +27,12 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: process.env.CORS_ORIGIN || "*",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  // Allow polling transport (required for Replit free tier)
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
 });
 
 // Middleware

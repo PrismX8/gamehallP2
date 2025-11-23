@@ -112,10 +112,12 @@
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     
     // Replit backend URL
-    // Try both formats: project-name--username.repl.co OR project-name.username.repl.co
-    // Replit URLs can vary, so we'll try the double-dash format first
-    const DEFAULT_BACKEND_URL = 'https://NodeRepl--PrismX8.repl.co';
-    // Alternative format (if double-dash doesn't work): 'https://NodeRepl.PrismX8.repl.co'
+    // Replit URLs are typically lowercase: project-name--username.repl.co
+    // Check your Replit webview for the exact URL format
+    const DEFAULT_BACKEND_URL = 'https://noderepl--prismx8.repl.co';
+    // Alternative formats to try if this doesn't work:
+    // 'https://NodeRepl--PrismX8.repl.co' (with capitals)
+    // 'https://noderepl.prismx8.repl.co' (with dot, lowercase)
     
     const backendUrl = window.BACKEND_URL || (isLocalhost 
       ? 'http://localhost:3000'

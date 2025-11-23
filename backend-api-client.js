@@ -116,7 +116,9 @@ class BackendAPI {
           timeout: 8000, // 8 second timeout
           forceNew: false,
           autoConnect: true,
-          transports: ['websocket', 'polling'],
+          // Force polling-only for Replit (WebSockets don't work on free tier)
+          transports: ['polling'], // Force polling only - more reliable on Replit
+          upgrade: false, // Don't try to upgrade to websocket
           randomizationFactor: 0.5
         });
 
