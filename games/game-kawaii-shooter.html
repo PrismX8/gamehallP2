@@ -557,8 +557,8 @@
             <p>&copy; 2024 SHS Game Hall. All rights reserved.</p>
         </div>
     </footer>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="../backend-api-client.js"></script>
     <script src="../script.js"></script>
     <script>
         // Game data
@@ -583,18 +583,18 @@
             }
         }
         const gameKey = getGameKey(gameEmbed);
-        // Use global db from script.js (Firebase is already initialized there)
+        // Use global db from script.js (Backend API is already initialized there)
         // Wait for script.js to load and initialize db
         function getDb() {
             if (typeof db !== 'undefined' && db !== null) {
                 return db;
             }
-            // Fallback: try to get db from firebase if script.js hasn't loaded yet
-            if (typeof firebase !== 'undefined') {
+            // Fallback: try to get db from backend API if script.js hasn't loaded yet
+            if (typeof backendAPI !== 'undefined' && backendAPI) {
                 try {
-                    return firebase.database();
+                    return backendAPI.database();
                 } catch (e) {
-                    console.error('Firebase error:', e);
+                    console.error('Backend API error:', e);
                 }
             }
             return null;

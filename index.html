@@ -334,7 +334,7 @@
     <div class="games-search-container">
         <div class="games-search-wrapper">
             <i class="fas fa-search games-search-icon"></i>
-            <input type="text" id="gamesSearchInput" class="games-search-input" placeholder="Search games...">
+            <input type="text" id="gamesSearchInput" name="gamesSearch" class="games-search-input" placeholder="Search games..." autocomplete="off" aria-label="Search games">
             <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">
                 <i class="fas fa-times"></i>
             </button>
@@ -451,7 +451,7 @@
             </button>
         </div>
         <div class="chat-input-wrapper">
-            <input type="text" id="chatInput" class="chat-input" placeholder="Type a message...">
+            <input type="text" id="chatInput" name="chatMessage" class="chat-input" placeholder="Type a message..." autocomplete="off" aria-label="Type a message">
             <button id="sendChatBtn" class="chat-send-btn" title="Send">
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -526,7 +526,8 @@
                 <!-- Search Bar (when active) -->
                 <div id="fullscreenChatSearchBar" class="fullscreen-chat-search-bar" style="display:none;">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="fullscreenChatSearchInput" placeholder="Search messages...">
+                    <label for="fullscreenChatSearchInput" class="sr-only">Search messages</label>
+                    <input type="text" id="fullscreenChatSearchInput" name="fullscreenChatSearch" placeholder="Search messages..." autocomplete="off" aria-label="Search messages">
                     <button id="closeSearchBtn" class="close-search-btn">
                         <i class="fas fa-times"></i>
                     </button>
@@ -547,7 +548,8 @@
                         </button>
                     </div>
                     <div class="fullscreen-chat-input-wrapper">
-                        <input type="text" id="fullscreenChatInput" class="fullscreen-chat-input" placeholder="Type a message...">
+                        <label for="fullscreenChatInput" class="sr-only">Type a message</label>
+                        <input type="text" id="fullscreenChatInput" name="fullscreenChatMessage" class="fullscreen-chat-input" placeholder="Type a message..." autocomplete="off" aria-label="Type a message">
                         <button id="fullscreenSendBtn" class="fullscreen-chat-send-btn" title="Send">
                             <i class="fas fa-paper-plane"></i>
                         </button>
@@ -582,11 +584,11 @@
     <div class="chat-popup-content">
         <label class="chat-popup-label">
             <span><i class="fas fa-user"></i> Name:</span>
-            <input type="text" id="chatPopupUsername" class="chat-popup-input" placeholder="Enter your name">
+            <input type="text" id="chatPopupUsername" name="chatUsername" class="chat-popup-input" placeholder="Enter your name" autocomplete="username" aria-label="Enter your name">
         </label>
         <label class="chat-popup-label">
             <span><i class="fas fa-palette"></i> Color:</span>
-            <input type="color" id="chatPopupColor" class="chat-popup-color-input" value="#FFD700">
+            <input type="color" id="chatPopupColor" name="chatColor" class="chat-popup-color-input" value="#FFD700" aria-label="Choose chat color">
         </label>
         <button id="chatSaveNameColor" class="chat-popup-save-btn">
             <i class="fas fa-check"></i> Save Changes
@@ -648,7 +650,7 @@
           <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">HTML5</span>
           <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">CSS3</span>
           <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">JavaScript</span>
-          <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">Firebase</span>
+          <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">Socket.io</span>
           <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">Font Awesome</span>
         </div>
       </div>
@@ -749,7 +751,8 @@
                 </label>
               </h3>
               <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="addProfanityWordInput" placeholder="Add word to filter..." style="flex:1; padding:12px 15px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#ffffff; font-size:14px;">
+                <label for="addProfanityWordInput" class="sr-only">Add word to filter</label>
+                <input type="text" id="addProfanityWordInput" name="profanityWord" placeholder="Add word to filter..." autocomplete="off" aria-label="Add word to filter" style="flex:1; padding:12px 15px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#ffffff; font-size:14px;">
                 <button id="addProfanityWordBtn" style="padding:12px 20px; background:#9c27b0; border:none; color:#ffffff; border-radius:10px; cursor:pointer; font-weight:600; font-size:14px;">
                   <i class="fas fa-plus"></i> Add
                 </button>
@@ -862,7 +865,8 @@
         <i class="fas fa-lock" style="font-size:14px;"></i>
         Enter Admin Password
       </label>
-      <input type="password" id="adminPasswordInput" placeholder="Enter your admin password..." style="width:100%; padding:14px 18px; border:2px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); border-radius:12px; box-sizing:border-box; margin-bottom:16px; color:rgba(255,255,255,0.9); font-size:15px; transition:all 0.3s ease;">
+      <label for="adminPasswordInput" style="display:none;">Admin Password</label>
+      <input type="password" id="adminPasswordInput" name="adminPassword" placeholder="Enter your admin password..." autocomplete="current-password" aria-label="Enter your admin password" style="width:100%; padding:14px 18px; border:2px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); border-radius:12px; box-sizing:border-box; margin-bottom:16px; color:rgba(255,255,255,0.9); font-size:15px; transition:all 0.3s ease;">
       <button id="adminLoginBtn" style="width:100%; padding:14px; background:linear-gradient(135deg, #007bff, #0056b3); border:2px solid rgba(0,123,255,0.5); color:#ffffff; border-radius:12px; cursor:pointer; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 15px rgba(0,123,255,0.3); display:flex; align-items:center; justify-content:center; gap:10px; position:relative; overflow:hidden;">
         <i class="fas fa-sign-in-alt"></i>
         <span>Login</span>
@@ -887,20 +891,20 @@
           <button id="textToolBtn" title="Text Tool" style="padding:6px 10px; border:1px solid #ccc; background:#ffffff; color:#333; border-radius:4px; cursor:pointer; font-weight:500; transition:all 0.2s ease;">T Text</button>
         </div>
         <label style="display:flex;align-items:center;gap:6px;">
-          <input id="colorPicker" type="color" value="#007bff" title="Brush Color">
+          <input id="colorPicker" name="brushColor" type="color" value="#007bff" title="Brush Color" aria-label="Brush Color">
         </label>
         <label style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:12px; color:#999;">Size:</span>
-          <input id="sizeSlider" type="range" min="1" max="50" value="4">
+          <input id="sizeSlider" name="brushSize" type="range" min="1" max="50" value="4" autocomplete="off" aria-label="Brush Size">
           <small id="sizeLabel" style="min-width:25px;">4</small>
         </label>
         <label style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:12px; color:#999;">Opacity:</span>
-          <input id="opacitySlider" type="range" min="0.1" max="1" step="0.1" value="1">
+          <input id="opacitySlider" name="brushOpacity" type="range" min="0.1" max="1" step="0.1" value="1" autocomplete="off" aria-label="Brush Opacity">
           <small id="opacityLabel" style="min-width:25px;">1</small>
         </label>
         <label style="display:flex;align-items:center;gap:6px;">
-          <input id="fillCheckbox" type="checkbox" title="Fill Shapes">
+          <input id="fillCheckbox" name="fillShapes" type="checkbox" title="Fill Shapes" aria-label="Fill Shapes">
           <span style="font-size:12px; color:#999;">Fill</span>
         </label>
         <button id="undoBtn" title="Undo" style="padding:6px 8px;border-radius:4px;border:1px solid #28a745;background:#28a745;color:#ffffff;cursor:pointer;font-weight:500;">↶ Undo</button>
@@ -914,7 +918,7 @@
       </div>
       <div id="canvasArea" style="position:relative; background:rgba(255,255,255,0.05); border-radius:12px; padding:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
         <canvas id="sharedCanvas" width="800" height="500" style="display:block; touch-action:none;"></canvas>
-        <canvas id="cursorOverlay" width="800" height="500" style="position:absolute; top:15px; left:15px; cursor:crosshair; background:transparent; border-radius:12px;"></canvas>
+        <canvas id="cursorOverlay" width="800" height="500" style="position:absolute; top:0; left:0; cursor:crosshair; background:transparent; border-radius:12px; z-index:10; pointer-events:none;"></canvas>
         <div style="padding:12px; margin-top:10px; font-size:13px; color:rgba(255,255,255,0.7); background:rgba(255,215,0,0.1); border-radius:8px; border-left:3px solid rgba(255,215,0,0.5);">
           <i class="fas fa-info-circle" style="color:#FFD700; margin-right:8px;"></i>
           <strong style="color:#FFD700;">Shared Canvas:</strong> Draw and everyone will see it in real-time. Your drawings are saved permanently across all devices and sessions.
@@ -1167,8 +1171,9 @@
           <button id="uploadPfpBtn" style="padding:8px 16px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer; font-size:12px;"><i class="fas fa-camera"></i> Upload Photo</button>
         </div>
       </div>
-      <input type="text" id="profileUsername" placeholder="Enter your username..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px; font-size:16px; font-weight:500;" required>
-      <input type="text" id="profileStatus" placeholder="Set your status message (optional)..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px;">
+      <label for="profileUsername" class="sr-only">Enter your username</label>
+      <input type="text" id="profileUsername" name="username" placeholder="Enter your username..." autocomplete="username" aria-label="Enter your username" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px; font-size:16px; font-weight:500;" required>
+      <input type="text" id="profileStatus" name="profileStatus" placeholder="Set your status message (optional)..." autocomplete="off" aria-label="Profile Status" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px;">
       <button id="saveProfileBtn" style="width:100%; padding:12px; background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.4); border-radius:8px; color:#FFD700; cursor:pointer; font-weight:500; margin-bottom:15px;"><i class="fas fa-save"></i> Save Profile</button>
       <div id="activityHistory" style="margin-top:20px; text-align:left;">
         <h3 style="color:#FFD700; margin-bottom:15px;">Activity History</h3>
@@ -1242,9 +1247,9 @@
         <div class="friends-toolbar">
           <div class="friends-search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="filterFriendsInput" placeholder="Search your friends..." class="friends-search-input">
+            <input type="text" id="filterFriendsInput" name="filterFriends" placeholder="Search your friends..." autocomplete="off" aria-label="Filter Friends" class="friends-search-input">
           </div>
-          <select id="friendsSortSelect" class="friends-sort-select">
+          <select id="friendsSortSelect" name="friendsSort" class="friends-sort-select" aria-label="Sort Friends">
             <option value="online">🟢 Online First</option>
             <option value="name">👤 Name (A-Z)</option>
             <option value="recent">🕐 Recently Active</option>
@@ -1276,7 +1281,7 @@
         <div class="friends-search-header">
           <div class="friends-search-box-large">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchFriendsInput" placeholder="Search by username..." class="friends-search-input-large">
+            <input type="text" id="searchFriendsInput" name="searchFriends" placeholder="Search by username..." autocomplete="off" aria-label="Search Friends" class="friends-search-input-large">
             <button class="friends-search-clear" id="clearSearchBtn" style="display:none;">
               <i class="fas fa-times"></i>
             </button>
@@ -1301,10 +1306,10 @@
     <button id="createPollBtn" style="width:100%; padding:12px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer; margin-bottom:20px; font-weight:500;"><i class="fas fa-plus"></i> Create New Poll</button>
     <div id="pollsList"></div>
     <div id="createPollForm" style="display:none; margin-top:20px; padding:20px; background:rgba(255,255,255,0.05); border-radius:12px;">
-      <input type="text" id="pollQuestion" placeholder="Poll question..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px;">
+      <input type="text" id="pollQuestion" name="pollQuestion" placeholder="Poll question..." autocomplete="off" aria-label="Poll Question" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px;">
       <div id="pollOptions">
-        <input type="text" class="pollOption" placeholder="Option 1" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;">
-        <input type="text" class="pollOption" placeholder="Option 2" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;">
+        <input type="text" class="pollOption" name="pollOption" placeholder="Option 1" autocomplete="off" aria-label="Poll Option 1" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;">
+        <input type="text" class="pollOption" name="pollOption" placeholder="Option 2" autocomplete="off" aria-label="Poll Option 2" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;">
       </div>
       <button id="addPollOptionBtn" style="padding:8px 15px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:6px; color:#FFD700; cursor:pointer; margin-bottom:10px;"><i class="fas fa-plus"></i> Add Option</button>
       <div style="display:flex; gap:10px;">
@@ -1327,7 +1332,7 @@
       <label style="display:block; margin-bottom:12px; color:#FFD700; font-weight:600; font-size:16px;">
         <i class="fas fa-link" style="margin-right:8px;"></i>Enter YouTube URL
       </label>
-      <input type="text" id="youtubeUrlInput" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="width:100%; padding:16px 20px; border-radius:12px; border:2px solid rgba(255,0,0,0.3); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); font-size:16px; transition:all 0.3s ease; box-sizing:border-box; font-family:'Inter', sans-serif;">
+      <input type="url" id="youtubeUrlInput" name="youtubeUrl" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" autocomplete="url" aria-label="YouTube URL" style="width:100%; padding:16px 20px; border-radius:12px; border:2px solid rgba(255,0,0,0.3); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); font-size:16px; transition:all 0.3s ease; box-sizing:border-box; font-family:'Inter', sans-serif;">
       <p style="margin:10px 0 0 0; font-size:13px; color:rgba(255,255,255,0.5); font-style:italic;">
         <i class="fas fa-info-circle" style="margin-right:6px;"></i>Example: https://www.youtube.com/watch?v=VIDEO_ID
       </p>
@@ -1389,7 +1394,7 @@
             <p>We use the following third-party services:</p>
             <ul>
                 <li><strong>Google AdSense:</strong> We display advertisements through Google AdSense. Google may use cookies and similar technologies to show you relevant ads based on your browsing history. You can learn more about how Google uses data at <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>.</li>
-                <li><strong>Firebase:</strong> We use Google Firebase for data storage and real-time features. Firebase's privacy practices are governed by Google's Privacy Policy.</li>
+                <li><strong>Custom Backend:</strong> We use our own backend server for data storage and real-time features. All data is stored securely and handled according to this Privacy Policy.</li>
             </ul>
             <h2>4. Cookies and Tracking</h2>
             <p>We use cookies and local storage to:</p>
@@ -1443,7 +1448,7 @@
             <h2>How It Works</h2>
             <p>Simply browse our game collection, click on any game cube to start playing, and explore our social features to connect with the community. All games are embedded directly on our platform for seamless access.</p>
             <h2>Technology</h2>
-            <p>SHS Game Hall is built using modern web technologies including HTML5, CSS3, JavaScript, and Firebase for real-time data synchronization. We prioritize performance, security, and user experience in everything we build.</p>
+            <p>SHS Game Hall is built using modern web technologies including HTML5, CSS3, JavaScript, and a custom backend server for real-time data synchronization. We prioritize performance, security, and user experience in everything we build.</p>
             <h2>Contact Us</h2>
             <p>Have questions or suggestions? We'd love to hear from you! Visit our <button id="contactFromAboutBtn" class="inline-link">Contact Us</button> page to get in touch.</p>
         </div>
@@ -1461,15 +1466,15 @@
                 <form id="contactForm">
                     <div class="form-group">
                         <label for="contactName">Your Name</label>
-                        <input type="text" id="contactName" name="name" placeholder="Enter your name" required>
+                        <input type="text" id="contactName" name="name" placeholder="Enter your name" autocomplete="name" required>
                     </div>
                     <div class="form-group">
                         <label for="contactEmail">Your Email</label>
-                        <input type="email" id="contactEmail" name="email" placeholder="Enter your email" required>
+                        <input type="email" id="contactEmail" name="email" placeholder="Enter your email" autocomplete="email" required>
                     </div>
                     <div class="form-group">
                         <label for="contactSubject">Subject</label>
-                        <select id="contactSubject" name="subject" required>
+                        <select id="contactSubject" name="subject" autocomplete="off" required>
                             <option value="">Select a subject</option>
                             <option value="general">General Inquiry</option>
                             <option value="support">Technical Support</option>
@@ -1480,7 +1485,7 @@
                     </div>
                     <div class="form-group">
                         <label for="contactMessage">Message</label>
-                        <textarea id="contactMessage" name="message" rows="6" placeholder="Enter your message here..." required></textarea>
+                        <textarea id="contactMessage" name="message" rows="6" placeholder="Enter your message here..." autocomplete="off" required></textarea>
                     </div>
                     <button type="submit" class="contact-submit-btn">
                         <i class="fas fa-paper-plane"></i> Send Message
@@ -1596,9 +1601,9 @@
         </div>
     </div>
 </div>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- Custom Backend API -->
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script src="backend-api-client.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

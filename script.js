@@ -72,81 +72,267 @@
         setTimeout(removeLoadingScreen, 3500);
     }
   })();
-  const firebaseConfig = {
-    apiKey: "AIzaSyBn1apVsFafY2-2a2QPeslX17XR0gWE9qs",
-    authDomain: "shsproject-d60d0.firebaseapp.com",
-    databaseURL: "https://shsproject-d60d0-default-rtdb.firebaseio.com",
-    projectId: "shsproject-d60d0",
-  };
-  
+  // Initialize Custom Backend API
   let db = null;
+  // backendAPI is declared in backend-api-client.js
   
-  // Initialize Firebase when SDK is ready
-  let firebaseInitAttempts = 0;
-  const MAX_FIREBASE_INIT_ATTEMPTS = 50; // 5 seconds max (50 * 100ms)
+  // Visitor ID will be set from backendAPI after it initializes
+  // Use sessionStorage to ensure each tab gets a unique ID
+  let visitorId = null;
   
-  function initializeFirebase() {
-    firebaseInitAttempts++;
-    
-    // Check if Firebase SDK is loaded
-    if (typeof firebase === 'undefined') {
-      if (firebaseInitAttempts < MAX_FIREBASE_INIT_ATTEMPTS) {
-        setTimeout(initializeFirebase, 100);
-      } else {
-        console.warn('Firebase SDK failed to load after multiple attempts. Running in offline mode.');
-        db = null;
-      }
+  // Initialize username early (will be updated later from profile)
+  let userProfileData = JSON.parse(localStorage.getItem('userProfile')) || { profileCreated: false };
+  let username = (userProfileData.profileCreated && userProfileData.username) ? userProfileData.username : ('Guest' + Math.floor(Math.random()*1000));
+  
+  // Initialize Backend API
+  // Re-enabled - testing with hard refresh
+  const ENABLE_BACKEND = true; // Backend enabled
+  
+  // Prevent infinite reloads - block any reload attempts for first 30 seconds
+  let pageLoadTime = Date.now();
+  const RELOAD_GUARD_DURATION = 30000; // 30 seconds
+  
+  // Store original functions
+  const originalReload = window.location.reload.bind(window.location);
+  
+  // Override reload to prevent during initial connection
+  window.location.reload = function(...args) {
+    const timeSinceLoad = Date.now() - pageLoadTime;
+    if (timeSinceLoad < RELOAD_GUARD_DURATION) {
+      console.warn('[Reload Guard] Blocked reload attempt within', Math.round(timeSinceLoad/1000), 'seconds of page load');
       return;
     }
-  
-    try {
-      // Check if Firebase is already initialized
-      if (firebase.apps.length === 0) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      db = firebase.database();
-      console.log('Firebase initialized successfully');
-      
-      // Test connection (only if db is available)
-      if (db) {
-        try {
-          db.ref('.info/connected').once('value', (snapshot) => {
-            if (snapshot.val() === true) {
-              console.log('Firebase connected');
-            } else {
-              console.warn('Firebase not connected, using offline mode');
-            }
-          }).catch(err => {
-            console.warn('Firebase connection test failed:', err);
-            console.warn('Running in offline mode - some features may be limited');
-          });
-        } catch (err) {
-          console.warn('Firebase connection test error:', err);
-        }
-      }
-    } catch (error) {
-      console.error('Firebase initialization error:', error);
-      console.warn('Running in offline mode - some features may be limited');
-      db = null;
-    }
-  }
-  
-  // Start initialization
-  initializeFirebase();
-  
-  // Generate a unique visitor ID (persistent across sessions)
-  let visitorId = localStorage.getItem('visitorId');
-  if (!visitorId) {
-    visitorId = 'visitor_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-    localStorage.setItem('visitorId', visitorId);
-  }
-  console.log('Visitor ID:', visitorId);
-  if (db) {
-    const onlineRef = db.ref('online/' + visitorId);
-    onlineRef.set({online:true, timestamp: Date.now()}).catch(error => {
-      console.error('Error setting online status:', error);
+    return originalReload.apply(window.location, args);
+  };
+
+  if (ENABLE_BACKEND && typeof initializeBackend !== 'undefined') {
+    // backendAPI is already declared globally in backend-api-client.js
+    // Auto-detect backend URL based on environment
+    // Priority: window.BACKEND_URL > environment detection
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // Replit backend URL
+    // Try both formats: project-name--username.repl.co OR project-name.username.repl.co
+    // Replit URLs can vary, so we'll try the double-dash format first
+    const DEFAULT_BACKEND_URL = 'https://NodeRepl--PrismX8.repl.co';
+    // Alternative format (if double-dash doesn't work): 'https://NodeRepl.PrismX8.repl.co'
+    
+    const backendUrl = window.BACKEND_URL || (isLocalhost 
+      ? 'http://localhost:3000'
+      : DEFAULT_BACKEND_URL); // Use Replit URL in production
+    
+    console.log('[Backend] Configuring backend connection:', {
+      isLocalhost,
+      backendUrl,
+      apiUrl: `${backendUrl}/api`,
+      wsUrl: backendUrl
     });
-    onlineRef.onDisconnect().remove();
+    
+    backendAPI = initializeBackend({
+      apiUrl: `${backendUrl}/api`,
+      wsUrl: backendUrl
+    });
+    
+    // Get visitorId from backendAPI (uses sessionStorage for unique per-tab ID)
+    visitorId = backendAPI.visitorId;
+    console.log('Visitor ID:', visitorId);
+    
+    // Connect to backend with delay to prevent refresh loops
+    // Wait for page to be fully loaded before connecting
+    // Use a per-page-load flag to prevent multiple attempts during same page load
+    const CONNECTION_ATTEMPT_KEY = 'backend_connection_attempted_' + Date.now();
+    let connectionAttempted = false; // Per-page-load flag
+    
+    // Clear any old sessionStorage flags on page load (allow new connection attempt)
+    try {
+      const keys = Object.keys(sessionStorage);
+      keys.forEach(key => {
+        if (key.startsWith('backend_connection_attempted_')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch (e) {
+      // Ignore errors clearing sessionStorage
+    }
+    
+    const connectBackend = () => {
+      // Prevent multiple connection attempts during same page load
+      if (connectionAttempted) {
+        console.log('[Backend] Connection already attempted on this page load, skipping...');
+        return;
+      }
+      connectionAttempted = true;
+      console.log('[Backend] Starting connection attempt...');
+      try {
+        backendAPI.connect(username || 'Anonymous').then(() => {
+          console.log('✅ Backend API connected');
+          db = backendAPI.database(); // Backend API (Firebase-compatible interface)
+          
+          // Set up refs now that db is available
+          totalRef = db ? db.ref('totalVisitors') : null;
+          onlineDbRef = db ? db.ref('online') : null;
+          
+          // Set up real-time listeners for visitor counter
+          if (onlineDbRef && totalRef) {
+            // Store last snapshots for both refs
+            let lastOnlineSnapshot = null;
+            let lastTotalSnapshot = null;
+            
+            const updateCounterFromSnapshots = () => {
+              // Update with whatever data we have - don't wait for both
+              const online = lastOnlineSnapshot && lastOnlineSnapshot.numChildren ? lastOnlineSnapshot.numChildren() : 0;
+              const total = lastTotalSnapshot && lastTotalSnapshot.val ? lastTotalSnapshot.val() : INITIAL_VISITOR_COUNT;
+              
+              // Updating counter
+              
+              const onlineCountEl = document.getElementById('onlineCount');
+              const totalCountEl = document.getElementById('totalCount');
+              if (onlineCountEl) onlineCountEl.textContent = online;
+              if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
+              if (!onlineCountEl && !totalCountEl && visitorCounter) {
+                visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
+              }
+            };
+            
+            onlineDbRef.on('value', (snap) => {
+              lastOnlineSnapshot = snap;
+              updateCounterFromSnapshots();
+            });
+            
+            totalRef.on('value', (snap) => {
+              lastTotalSnapshot = snap;
+              updateCounterFromSnapshots();
+            });
+            
+            // Get initial values
+            updateCounter();
+          }
+          
+          // Set up chat listeners
+          if (db && typeof setupChatListeners === 'function') {
+            setupChatListeners();
+          } else if (db && document.getElementById('chatMessages')) {
+            // Initialize chat listeners
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+              db.ref('chat').limitToLast(50).once('value').then(snap => {
+                const initialMessages = snap.val() || {};
+                const messageArray = Object.entries(initialMessages)
+                  .map(([id, msg]) => ({ id, ...msg }))
+                  .sort((a, b) => (a.time || 0) - (b.time || 0));
+                messageArray.forEach(({id, ...msg}) => {
+                  renderChatMessage(msg, id, null);
+                });
+                const lastMessageTime = messageArray.length > 0 ? messageArray[messageArray.length - 1].time : 0;
+                db.ref('chat').limitToLast(100).on('child_added', snapshot => {
+                  const msg = snapshot.val();
+                  if(msg && msg.time > lastMessageTime) {
+                    renderChatMessage(msg, snapshot.key, snapshot);
+                  }
+                });
+              }).catch(err => {
+                console.error('Error loading initial chat:', err);
+                db.ref('chat').limitToLast(100).on('child_added', snapshot => {
+                  const msg = snapshot.val();
+                  renderChatMessage(msg, snapshot.key, snapshot);
+                });
+              });
+              
+              db.ref('chat').on('child_changed', snapshot => {
+                const msg = snapshot.val();
+                if(msg && msg.reactions) {
+                  updateMessageReactions(snapshot.key, msg.reactions);
+                }
+              });
+              
+              const typingIndicator = document.getElementById('typingIndicator');
+              if (typingIndicator) {
+                db.ref('chatTyping').on('value', snap => {
+                  const typingUsers = Object.values(snap.val() || {}).filter(u => u !== username);
+                  if(typingUsers.length > 0) {
+                    typingIndicator.innerText = typingUsers.join(', ') + ' is typing...';
+                  } else {
+                    typingIndicator.innerText = '';
+                  }
+                });
+              }
+            }
+          }
+          
+          // Initialize canvas refs if they exist
+          if (typeof window.initCanvasRefs === 'function') {
+            window.initCanvasRefs();
+          }
+          
+          // Initialize presence and cursors if they exist
+          if (typeof window.initPresenceAndCursors === 'function') {
+            window.initPresenceAndCursors();
+          }
+          
+          // Set up leaderboard auto-refresh
+          setupLeaderboardAutoRefresh();
+          
+          // Set user online (with delay to ensure connection is stable)
+          setTimeout(() => {
+            if (db) {
+              const onlineRef = db.ref('online/' + visitorId);
+              onlineRef.set({online: true, timestamp: Date.now()}).catch(error => {
+                console.error('Error setting online status:', error);
+                // Don't reload on error
+              });
+              
+              // Increment visitor count after connection is stable
+              if (typeof window.incrementVisitorCount === 'function') {
+                window.incrementVisitorCount();
+              }
+            }
+          }, 500);
+        }).catch(err => {
+          console.warn('⚠️ Failed to connect to backend:', err.message || err);
+          console.warn('Running in offline mode - some features may be limited');
+          db = null;
+          // DO NOT reload on connection failure - just run in offline mode
+          // Explicitly prevent any reload attempts
+          if (err && err.message) {
+            console.log('Connection error details:', err.message);
+          }
+        }).finally(() => {
+          // Ensure we don't trigger any reloads in finally block
+          console.log('✅ Backend connection attempt completed');
+        });
+      } catch (err) {
+        console.error('Error initializing backend connection:', err);
+        db = null;
+        // DO NOT reload on error - just run in offline mode
+      }
+    };
+    
+    // Wait for DOM to be ready and add a delay to prevent connection loops
+    // Only attempt connection once per page load
+    if (!connectionAttempted) {
+      // Hard timeout: if connection takes too long, continue anyway
+      const hardTimeout = setTimeout(() => {
+        if (!connectionAttempted) {
+          console.warn('[Backend] Hard timeout - continuing without backend connection');
+          connectionAttempted = true; // Mark as attempted
+        }
+      }, 10000); // 10 second hard limit
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          clearTimeout(hardTimeout);
+          setTimeout(connectBackend, 1000);
+        });
+      } else {
+        clearTimeout(hardTimeout);
+        setTimeout(connectBackend, 1000);
+      }
+    } else {
+      console.log('[Backend] Connection already attempted on this page load, skipping...');
+    }
+  } else {
+    console.warn('Backend API client not loaded. Running in offline mode.');
+    db = null;
   }
   const visitorCounter = document.getElementById('visitorCounter');
   const INITIAL_VISITOR_COUNT = 127349;
@@ -165,22 +351,40 @@
     });
   }
   
-  // Increment visitor count on every page load (including refreshes)
-  if (db) {
-    db.ref('totalVisitors').transaction(val => {
-        const currentVal = val || INITIAL_VISITOR_COUNT;
-        // If count is less than initial, set to initial first
-        if (currentVal < INITIAL_VISITOR_COUNT) {
-            return INITIAL_VISITOR_COUNT + 1;
+  // Increment visitor count - with proper guards to prevent refresh loops
+  // Use sessionStorage to only increment once per browser session
+  function incrementVisitorCount() {
+    // This function will be called after backend connection is stable
+    const hasCounted = sessionStorage.getItem('visitorCounted') === 'true';
+    
+    if (db && !hasCounted) {
+      // Mark as counted immediately to prevent multiple increments
+      sessionStorage.setItem('visitorCounted', 'true');
+      
+      // Wait a bit to ensure backend is stable before incrementing
+      setTimeout(() => {
+        if (db) {
+          db.ref('totalVisitors').transaction(val => {
+            const currentVal = val || INITIAL_VISITOR_COUNT;
+            if (currentVal < INITIAL_VISITOR_COUNT) {
+              return INITIAL_VISITOR_COUNT + 1;
+            }
+            return (currentVal || 0) + 1;
+          }).catch(error => {
+            console.error('Error updating visitor count:', error);
+            // Don't remove flag on error - prevent retry loops
+          });
         }
-        return currentVal + 1;
-    }).catch(error => {
-        console.error('Error updating visitor count:', error);
-      });
+      }, 500); // Small delay to ensure backend is stable
+    }
   }
   
-  const totalRef = db ? db.ref('totalVisitors') : null;
-  const onlineDbRef = db ? db.ref('online') : null;
+  // Make incrementVisitorCount available globally
+  window.incrementVisitorCount = incrementVisitorCount;
+  
+  // These will be set up after backend connection is established
+  let totalRef = null;
+  let onlineDbRef = null;
   
   // Initialize games arrays early to avoid temporal dead zone issues
   let gameSites = [];
@@ -218,7 +422,7 @@
       activeUsers: 0
   };
   
-  // Load moderation settings from Firebase
+  // Load moderation settings from Backend
   if (db) {
       db.ref('moderationSettings').on('value', (snapshot) => {
           if (snapshot.exists()) {
@@ -315,7 +519,7 @@
       return true;
   }
   
-  // Load banned users from Firebase
+  // Load banned users from Backend
   if (db) {
       db.ref('bannedUsers').on('value', (snapshot) => {
           bannedUsers = snapshot.val() || {};
@@ -347,23 +551,42 @@
     }
   };
   
-  function updateCounter() {
-      if (!onlineDbRef || !totalRef) return;
-      onlineDbRef.once('value').then(snap => {
-          const online = snap.numChildren();
-          totalRef.once('value').then(snap2 => {
-            const total = snap2.val() || INITIAL_VISITOR_COUNT;
-            const onlineCountEl = document.getElementById('onlineCount');
-            const totalCountEl = document.getElementById('totalCount');
-            if (onlineCountEl) onlineCountEl.textContent = online;
-            if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
-            if (!onlineCountEl && !totalCountEl) {
-                visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
-            }
+  function updateCounter(onlineSnapshot, totalSnapshot) {
+      let online = 0;
+      let total = INITIAL_VISITOR_COUNT;
+      
+      // Use provided snapshots or fetch if not provided
+      if (onlineSnapshot && totalSnapshot) {
+          online = onlineSnapshot.numChildren ? onlineSnapshot.numChildren() : 0;
+          total = totalSnapshot.val ? totalSnapshot.val() : INITIAL_VISITOR_COUNT;
+          
+          const onlineCountEl = document.getElementById('onlineCount');
+          const totalCountEl = document.getElementById('totalCount');
+          if (onlineCountEl) onlineCountEl.textContent = online;
+          if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
+          if (!onlineCountEl && !totalCountEl && visitorCounter) {
+              visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
+          }
+      } else if (!onlineDbRef || !totalRef) {
+          return;
+      } else {
+          // Fallback: fetch if snapshots not provided
+          onlineDbRef.once('value').then(snap => {
+              const online = snap.numChildren ? snap.numChildren() : 0;
+              totalRef.once('value').then(snap2 => {
+                const total = snap2.val ? snap2.val() : INITIAL_VISITOR_COUNT;
+                const onlineCountEl = document.getElementById('onlineCount');
+                const totalCountEl = document.getElementById('totalCount');
+                if (onlineCountEl) onlineCountEl.textContent = online;
+                if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
+                if (!onlineCountEl && !totalCountEl && visitorCounter) {
+                    visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
+                }
+              });
+          }).catch(error => {
+              console.error('Error updating counter:', error);
           });
-      }).catch(error => {
-          console.error('Error updating counter:', error);
-      });
+      }
   }
   
   // Format number with commas for display
@@ -372,13 +595,49 @@
   }
   
   // Update counter live when online users change
-  if (onlineDbRef && totalRef) {
-    onlineDbRef.on('value', updateCounter);
-    totalRef.on('value', updateCounter);
+  // Throttle updates to prevent excessive calls
+  let counterUpdateThrottle = false;
+  let lastOnlineSnapshot = null;
+  let lastTotalSnapshot = null;
+  
+  function throttledUpdateCounter(snapshot) {
+    if (counterUpdateThrottle) {
+      // Store latest snapshot to use when throttle releases
+      if (snapshot) {
+        if (snapshot.path && snapshot.path.includes('total')) {
+          lastTotalSnapshot = snapshot;
+        } else {
+          lastOnlineSnapshot = snapshot;
+        }
+      }
+      return;
+    }
+    counterUpdateThrottle = true;
+    
+    // Use stored snapshots if available
+    if (snapshot) {
+      if (snapshot.path && snapshot.path.includes('total')) {
+        lastTotalSnapshot = snapshot;
+      } else {
+        lastOnlineSnapshot = snapshot;
+      }
+    }
+    
+    // Update counter with both snapshots
+    updateCounter(lastOnlineSnapshot, lastTotalSnapshot);
+    
+    setTimeout(() => { 
+      counterUpdateThrottle = false;
+      // Update again with any snapshots that arrived during throttle
+      if (lastOnlineSnapshot || lastTotalSnapshot) {
+        updateCounter(lastOnlineSnapshot, lastTotalSnapshot);
+      }
+    }, 1000); // Update max once per second
   }
   
-  let userProfileData = JSON.parse(localStorage.getItem('userProfile')) || { profileCreated: false };
-  let username = (userProfileData.profileCreated && userProfileData.username) ? userProfileData.username : ('Guest' + Math.floor(Math.random()*1000));
+  // Listeners will be set up after backend connection (see connectBackend function above)
+  
+  // username and userProfileData are already declared earlier (around line 88-89)
   let userColor = ['#007bff','#ff4500','#32cd32','#ffa500','#9932cc'][Math.floor(Math.random()*5)];
   
   const chatMessages = document.getElementById('chatMessages');
@@ -576,46 +835,7 @@
           updateMessageReactions(msgId, msg.reactions);
       }
   }
-  if (db && chatMessages) {
-    db.ref('chat').limitToLast(50).once('value').then(snap => {
-        const initialMessages = snap.val() || {};
-        const messageArray = Object.entries(initialMessages)
-            .map(([id, msg]) => ({ id, ...msg }))
-            .sort((a, b) => (a.time || 0) - (b.time || 0));
-        messageArray.forEach(({id, ...msg}) => {
-            renderChatMessage(msg, id, null);
-        });
-        const lastMessageTime = messageArray.length > 0 ? messageArray[messageArray.length - 1].time : 0;
-        db.ref('chat').limitToLast(100).on('child_added', snapshot => {
-            const msg = snapshot.val();
-            if(msg && msg.time > lastMessageTime) {
-                renderChatMessage(msg, snapshot.key, snapshot);
-            }
-        });
-    }).catch(err => {
-        console.error('Error loading initial chat:', err);
-        db.ref('chat').limitToLast(100).on('child_added', snapshot => {
-            const msg = snapshot.val();
-            renderChatMessage(msg, snapshot.key, snapshot);
-        });
-    });
-    db.ref('chat').on('child_changed', snapshot => {
-        const msg = snapshot.val();
-        if(msg.reactions) {
-            updateMessageReactions(snapshot.key, msg.reactions);
-        }
-    });
-    if (typingIndicator) {
-        db.ref('chatTyping').on('value', snap => {
-            const typingUsers = Object.values(snap.val()||{}).filter(u => u!==username);
-            if(typingUsers.length>0){
-                typingIndicator.innerText = typingUsers.join(', ') + ' is typing...';
-            } else {
-                typingIndicator.innerText = '';
-            }
-        });
-    }
-  }
+  // Chat listeners will be set up after backend connection (see connectBackend function above)
   
   function updateMessageReactions(msgId, reactions) {
       const msgDiv = document.querySelector(`[data-msg-id="${msgId}"]`);
@@ -764,7 +984,9 @@
       showIframeBtn.addEventListener('click', ()=>iframe.style.display='block');
   }
   
-  extraBtn.addEventListener('click', ()=>{
+  // extraBtn is already defined above as extraSiteBtn
+  if (extraBtn) {
+    extraBtn.addEventListener('click', ()=>{
       const iframeContainer = document.getElementById('iframeContainer');
       const gamesGridContainer = document.getElementById('gamesGridContainer');
       const currentSiteTitle = document.getElementById('currentSiteTitle');
@@ -796,9 +1018,11 @@
           extraBtn.innerHTML='<i class="fas fa-gamepad"></i> Extra Site';
           onExtra=false;
       }
-  });
+    });
+  }
   
-  privacyBtn.addEventListener('click', ()=>{
+  if (privacyBtn) {
+    privacyBtn.addEventListener('click', ()=>{
       const iframeContainer = document.getElementById('iframeContainer');
       const gamesGridContainer = document.getElementById('gamesGridContainer');
       const currentSiteTitle = document.getElementById('currentSiteTitle');
@@ -830,7 +1054,8 @@
           privacyBtn.innerHTML='<i class="fas fa-shield-alt"></i> Browser';
           onPrivacy=false;
       }
-  });
+    });
+  }
   
   // YouTube Video Watcher
   const youtubeWatcherBtn = document.getElementById('youtubeWatcherBtn');
@@ -1426,7 +1651,7 @@
     saveModerationSettings();
   });
   
-  // Save moderation settings to Firebase
+  // Save moderation settings to Backend
   function saveModerationSettings() {
     if (db) {
       db.ref('moderationSettings').set(moderationSettings);
@@ -3258,10 +3483,99 @@
     let panX = 0, panY = 0;
     let pushedStrokes = [];
     const drawnIds = new Set(); // stroke IDs already rendered
-    const strokesRef = db.ref('canvas/strokes');
-    const metaRef = db.ref('canvas/meta');
+    let strokesRef = null;
+    let metaRef = null;
     const strokesCache = {}; // local cache of strokes by id to allow redraw on resize
     let initialLoadComplete = false; // Flag to prevent duplicate rendering during initial load
+    
+    // Function to initialize canvas refs when db is available
+    function initCanvasRefs() {
+      if (db && !strokesRef) {
+        strokesRef = db.ref('canvas/strokes');
+        metaRef = db.ref('canvas/meta');
+        
+        // Set up stroke listeners now that strokesRef is available
+        setupStrokeListeners();
+        
+        // Now load initial strokes
+        if (strokesRef && !initialLoadComplete) {
+          strokesRef.once('value').then(snap => {
+            const data = snap.val();
+            if(!data) {
+              console.log('No existing strokes found');
+              initialLoadComplete = true;
+              return;
+            }
+            try {
+              // Load all strokes into cache
+              Object.keys(data).forEach(k => {
+                strokesCache[k] = data[k];
+              });
+              // Sort and draw all strokes in order
+              const strokes = Object.keys(strokesCache).map(k => ({ id: k, s: strokesCache[k] }));
+              strokes.sort((a,b) => (a.s.time || 0) - (b.s.time || 0));
+              strokes.forEach(item => {
+                drawStrokeLocally(item.s);
+                drawnIds.add(item.id);
+              });
+              console.log(`Loaded ${strokes.length} strokes from Backend - canvas restored`);
+              initialLoadComplete = true;
+            } catch (err) {
+              console.warn('initial strokes processing failed', err);
+              initialLoadComplete = true;
+            }
+          }).catch(err => {
+            console.warn('initial strokes load failed', err);
+            initialLoadComplete = true;
+          });
+        }
+      }
+    }
+    
+    // Function to set up stroke listeners (called after strokesRef is initialized)
+    function setupStrokeListeners() {
+      // Listen for strokes added by anyone (only new strokes after initial load)
+      if (strokesRef) {
+        console.log('[Canvas] Setting up child_added listener on strokesRef');
+        strokesRef.on('child_added', snapshot => {
+          const strokeId = snapshot.key;
+          const stroke = snapshot.val();
+          console.log('[Canvas] child_added event received:', strokeId, 'type:', stroke?.type || 'path', 'initialLoadComplete:', initialLoadComplete, 'alreadyDrawn:', drawnIds.has(strokeId), 'stroke:', stroke);
+          if(!stroke) {
+            console.warn('[Canvas] Empty stroke received:', strokeId);
+            return;
+          }
+          // Cache the stroke
+          strokesCache[strokeId] = stroke;
+          // Only draw if it's a new stroke (not from initial load) and initial load is complete
+          if(initialLoadComplete && !drawnIds.has(strokeId)){
+            console.log('[Canvas] Drawing stroke locally:', strokeId, 'stroke data:', stroke);
+            drawStrokeLocally(stroke);
+            drawnIds.add(strokeId);
+          } else {
+            console.log('[Canvas] Skipping stroke draw - initialLoadComplete:', initialLoadComplete, 'alreadyDrawn:', drawnIds.has(strokeId), 'Will draw after initial load completes');
+          }
+        });
+        console.log('[Canvas] child_added listener registered');
+        
+        // When a stroke is removed (e.g., clear), update cache and redraw
+        strokesRef.on('child_removed', snapshot => {
+          const id = snapshot.key;
+          if(id && strokesCache[id]) delete strokesCache[id];
+          redrawAllStrokes();
+        });
+      } else {
+        console.warn('[Canvas] strokesRef is null - cannot set up listeners');
+      }
+    }
+    
+    // Make initCanvasRefs available globally
+    window.initCanvasRefs = initCanvasRefs;
+    
+    // Try to initialize immediately if db is already available
+    if (db) {
+      initCanvasRefs();
+    }
   
     // Tool switching
     function resetToolStyles() {
@@ -3316,7 +3630,7 @@
     }
   
     function undoLast() {
-      if(pushedStrokes.length > 0) {
+      if(pushedStrokes.length > 0 && strokesRef) {
         const lastKey = pushedStrokes.pop();
         strokesRef.child(lastKey).remove();
       }
@@ -3549,7 +3863,17 @@
             opacity: brushOpacity,
             time: Date.now()
           };
-          strokesRef.push(strokeObj).then(pushRef => pushedStrokes.push(pushRef.key));
+          if (strokesRef) {
+            console.log('[Canvas] Pushing stroke to backend:', strokeObj.type || 'path', 'points:', strokeObj.points?.length || 0);
+            strokesRef.push(strokeObj).then(pushRef => {
+              console.log('[Canvas] Stroke pushed successfully:', pushRef.key);
+              pushedStrokes.push(pushRef.key);
+            }).catch(err => {
+              console.error('[Canvas] Failed to push stroke:', err);
+            });
+          } else {
+            console.warn('[Canvas] strokesRef is null - cannot push stroke');
+          }
         }
       } else if(currentTool === 'eyedropper') {
         const imageData = ctx2.getImageData(p.x, p.y, 1, 1);
@@ -3658,10 +3982,16 @@
           }
   
           try {
-            const pushRef = await strokesRef.push(strokeObj);
-            pushedStrokes.push(pushRef.key);
+            if (strokesRef) {
+              console.log('[Canvas] Pushing shape stroke to backend:', strokeObj.type, 'points:', strokeObj.points?.length || 0);
+              const pushRef = await strokesRef.push(strokeObj);
+              console.log('[Canvas] Shape stroke pushed successfully:', pushRef.key);
+              pushedStrokes.push(pushRef.key);
+            } else {
+              console.warn('[Canvas] strokesRef is null - cannot push shape stroke');
+            }
           } catch (err) {
-            console.error('Failed to push stroke', err);
+            console.error('[Canvas] Failed to push shape stroke:', err);
           }
         }
       } else if(shapeStart) {
@@ -3683,10 +4013,12 @@
           strokeObj.type = 'line';
         }
         try {
+          console.log('[Canvas] Pushing shape to backend:', strokeObj.type);
           const pushRef = await strokesRef.push(strokeObj);
+          console.log('[Canvas] Shape pushed successfully:', pushRef.key);
           pushedStrokes.push(pushRef.key);
         } catch (err) {
-          console.error('Failed to push shape', err);
+          console.error('[Canvas] Failed to push shape:', err);
         }
         shapeStart = null;
         redrawAllStrokes(); // to remove preview
@@ -3696,67 +4028,142 @@
   
     canvasEl.addEventListener('pointercancel', () => { drawing=false; currentStroke=[]; });
   
-    // Listen for strokes added by anyone (only new strokes after initial load)
-    strokesRef.on('child_added', snapshot => {
-      const strokeId = snapshot.key;
-      const stroke = snapshot.val();
-      if(!stroke) return;
-      // Cache the stroke
-      strokesCache[strokeId] = stroke;
-      // Only draw if it's a new stroke (not from initial load) and initial load is complete
-      if(initialLoadComplete && !drawnIds.has(strokeId)){
-        drawStrokeLocally(stroke);
-        drawnIds.add(strokeId);
-      }
-    });
+    // DIRECT socket listener as backup (bypasses Firebase abstraction)
+    // This works even if strokesRef is null
+    if (backendAPI) {
+      console.log('[Canvas] Setting up DIRECT canvas:stroke listener');
+      backendAPI.on('canvas:stroke', (data) => {
+        console.log('[Canvas] DIRECT listener received canvas:stroke event:', data);
+        if (data && data.id && data.strokeData) {
+          const strokeId = data.id;
+          const stroke = data.strokeData;
+          console.log('[Canvas] DIRECT listener processing stroke:', strokeId, 'initialLoadComplete:', initialLoadComplete, 'alreadyDrawn:', drawnIds.has(strokeId));
+          
+          // Skip if already drawn
+          if (drawnIds.has(strokeId)) {
+            console.log('[Canvas] DIRECT listener skipping - already drawn:', strokeId);
+            return;
+          }
+          
+          // Cache the stroke
+          strokesCache[strokeId] = stroke;
+          
+          // Draw immediately (don't wait for initialLoadComplete for real-time updates)
+          if (initialLoadComplete) {
+            console.log('[Canvas] DIRECT listener drawing stroke:', strokeId);
+            drawStrokeLocally(stroke);
+            drawnIds.add(strokeId);
+          } else {
+            console.log('[Canvas] DIRECT listener waiting for initial load to complete before drawing:', strokeId);
+            // Store for later drawing
+            drawnIds.add(strokeId); // Mark as seen so we don't draw twice
+          }
+        } else {
+          console.warn('[Canvas] DIRECT listener received invalid stroke data:', { hasId: !!data?.id, hasStrokeData: !!data?.strokeData, data });
+        }
+      });
+      console.log('[Canvas] DIRECT canvas:stroke listener registered');
+    } else {
+      console.warn('[Canvas] backendAPI is null - cannot set up DIRECT listener');
+    }
+    
+    // Note: Firebase ref listeners are set up in setupStrokeListeners() 
+    // which is called from initCanvasRefs() after strokesRef is initialized
   
-    // When a stroke is removed (e.g., clear), update cache and redraw
-    strokesRef.on('child_removed', snapshot => {
-      const id = snapshot.key;
-      if(id && strokesCache[id]) delete strokesCache[id];
-      redrawAllStrokes();
-    });
-  
-    // Listen for clear events
-    metaRef.child('clear').on('value', snap => {
-      const v = snap.val();
-      if(v) {
-        // Clear visible canvas and local caches so redraw won't restore cleared strokes
-        ctx2.clearRect(0,0,canvasEl.width,canvasEl.height);
+    // Listen for clear events via socket (real-time)
+    if (backendAPI) {
+      backendAPI.on('canvas:clear', (data) => {
+        console.log('[Canvas] Received clear event via socket:', data);
+        // Clear visible canvas and local caches
+        ctx2.clearRect(0, 0, canvasEl.width, canvasEl.height);
         drawnIds.clear();
         for(const k in strokesCache) delete strokesCache[k];
-      }
-    });
+      });
+    }
+    
+    // Also listen for clear events via Firebase ref (backup)
+    if (metaRef) {
+      metaRef.child('clear').on('value', snap => {
+        const v = snap.val();
+        if(v) {
+          console.log('[Canvas] Received clear event via Firebase ref:', v);
+          // Clear visible canvas and local caches so redraw won't restore cleared strokes
+          ctx2.clearRect(0,0,canvasEl.width,canvasEl.height);
+          drawnIds.clear();
+          for(const k in strokesCache) delete strokesCache[k];
+        }
+      });
+    }
   
     // Clear button
     clearBtn.addEventListener('click', async () => {
       try {
-        // Remove all strokes from DB so the clear persists across reloads
-        await strokesRef.remove();
-        // Notify other clients with a transient clear flag
-        await metaRef.child('clear').set({ by: visitorId || 'anon', time: Date.now() });
-        // Remove transient clear flag shortly after so new clients don't auto-clear forever
-        setTimeout(() => { metaRef.child('clear').remove().catch(()=>{}); }, 1500);
+        // Clear locally first for immediate feedback
+        ctx2.clearRect(0, 0, canvasEl.width, canvasEl.height);
+        drawnIds.clear();
+        for(const k in strokesCache) delete strokesCache[k];
+        
+        // Send clear event via socket to notify all other clients
+        if (backendAPI && backendAPI.connected) {
+          backendAPI.clearCanvas({ by: visitorId || 'anon', time: Date.now() });
+        }
+        
+        // Also use Firebase ref as backup
+        if (strokesRef) {
+          await strokesRef.remove();
+        }
+        if (metaRef) {
+          await metaRef.child('clear').set({ by: visitorId || 'anon', time: Date.now() });
+          setTimeout(() => { metaRef.child('clear').remove().catch(()=>{}); }, 1500);
+        }
       } catch (err) {
         console.warn('Failed to clear strokes', err);
       }
     });
   
     // Presence
-    const userId = visitorId || ('anon_'+Date.now());
-    const presenceRef = db.ref('canvas/presence/' + userId);
-    presenceRef.set({online:true, color: colorPicker.value, lastSeen: Date.now()});
-    presenceRef.onDisconnect().remove();
-  
-    // ================= Cursor Tracking =================
-    const cursorOverlay = document.getElementById('cursorOverlay');
-    const ctxCursor = cursorOverlay.getContext('2d');
-    const cursorsRef = db.ref('canvas/cursors');
+    let presenceRef = null;
+    let cursorsRef = null;
+    
+    function initPresenceAndCursors() {
+      if (db) {
+        const userId = visitorId || ('anon_'+Date.now());
+        presenceRef = db.ref('canvas/presence/' + userId);
+        presenceRef.set({online:true, color: colorPicker.value, lastSeen: Date.now()});
+        try {
+          presenceRef.onDisconnect().remove();
+        } catch (err) {
+          console.warn('onDisconnect not available:', err);
+        }
+        
+        // ================= Cursor Tracking =================
+        cursorOverlay = document.getElementById('cursorOverlay');
+        if (cursorOverlay) {
+          ctxCursor = cursorOverlay.getContext('2d');
+          cursorsRef = db.ref('canvas/cursors');
+          // Initialize cursor overlay sync
+          syncCursorOverlay();
+          window.addEventListener('resize', syncCursorOverlay);
+        }
+      }
+    }
+    
+    // Make initPresenceAndCursors available globally
+    window.initPresenceAndCursors = initPresenceAndCursors;
+    
+    // Try to initialize immediately if db is already available
+    if (db) {
+      initPresenceAndCursors();
+    }
+    
     let activeCursors = {}; // { userId: { x, y, color, username, timestamp } }
     const avatarImageCache = {}; // Cache for loaded avatar images
+    let ctxCursor = null; // Will be initialized when cursor overlay is available
+    let cursorOverlay = null; // Will be initialized when available
     
     // Sync cursor overlay to main canvas size
     function syncCursorOverlay() {
+      if (!cursorOverlay || !ctxCursor) return;
       // Match the overlay to the main canvas device pixel dimensions
       // canvasEl.width/height are in device pixels (after resize helper sets them)
       const ratio = window.devicePixelRatio || 1;
@@ -3771,8 +4178,6 @@
       // Ensure overlay doesn't block pointer events on the main canvas
       cursorOverlay.style.pointerEvents = 'none';
     }
-    window.addEventListener('resize', syncCursorOverlay);
-    syncCursorOverlay();
   
     // Track mouse movement and broadcast cursor
     let lastCursorUpdate = 0;
@@ -3780,7 +4185,8 @@
       const now = Date.now();
       if(now - lastCursorUpdate > 100) { // Throttle to 100ms
         const p = getCanvasPoint(e);
-        cursorsRef.child(userId).set({
+        const currentUserId = visitorId || ('anon_'+Date.now());
+        const cursorData = {
           x: p.x,
           y: p.y,
           color: brushColor,
@@ -3788,26 +4194,82 @@
           avatar: userProfile.avatar || '👤',
           avatarImage: userProfile.avatarImage || null,
           timestamp: Date.now()
-        }).catch(err => console.warn('Cursor update failed', err));
+        };
+        
+        // Send cursor update via Socket.io for real-time sync
+        if (backendAPI && visitorId) {
+          backendAPI.sendCanvasCursor(visitorId, cursorData);
+        }
+        
+        // Also update via Firebase-compatible API for compatibility
+        if (cursorsRef) {
+          cursorsRef.child(currentUserId).set(cursorData).catch(err => console.warn('Cursor update failed', err));
+        }
         lastCursorUpdate = now;
       }
     });
   
-    // Listen for other users' cursors
-    cursorsRef.on('value', snap => {
-      const data = snap.val() || {};
-      activeCursors = data;
-    });
+    // Listen for other users' cursors via Socket.io
+    // Set up Firebase ref listener if available
+    if (cursorsRef) {
+      cursorsRef.on('value', snap => {
+        const data = snap.val() || {};
+        activeCursors = data;
+      });
+    }
+    
+    // Set up DIRECT socket listener for real-time cursor updates (works independently of cursorsRef)
+    if (backendAPI) {
+      backendAPI.on('canvas:cursor', (data) => {
+        if (!data || !data.userId) {
+          return;
+        }
+        
+        // Accept BOTH formats:
+        // Format 1: { userId, cursorData: { x, y, color, ... } }
+        // Format 2: { userId, x, y, color, ... } (what backend actually sends)
+        const cursorX = data.cursorData?.x ?? data.x;
+        const cursorY = data.cursorData?.y ?? data.y;
+        
+        if (typeof cursorX !== 'number' || typeof cursorY !== 'number') {
+          return;
+        }
+        
+        const currentUserId = visitorId || ('anon_'+Date.now());
+        if (data.userId !== currentUserId) {
+          // Merge cursorData if present, otherwise use root level properties
+          activeCursors[data.userId] = data.cursorData 
+            ? { ...data.cursorData, ...data }
+            : { x: cursorX, y: cursorY, color: data.color, username: data.username, avatar: data.avatar, avatarImage: data.avatarImage, timestamp: data.timestamp || Date.now() };
+        }
+      });
+      
+      backendAPI.on('canvas:cursor:remove', (data) => {
+        if (data && data.userId) {
+          delete activeCursors[data.userId];
+        }
+      });
+    } else {
+      console.warn('[Canvas] backendAPI is null - cannot set up cursor listener');
+    }
   
     // Draw cursors on overlay
     function drawCursorsFrame() {
+      if (!ctxCursor || !cursorOverlay) {
+        requestAnimationFrame(drawCursorsFrame);
+        return;
+      }
       // Clear using device pixel dimensions — ctx transform is already scaled to device pixels
       ctxCursor.clearRect(0, 0, cursorOverlay.width, cursorOverlay.height);
   
+      const currentUserId = visitorId || ('anon_'+Date.now());
+      const cursorCount = Object.keys(activeCursors).length;
       for(const uid in activeCursors) {
-        if(uid === userId) continue; // Don't draw own cursor
+        if(uid === currentUserId) continue; // Don't draw own cursor
         const cursor = activeCursors[uid];
-        if(!cursor || (typeof cursor.x !== 'number') || (typeof cursor.y !== 'number')) continue;
+        if(!cursor || (typeof cursor.x !== 'number') || (typeof cursor.y !== 'number')) {
+          continue;
+        }
   
         // Don't show stale cursors (older than 2 seconds)
         if(Date.now() - cursor.timestamp > 2000) continue;
@@ -3899,57 +4361,39 @@
   
     // Clean up own cursor on canvas exit
     canvasEl.addEventListener('pointerleave', () => {
-      cursorsRef.child(userId).remove().catch(err => console.warn('Cursor cleanup failed', err));
+      if (cursorsRef) {
+        const userId = visitorId || ('anon_'+Date.now());
+        cursorsRef.child(userId).remove().catch(err => console.warn('Cursor cleanup failed', err));
+      }
     });
   
     canvasEl.addEventListener('pointerenter', () => {
-      presenceRef.update({lastSeen: Date.now()});
+      if (presenceRef) {
+        presenceRef.update({lastSeen: Date.now()});
+      }
     });
   
     // Ensure presence and cursor entries are removed when the connection disconnects
-    try {
-      presenceRef.onDisconnect().remove();
-      cursorsRef.child(userId).onDisconnect().remove();
-    } catch (err) {
-      console.warn('onDisconnect setup failed', err);
+    if (presenceRef && cursorsRef) {
+      try {
+        const userId = visitorId || ('anon_'+Date.now());
+        presenceRef.onDisconnect().remove();
+        cursorsRef.child(userId).onDisconnect().remove();
+      } catch (err) {
+        console.warn('onDisconnect setup failed', err);
+      }
     }
   
     // Update presence color when user changes brush color
     colorPicker.addEventListener('input', (e) => {
       brushColor = e.target.value;
-      try { presenceRef.update({ color: brushColor }); } catch (err) { /* ignore */ }
+      if (presenceRef) {
+        try { presenceRef.update({ color: brushColor }); } catch (err) { /* ignore */ }
+      }
     });
   
-    // Initial load of existing strokes - load ALL strokes to ensure persistence across sessions
-    strokesRef.once('value').then(snap => {
-      const data = snap.val();
-      if(!data) {
-        console.log('No existing strokes found');
-        initialLoadComplete = true;
-        return;
-      }
-      try {
-        // Load all strokes into cache
-        Object.keys(data).forEach(k => {
-          strokesCache[k] = data[k];
-        });
-        // Sort and draw all strokes in order
-        const strokes = Object.keys(strokesCache).map(k => ({ id: k, s: strokesCache[k] }));
-        strokes.sort((a,b) => (a.s.time || 0) - (b.s.time || 0));
-        strokes.forEach(item => {
-          drawStrokeLocally(item.s);
-          drawnIds.add(item.id);
-        });
-        console.log(`Loaded ${strokes.length} strokes from Firebase - canvas restored`);
-        initialLoadComplete = true;
-      } catch (err) {
-        console.warn('initial strokes processing failed', err);
-        initialLoadComplete = true;
-      }
-    }).catch(err => {
-      console.warn('initial strokes load failed', err);
-      initialLoadComplete = true;
-    });
+    // Initial load of existing strokes is now handled in initCanvasRefs()
+    // This will be called when db becomes available
   })();
   
   // Loading screen removal is now handled at the top of the script
@@ -4142,7 +4586,7 @@
           chatPopupUsername.value = usernameValue;
       }
       
-      // Save to Firebase
+      // Save to Backend
       if(db) {
           const profileData = {
               username: userProfile.username,
@@ -4276,6 +4720,27 @@
           loadLeaderboard(currentLeaderboardTab);
       });
   });
+  
+  // Set up leaderboard auto-refresh listeners
+  function setupLeaderboardAutoRefresh() {
+    if (!backendAPI) return;
+    
+    // Auto-refresh chatters leaderboard when new messages arrive
+    backendAPI.on('chat:message', () => {
+      // Only refresh if leaderboard modal is open and chatters tab is active
+      if (leaderboardModal && leaderboardModal.style.display === 'flex' && currentLeaderboardTab === 'chatters') {
+        loadLeaderboard('chatters');
+      }
+    });
+    
+    // Auto-refresh active users leaderboard when online users update
+    backendAPI.on('visitors:online', () => {
+      // Only refresh if leaderboard modal is open and active tab is active
+      if (leaderboardModal && leaderboardModal.style.display === 'flex' && currentLeaderboardTab === 'active') {
+        loadLeaderboard('active');
+      }
+    });
+  }
   
   function loadLeaderboard(type) {
       if(!db || !leaderboardContent) return;
@@ -4435,7 +4900,7 @@
   function initFriendsSystem() {
     if (!db) return;
     
-    // Load friends data from Firebase if available
+    // Load friends data from Backend if available
     loadFriendsFromFirebase();
     
     // Set up real-time listeners
@@ -4445,7 +4910,7 @@
     initNotificationSystem();
   }
   
-  // Load friends from Firebase (with localStorage fallback)
+  // Load friends from Backend (with localStorage fallback)
   function loadFriendsFromFirebase() {
     if (!db) {
         updateAllDisplays();
@@ -4517,7 +4982,7 @@
             updateAllDisplays();
         }
     }).catch(err => {
-        console.error('Error loading friends from Firebase:', err);
+        console.error('Error loading friends from Backend:', err);
         updateAllDisplays();
     });
   }
@@ -4526,7 +4991,7 @@
   function setupFriendsRealtimeListeners() {
     if (!db) return;
     
-    // Friends listener
+    // Friends listener (Firebase ref - backup)
     db.ref(`friends/${visitorId}`).on('value', (snap) => {
         const friends = snap.val();
         if (friends) {
@@ -4539,7 +5004,7 @@
         }
     });
     
-    // Requests listener
+    // Requests listener (Firebase ref - backup)
     db.ref(`friendRequests/${visitorId}`).on('value', (snap) => {
         const requests = snap.val() || {};
         friendsData.requests = {
@@ -4562,6 +5027,61 @@
             renderFriendsTab();
         }
     });
+    
+    // Socket listeners for real-time friend updates
+    if (backendAPI) {
+      // Friend added
+      backendAPI.on('friend:added', (data) => {
+        console.log('[Friends] Friend added event:', data);
+        if (data && data.friendId) {
+          if (!friendsData.friends.includes(data.friendId)) {
+            friendsData.friends.push(data.friendId);
+            localStorage.setItem('friends', JSON.stringify(friendsData.friends));
+            updateCountBadges();
+            if (document.querySelector('.friends-tab-btn[data-tab="friends"]')?.classList.contains('active')) {
+              renderFriendsTab();
+            }
+            // Remove from requests if it was there
+            friendsData.requests.received = friendsData.requests.received.filter(id => id !== data.friendId);
+            friendsData.requests.sent = friendsData.requests.sent.filter(id => id !== data.friendId);
+            localStorage.setItem('friendRequestsReceived', JSON.stringify(friendsData.requests.received));
+            localStorage.setItem('friendRequestsSent', JSON.stringify(friendsData.requests.sent));
+            if (document.querySelector('.friends-tab-btn[data-tab="requests"]')?.classList.contains('active')) {
+              renderRequestsTab();
+            }
+          }
+        }
+      });
+      
+      // Friend removed
+      backendAPI.on('friend:removed', (data) => {
+        console.log('[Friends] Friend removed event:', data);
+        if (data && data.friendId) {
+          friendsData.friends = friendsData.friends.filter(id => id !== data.friendId);
+          localStorage.setItem('friends', JSON.stringify(friendsData.friends));
+          updateCountBadges();
+          if (document.querySelector('.friends-tab-btn[data-tab="friends"]')?.classList.contains('active')) {
+            renderFriendsTab();
+          }
+        }
+      });
+      
+      // Friend request received
+      backendAPI.on('friend:request:received', (data) => {
+        console.log('[Friends] Friend request received event:', data);
+        if (data && data.fromUserId) {
+          if (!friendsData.requests.received.includes(data.fromUserId)) {
+            friendsData.requests.received.push(data.fromUserId);
+            localStorage.setItem('friendRequestsReceived', JSON.stringify(friendsData.requests.received));
+            updateCountBadges();
+            updateNotificationBadge();
+            if (document.querySelector('.friends-tab-btn[data-tab="requests"]')?.classList.contains('active')) {
+              renderRequestsTab();
+            }
+          }
+        }
+      });
+    }
   }
   
   // Update count badges
@@ -5043,10 +5563,15 @@
     friendsData.friends = friendsData.friends.filter(id => id !== friendId);
     localStorage.setItem('friends', JSON.stringify(friendsData.friends));
     
-    // Remove from Firebase if db exists
+    // Remove from Backend if db exists
     if (db) {
         db.ref(`friends/${visitorId}/${friendId}`).remove();
         db.ref(`friends/${friendId}/${visitorId}`).remove();
+    }
+    
+    // Emit socket event for real-time update
+    if (backendAPI && backendAPI.socket && backendAPI.connected) {
+      backendAPI.socket.emit('friend:removed', { userId: visitorId, friendId: friendId });
     }
     
     notifications.show('Friend removed', 'success', 2000);
@@ -5134,6 +5659,11 @@
     friendsData.requests.sent.push(userId);
     localStorage.setItem('friendRequestsSent', JSON.stringify(friendsData.requests.sent));
     
+    // Emit socket event for real-time update
+    if (backendAPI && backendAPI.socket && backendAPI.connected) {
+      backendAPI.socket.emit('friend:request', { fromUserId: visitorId, toUserId: userId });
+    }
+    
     notifications.show('Friend request sent!', 'success', 2000);
     renderRequestsTab();
     updateCountBadges();
@@ -5152,6 +5682,11 @@
     // Remove from requests
     db.ref(`friendRequests/${visitorId}/received/${userId}`).remove();
     db.ref(`friendRequests/${userId}/sent/${visitorId}`).remove();
+    
+    // Emit socket event for real-time update
+    if (backendAPI && backendAPI.socket && backendAPI.connected) {
+      backendAPI.socket.emit('friend:added', { userId: visitorId, friendId: userId });
+    }
     
     friendsData.friends.push(userId);
     friendsData.requests.received = friendsData.requests.received.filter(id => id !== userId);
@@ -5220,25 +5755,24 @@
           return;
       }
       
-    // Use cached profiles if available (don't reload all profiles on every search)
-    // Only reload if cache is very stale (5 minutes) or completely empty
-    const now = Date.now();
-    const LONG_CACHE_DURATION = 300000; // 5 minutes instead of 10 seconds
-    if ((now - cacheTimestamp > LONG_CACHE_DURATION || Object.keys(profilesCache).length === 0) && query.length >= 2) {
-          // Only reload if user has typed at least 2 characters (showing intent to search)
-          Promise.all([
-              db.ref('profiles').once('value'),
-              db.ref('online').once('value')
-          ]).then(([profilesSnap, onlineSnap]) => {
-            profilesCache = profilesSnap.val() || {};
-            onlineCache = onlineSnap.val() || {};
-            cacheTimestamp = now;
-            performSearch(query);
-        }).catch(err => {
-            console.error('Error loading profiles for search:', err);
-            // Use cached data even if reload fails
-            performSearch(query);
-        });
+    // Always load all profiles for search (not just cached friends/requests)
+    // This ensures we can find any user, not just ones we've interacted with
+    if (query.length >= 2) {
+      Promise.all([
+          db.ref('profiles').once('value'),
+          db.ref('online').once('value')
+      ]).then(([profilesSnap, onlineSnap]) => {
+        // Update cache with all profiles for search
+        const allProfiles = profilesSnap.val() || {};
+        profilesCache = { ...profilesCache, ...allProfiles }; // Merge, don't replace
+        onlineCache = onlineSnap.val() || {};
+        cacheTimestamp = Date.now();
+        performSearch(query);
+      }).catch(err => {
+          console.error('Error loading profiles for search:', err);
+          // Use cached data even if reload fails
+          performSearch(query);
+      });
     } else {
         performSearch(query);
     }
@@ -8943,18 +9477,20 @@
                   contentRect: content ? content.getBoundingClientRect() : null
               });
           } else {
-              console.error('More dropdown not found!');
+              // Don't log as error - element might not exist on all pages
+              console.log('More dropdown not found (this is OK if not used)');
           }
           console.log('=== END DEBUG INFO ===');
       };
       
-      // Run debug check after a short delay
-      setTimeout(() => {
-          console.log('[DEBUG] Running initial debug check...');
-          if (window.debugDropdown) {
-              window.debugDropdown();
-          }
-      }, 1000);
+      // Run debug check after a short delay (disabled to prevent console errors)
+      // Uncomment if you need to debug the dropdown
+      // setTimeout(() => {
+      //     console.log('[DEBUG] Running initial debug check...');
+      //     if (window.debugDropdown) {
+      //         window.debugDropdown();
+      //     }
+      // }, 1000);
       
       // Chat button in navigation
       const navChatBtn = document.getElementById('navChatBtn');
@@ -9162,12 +9698,12 @@
                   date: new Date().toISOString()
               };
               
-              // Save to Firebase
+              // Save to Backend
               if (db) {
                   try {
                       const messagesRef = db.ref('contactMessages');
                       await messagesRef.push(formData);
-                      console.log('Contact message saved to Firebase');
+                      console.log('Contact message saved to Backend');
                       
                       // Show success message
                       contactForm.style.display = 'none';
@@ -9188,7 +9724,7 @@
                       alert('There was an error sending your message. Please try again.');
                   }
               } else {
-                  // Fallback if Firebase is not available
+                  // Fallback if Backend is not available
                   contactForm.style.display = 'none';
                   if (contactFormSuccess) {
                       contactFormSuccess.style.display = 'block';

@@ -529,8 +529,8 @@
             <p>&copy; 2024 SHS Game Hall. All rights reserved.</p>
         </div>
     </footer>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="../backend-api-client.js"></script>
     <script src="../script.js"></script>
     <script>
         const gameTitle = 'Slope Rider';
@@ -557,11 +557,11 @@
             if (typeof db !== 'undefined' && db !== null) {
                 return db;
             }
-            if (typeof firebase !== 'undefined') {
+            if (typeof backendAPI !== 'undefined' && backendAPI) {
                 try {
-                    return firebase.database();
+                    return backendAPI.database();
                 } catch (e) {
-                    console.error('Firebase error:', e);
+                    console.error('Backend API error:', e);
                 }
             }
             return null;
