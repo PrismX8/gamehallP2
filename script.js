@@ -2479,11 +2479,16 @@
     }
   });
   
-  // Minimize from full screen
+  // Minimize chat - hide the chat container
   minimizeChatBtn?.addEventListener('click', () => {
     try {
+        // Close fullscreen modal if open
         if (fullScreenChatModal) {
             fullScreenChatModal.style.display = 'none';
+        }
+        // Hide the chat container
+        if (chatContainer) {
+            chatContainer.style.display = 'none';
         }
     } catch (error) {
         console.error('Error minimizing chat:', error);
@@ -9047,6 +9052,165 @@
   
   // Navigation button handlers
   document.addEventListener('DOMContentLoaded', () => {
+      // Dropdown click support for all devices (hover works on desktop, click works everywhere)
+      console.log('[DEBUG] Initializing dropdowns...');
+      const navDropdowns = document.querySelectorAll('.nav-dropdown');
+      console.log('[DEBUG] Found', navDropdowns.length, 'dropdowns');
+      
+      navDropdowns.forEach((dropdown, index) => {
+          const dropdownLink = dropdown.querySelector('.nav-link');
+          const dropdownContent = dropdown.querySelector('.nav-dropdown-content');
+          
+          console.log(`[DEBUG] Dropdown ${index}:`, {
+              hasLink: !!dropdownLink,
+              hasContent: !!dropdownContent,
+              classes: dropdown.className,
+              href: dropdownLink?.getAttribute('href')
+          });
+          
+          if (dropdownLink) {
+              // Add click handler for all devices (works as fallback and for mobile)
+              dropdownLink.addEventListener('click', (e) => {
+                  console.log(`[DEBUG] Click event on dropdown ${index}`);
+                  console.log('[DEBUG] Event details:', {
+                      target: e.target,
+                      currentTarget: e.currentTarget,
+                      href: dropdownLink.getAttribute('href'),
+                      defaultPrevented: e.defaultPrevented
+                  });
+                  
+                  // Always prevent default navigation for dropdown links
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('[DEBUG] Prevented default navigation');
+                  
+                  // Always toggle on click (works on all devices, including desktop as fallback)
+                  // Close other dropdowns
+                  navDropdowns.forEach(other => {
+                      if (other !== dropdown) {
+                          other.classList.remove('active');
+                      }
+                  });
+                  
+                  // Toggle current dropdown
+                  const wasActive = dropdown.classList.contains('active');
+                  dropdown.classList.toggle('active');
+                  const isActive = dropdown.classList.contains('active');
+                  
+                  console.log(`[DEBUG] Toggled dropdown ${index}:`, {
+                      wasActive,
+                      isActive,
+                      classes: dropdown.className
+                  });
+                  
+                  // Check computed styles
+                  if (dropdownContent) {
+                      const styles = window.getComputedStyle(dropdownContent);
+                      console.log('[DEBUG] Dropdown content styles:', {
+                          opacity: styles.opacity,
+                          visibility: styles.visibility,
+                          display: styles.display,
+                          transform: styles.transform,
+                          zIndex: styles.zIndex,
+                          pointerEvents: styles.pointerEvents
+                      });
+                  }
+                  
+                  // Close when clicking outside (use mousedown to avoid conflicts with the click that opened it)
+                  if (isActive) {
+                      // Remove any existing close handlers first
+                      if (dropdown._closeHandler) {
+                          document.removeEventListener('mousedown', dropdown._closeHandler);
+                      }
+                      
+                      // Add new close handler
+                      dropdown._closeHandler = (event) => {
+                          // Don't close if clicking inside the dropdown
+                          if (!dropdown.contains(event.target)) {
+                              console.log('[DEBUG] Clicked outside, closing dropdown');
+                              dropdown.classList.remove('active');
+                              document.removeEventListener('mousedown', dropdown._closeHandler);
+                              dropdown._closeHandler = null;
+                          }
+                      };
+                      
+                      // Use mousedown instead of click, and delay to avoid immediate trigger
+                      setTimeout(() => {
+                          document.addEventListener('mousedown', dropdown._closeHandler);
+                      }, 200);
+                  } else {
+                      // If closing, remove the handler
+                      if (dropdown._closeHandler) {
+                          document.removeEventListener('mousedown', dropdown._closeHandler);
+                          dropdown._closeHandler = null;
+                      }
+                  }
+              });
+              
+              // Add hover event listeners for debugging
+              dropdown.addEventListener('mouseenter', () => {
+                  console.log(`[DEBUG] Mouse entered dropdown ${index}`);
+                  if (dropdownContent) {
+                      const styles = window.getComputedStyle(dropdownContent);
+                      console.log('[DEBUG] On hover - content styles:', {
+                          opacity: styles.opacity,
+                          visibility: styles.visibility
+                      });
+                  }
+              });
+              
+              dropdown.addEventListener('mouseleave', () => {
+                  console.log(`[DEBUG] Mouse left dropdown ${index}`);
+              });
+          } else {
+              console.warn(`[DEBUG] Dropdown ${index} has no link element!`);
+          }
+      });
+      
+      // Debug function to check dropdown state
+      window.debugDropdown = function() {
+          console.log('=== DROPDOWN DEBUG INFO ===');
+          const moreDropdown = document.querySelector('.nav-more-dropdown');
+          if (moreDropdown) {
+              const link = moreDropdown.querySelector('.nav-link');
+              const content = moreDropdown.querySelector('.nav-dropdown-content');
+              const styles = content ? window.getComputedStyle(content) : null;
+              
+              console.log('More Dropdown:', {
+                  exists: !!moreDropdown,
+                  hasLink: !!link,
+                  hasContent: !!content,
+                  classes: moreDropdown.className,
+                  isActive: moreDropdown.classList.contains('active'),
+                  linkHref: link?.getAttribute('href'),
+                  contentStyles: styles ? {
+                      opacity: styles.opacity,
+                      visibility: styles.visibility,
+                      display: styles.display,
+                      transform: styles.transform,
+                      zIndex: styles.zIndex,
+                      pointerEvents: styles.pointerEvents,
+                      position: styles.position,
+                      top: styles.top,
+                      left: styles.left,
+                      right: styles.right
+                  } : null,
+                  contentRect: content ? content.getBoundingClientRect() : null
+              });
+          } else {
+              console.error('More dropdown not found!');
+          }
+          console.log('=== END DEBUG INFO ===');
+      };
+      
+      // Run debug check after a short delay
+      setTimeout(() => {
+          console.log('[DEBUG] Running initial debug check...');
+          if (window.debugDropdown) {
+              window.debugDropdown();
+          }
+      }, 1000);
+      
       // Chat button in navigation
       const navChatBtn = document.getElementById('navChatBtn');
       if (navChatBtn) {
@@ -9056,30 +9220,103 @@
           });
       }
       
-      // Profile button in navigation
+      // Navigation collapse/expand button
+      const navCollapseBtn = document.getElementById('navCollapseBtn');
+      const mainNavigation = document.querySelector('.main-navigation');
+      if (navCollapseBtn && mainNavigation) {
+          // Check if collapsed state is saved in localStorage
+          const isCollapsed = localStorage.getItem('navCollapsed') === 'true';
+          if (isCollapsed) {
+              mainNavigation.classList.add('collapsed');
+          }
+          
+          navCollapseBtn.addEventListener('click', () => {
+              mainNavigation.classList.toggle('collapsed');
+              const isNowCollapsed = mainNavigation.classList.contains('collapsed');
+              
+              // Save state to localStorage
+              localStorage.setItem('navCollapsed', isNowCollapsed.toString());
+              
+              // Update aria-label for accessibility
+              navCollapseBtn.setAttribute('aria-label', 
+                  isNowCollapsed ? 'Expand navigation' : 'Collapse navigation');
+          });
+      }
+      
+      // Profile button in navigation (from More dropdown)
       const navProfileBtn = document.getElementById('navProfileBtn');
       if (navProfileBtn) {
-          navProfileBtn.addEventListener('click', () => {
+          navProfileBtn.addEventListener('click', (e) => {
+              e.preventDefault();
               const profileBtn = document.getElementById('profileBtn');
               if (profileBtn) profileBtn.click();
           });
       }
       
-      // Leaderboard button in navigation
+      // Leaderboard button in navigation (from More dropdown)
       const navLeaderboardBtn = document.getElementById('navLeaderboardBtn');
       if (navLeaderboardBtn) {
-          navLeaderboardBtn.addEventListener('click', () => {
+          navLeaderboardBtn.addEventListener('click', (e) => {
+              e.preventDefault();
               const leaderboardBtn = document.getElementById('leaderboardBtn');
               if (leaderboardBtn) leaderboardBtn.click();
           });
       }
       
-      // Friends button in navigation
+      // Community dropdown buttons
+      const navForumsBtn = document.getElementById('navForumsBtn');
+      if (navForumsBtn) {
+          navForumsBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              // Forums functionality - can be implemented later
+              alert('Forums feature coming soon!');
+          });
+      }
+      
+      const navPollsBtn = document.getElementById('navPollsBtn');
+      if (navPollsBtn) {
+          navPollsBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              const pollsBtn = document.getElementById('pollsBtn');
+              if (pollsBtn) pollsBtn.click();
+          });
+      }
+      
+      // Friends button in navigation (from dropdown)
       const navFriendsBtn = document.getElementById('navFriendsBtn');
       if (navFriendsBtn) {
-          navFriendsBtn.addEventListener('click', () => {
+          navFriendsBtn.addEventListener('click', (e) => {
+              e.preventDefault();
               const friendsBtn = document.getElementById('friendsBtn');
               if (friendsBtn) friendsBtn.click();
+          });
+      }
+      
+      // Resources dropdown buttons
+      const navGuidesBtn = document.getElementById('navGuidesBtn');
+      if (navGuidesBtn) {
+          navGuidesBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              // Guides functionality - can link to blog or guides page
+              window.location.href = 'blog/blog.html';
+          });
+      }
+      
+      const navTipsBtn = document.getElementById('navTipsBtn');
+      if (navTipsBtn) {
+          navTipsBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              // Tips functionality - can link to tips page or blog
+              window.location.href = 'blog/blog.html';
+          });
+      }
+      
+      const navTutorialsBtn = document.getElementById('navTutorialsBtn');
+      if (navTutorialsBtn) {
+          navTutorialsBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              // Tutorials functionality - can link to tutorials page or blog
+              window.location.href = 'blog/blog-mastering-controls.html';
           });
       }
       
@@ -9092,10 +9329,11 @@
           });
       }
       
-      // YouTube button in navigation
+      // YouTube button in navigation (from More dropdown)
       const navYouTubeBtn = document.getElementById('navYouTubeBtn');
       if (navYouTubeBtn) {
-          navYouTubeBtn.addEventListener('click', () => {
+          navYouTubeBtn.addEventListener('click', (e) => {
+              e.preventDefault();
               const youtubeWatcherBtn = document.getElementById('youtubeWatcherBtn');
               if (youtubeWatcherBtn) youtubeWatcherBtn.click();
           });

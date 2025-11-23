@@ -1474,6 +1474,7 @@
            inset 0 1px 0 rgba(255, 255, 255, 0.1),
            inset 0 -1px 0 rgba(255, 215, 0, 0.05);
        transition: all var(--transition-base);
+       overflow: visible;
    }
    .main-navigation::before {
        content: '';
@@ -1496,6 +1497,72 @@
        flex-wrap: wrap;
        gap: var(--spacing-sm);
        padding: var(--spacing-md) var(--spacing-xl);
+       overflow: visible;
+       position: relative;
+       row-gap: var(--spacing-xs);
+       transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                   opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                   padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+       max-height: 500px;
+       opacity: 1;
+   }
+   /* Collapsed state */
+   .main-navigation.collapsed .nav-container {
+       max-height: 0;
+       opacity: 0;
+       padding-top: 0;
+       padding-bottom: 0;
+       overflow: hidden;
+   }
+   /* Collapse button */
+   .nav-collapse-btn {
+       position: absolute;
+       bottom: -22px;
+       left: 50%;
+       transform: translateX(-50%);
+       width: 44px;
+       height: 22px;
+       background: linear-gradient(180deg,
+           rgba(15, 15, 25, 0.98) 0%,
+           rgba(26, 26, 46, 0.95) 100%);
+       backdrop-filter: blur(20px) saturate(200%);
+       -webkit-backdrop-filter: blur(20px) saturate(200%);
+       border: 2px solid rgba(255, 215, 0, 0.4);
+       border-top: none;
+       border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+       color: var(--color-primary);
+       cursor: pointer;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+       z-index: calc(var(--z-sticky) + 5);
+       box-shadow:
+           0 4px 12px rgba(0, 0, 0, 0.4),
+           0 0 15px rgba(255, 215, 0, 0.2);
+       padding: 0;
+       margin: 0;
+   }
+   .nav-collapse-btn i {
+       font-size: 0.9em;
+       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+   }
+   .nav-collapse-btn:hover {
+       background: linear-gradient(180deg,
+           rgba(26, 26, 46, 0.98) 0%,
+           rgba(15, 15, 25, 0.95) 100%);
+       border-color: var(--color-primary);
+       box-shadow:
+           0 6px 20px rgba(0, 0, 0, 0.5),
+           0 0 25px rgba(255, 215, 0, 0.3);
+       transform: translateX(-50%) translateY(-2px);
+   }
+   .nav-collapse-btn:active {
+       transform: translateX(-50%) translateY(0);
+   }
+   /* Rotate arrow when collapsed */
+   .main-navigation.collapsed .nav-collapse-btn i {
+       transform: rotate(180deg);
    }
    .nav-item {
        position: relative;
@@ -1506,13 +1573,13 @@
        border-radius: var(--radius-lg);
        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
        text-decoration: none;
-       color: var(--text-primary);
+       color: #FFFFFF;
        font-size: var(--font-size-sm);
        font-weight: var(--font-weight-semibold);
        font-family: var(--font-display);
        cursor: pointer;
        border: 2px solid transparent;
-       background: rgba(15, 15, 25, 0.4);
+       background: rgba(15, 15, 25, 0.75);
        overflow: hidden;
        letter-spacing: 0.3px;
    }
@@ -1564,20 +1631,23 @@
        white-space: nowrap;
        position: relative;
        z-index: 1;
-       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+       text-shadow: 
+           0 2px 4px rgba(0, 0, 0, 0.8),
+           0 0 8px rgba(0, 0, 0, 0.5),
+           0 1px 2px rgba(0, 0, 0, 0.9);
+       font-weight: 600;
    }
    .nav-item:hover {
        background: linear-gradient(135deg,
-           rgba(255, 215, 0, 0.15),
-           rgba(0, 212, 255, 0.1));
-       border-color: rgba(255, 215, 0, 0.5);
-       color: var(--text-primary);
-       transform: translateY(-2px);
+           rgba(255, 215, 0, 0.25),
+           rgba(0, 212, 255, 0.2));
+       border-color: rgba(255, 215, 0, 0.6);
+       color: #FFFFFF;
+       transform: translateY(-3px) scale(1.02);
        box-shadow:
            0 8px 25px rgba(0, 0, 0, 0.4),
            0 0 20px rgba(255, 215, 0, 0.2),
            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-       transform: translateY(-3px) scale(1.02);
    }
    .nav-item:active {
        transform: translateY(-1px) scale(0.98);
@@ -1613,10 +1683,32 @@
       .nav-dropdown {
        position: relative;
    }
+   /* Bridge element to maintain hover through gap */
+   .nav-dropdown::after {
+       content: '';
+       position: absolute;
+       top: 100%;
+       left: 0;
+       right: 0;
+       height: 8px;
+       z-index: calc(var(--z-sticky) + 9);
+       pointer-events: none;
+   }
+   .nav-dropdown:hover::after {
+       pointer-events: auto;
+   }
    .nav-dropdown-content {
        position: absolute;
        top: calc(100% + 8px);
        left: 0;
+       right: auto;
+       pointer-events: none;
+       display: block;
+   }
+   /* Position "More" dropdown to the right */
+   .nav-more-dropdown .nav-dropdown-content {
+       left: auto;
+       right: 0;
        background: linear-gradient(180deg,
            rgba(15, 15, 25, 0.98) 0%,
            rgba(26, 26, 46, 0.95) 100%);
@@ -1649,10 +1741,70 @@
            rgba(255, 215, 0, 0.5),
            transparent);
    }
-   .nav-dropdown:hover .nav-dropdown-content {
-       opacity: 1;
-       visibility: visible;
-       transform: translateY(0) scale(1);
+   .nav-dropdown:hover .nav-dropdown-content,
+   .nav-dropdown.active .nav-dropdown-content {
+       opacity: 1 !important;
+       visibility: visible !important;
+       transform: translateY(0) scale(1) !important;
+       pointer-events: auto !important;
+       display: block !important;
+   }
+   /* Specific rule for More dropdown hover/active - needs higher specificity */
+   .nav-more-dropdown:hover .nav-dropdown-content,
+   .nav-more-dropdown.active .nav-dropdown-content {
+       opacity: 1 !important;
+       visibility: visible !important;
+       transform: translateY(0) scale(1) !important;
+       pointer-events: auto !important;
+       display: block !important;
+       position: absolute !important;
+   }
+   /* Keep dropdown visible when hovering over it - but only if parent is active or hovered */
+   .nav-dropdown.active .nav-dropdown-content:hover,
+   .nav-dropdown:hover .nav-dropdown-content:hover {
+       opacity: 1 !important;
+       visibility: visible !important;
+       transform: translateY(0) scale(1) !important;
+       pointer-events: auto !important;
+       display: block !important;
+   }
+   /* Hide dropdown content when parent is not active, even on hover */
+   .nav-dropdown:not(.active):not(:hover) .nav-dropdown-content {
+       opacity: 0 !important;
+       visibility: hidden !important;
+       pointer-events: none !important;
+   }
+   /* Same for More dropdown */
+   .nav-more-dropdown:not(.active):not(:hover) .nav-dropdown-content {
+       opacity: 0 !important;
+       visibility: hidden !important;
+       pointer-events: none !important;
+       transform: translateY(-15px) scale(0.95) !important;
+   }
+   /* Force show when active - highest specificity */
+   .nav-more-dropdown.active .nav-dropdown-content {
+       opacity: 1 !important;
+       visibility: visible !important;
+       display: block !important;
+       pointer-events: auto !important;
+       transform: translateY(0) scale(1) !important;
+       position: absolute !important;
+       z-index: 9999 !important;
+       top: calc(100% + 8px) !important;
+       right: 0 !important;
+       left: auto !important;
+   }
+   /* Debug: Add border when active for visibility */
+   .nav-dropdown.active {
+       border: 2px solid red !important;
+   }
+   .nav-dropdown.active .nav-dropdown-content {
+       border: 2px solid blue !important;
+       background: linear-gradient(180deg,
+           rgba(15, 15, 25, 0.98) 0%,
+           rgba(26, 26, 46, 0.95) 100%) !important;
+       min-width: 240px !important;
+       max-width: none !important;
    }
    .nav-dropdown-content a {
        position: relative;
@@ -1704,11 +1856,20 @@
    .nav-dropdown-content a:hover::before {
        transform: scaleY(1);
    }
-   .nav-dropdown-content a:hover i {
-       color: var(--color-primary);
-       transform: scale(1.2) rotate(5deg);
-       filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
-   }
+      .nav-dropdown-content a:hover i {
+          color: var(--color-primary);
+          transform: scale(1.2) rotate(5deg);
+          filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+      }
+      .nav-dropdown-divider {
+          height: 1px;
+          background: linear-gradient(90deg,
+              transparent,
+              rgba(255, 215, 0, 0.3),
+              transparent);
+          margin: 8px var(--spacing-xs);
+          border: none;
+      }
       .nav-button {
        background: linear-gradient(135deg,
            rgba(0, 212, 255, 0.15),
@@ -1759,38 +1920,59 @@
        .nav-container {
            justify-content: space-around;
            padding: var(--spacing-sm);
-           gap: var(--spacing-xs);
+           gap: 4px;
        }
        .nav-item {
            flex: 1;
            justify-content: center;
-           padding: var(--spacing-md) var(--spacing-sm);
+           padding: var(--spacing-sm) 6px;
            min-width: 0;
            border-radius: var(--radius-md);
+           font-size: 0.85rem;
        }
        .nav-item span {
            display: none;
        }
        .nav-item i {
-           font-size: 1.4em;
+           font-size: 1.2em;
        }
        .nav-dropdown-content {
            left: auto;
            right: 0;
-           min-width: 220px;
+           min-width: 200px;
+           max-width: 90vw;
+       }
+       /* Position "More" dropdown to the right on mobile */
+       .nav-more-dropdown .nav-dropdown-content {
+           left: auto;
+           right: 0;
+       }
+       .nav-dropdown-content a {
+           padding: var(--spacing-sm) var(--spacing-md);
+           font-size: 0.9rem;
        }
    }
    @media (max-width: 480px) {
        .nav-container {
-           gap: 4px;
-           padding: var(--spacing-xs);
+           gap: 3px;
+           padding: 8px 4px;
        }
        .nav-item {
-           padding: var(--spacing-sm);
+           padding: 10px 6px;
            border-radius: var(--radius-md);
+           min-width: 44px;
        }
        .nav-item i {
-           font-size: 1.2em;
+           font-size: 1.1em;
+       }
+       .nav-dropdown-content {
+           min-width: 180px;
+           max-width: 85vw;
+           right: 0;
+       }
+       .nav-dropdown-content a {
+           padding: 10px 12px;
+           font-size: 0.85rem;
        }
        .nav-dropdown-content {
            min-width: 200px;
