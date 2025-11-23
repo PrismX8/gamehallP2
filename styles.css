@@ -3112,224 +3112,467 @@
        from { transform: rotate(0deg); }
        to { transform: rotate(360deg); }
    }
-      .game-of-season-container {
-       max-width: 1400px;
-       margin: 30px auto;
-       padding: 0 20px;
-       position: relative;
-       z-index: 10;
-   }
-   .game-of-season-header {
-       text-align: center;
-       margin-bottom: 30px;
-   }
-   .game-of-season-header h2 {
-       font-size: 42px;
-       font-weight: 800;
-       background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #f9ca24 75%, #f0932b 100%);
-       -webkit-background-clip: text;
-       -webkit-text-fill-color: transparent;
-       background-clip: text;
-       margin-bottom: 10px;
-       text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
-       animation: gradientShift 3s ease infinite;
-   }
-   @keyframes gradientShift {
-       0% { background-position: 0% 50%; }
-       50% { background-position: 100% 50%; }
-       100% { background-position: 0% 50%; }
-   }
-   .game-of-season-header p {
-       color: rgba(255, 255, 255, 0.7);
-       font-size: 18px;
-   }
-   .festive-game-card {
-       background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(78, 205, 196, 0.1) 50%, rgba(69, 183, 209, 0.1) 100%);
-       backdrop-filter: blur(30px) saturate(180%);
-       border-radius: 30px;
-       border: 3px solid;
-       border-image: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #eb4d4b) 1;
-       padding: 40px;
-       position: relative;
-       overflow: hidden;
-       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 107, 107, 0.3);
-       animation: festiveCardGlow 4s ease-in-out infinite;
-   }
-   @keyframes festiveCardGlow {
-       0%, 100% { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 107, 107, 0.3); }
-       50% { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 60px rgba(78, 205, 196, 0.5), 0 0 80px rgba(69, 183, 209, 0.3); }
-   }
-   .festive-badge {
-       position: absolute;
-       top: 20px;
-       right: 20px;
-       background: linear-gradient(135deg, #ff6b6b, #f9ca24);
-       color: white;
-       padding: 10px 20px;
-       border-radius: 25px;
-       font-weight: 700;
-       font-size: 14px;
-       box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-       animation: festiveBadgePulse 2s ease-in-out infinite;
-       z-index: 5;
-   }
-   @keyframes festiveBadgePulse {
-       0%, 100% { transform: scale(1); }
-       50% { transform: scale(1.05); }
-   }
-   .festive-game-content {
-       display: flex;
-       gap: 40px;
-       align-items: center;
-   }
-   .festive-game-image {
-       width: 300px;
-       height: 300px;
-       border-radius: 20px;
-       background-size: cover;
-       background-position: center;
-       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-       border: 3px solid rgba(255, 255, 255, 0.2);
-       flex-shrink: 0;
-   }
-   .festive-game-info {
-       flex: 1;
-   }
-   .festive-game-title {
-       font-size: 48px;
-       font-weight: 800;
-       background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1);
-       -webkit-background-clip: text;
-       -webkit-text-fill-color: transparent;
-       background-clip: text;
-       margin-bottom: 20px;
-   }
-   .festive-game-description {
-       font-size: 16px;
-       line-height: 1.8;
-       color: rgba(255, 255, 255, 0.9);
-       margin-bottom: 25px;
-   }
-   .festive-game-rating {
-       margin-bottom: 30px;
-   }
-   .festive-game-stars {
-       display: flex;
-       gap: 8px;
-       margin-bottom: 10px;
-   }
-   .festive-game-stars .fa-star {
-       font-size: 24px;
-       color: rgba(255, 255, 255, 0.4);
-       cursor: pointer;
-       transition: all 0.2s ease;
-   }
-   .festive-game-stars .fa-star.active {
-       color: #f9ca24;
-       filter: drop-shadow(0 0 8px rgba(249, 202, 36, 0.8));
-   }
-   .festive-game-stars .fa-star:hover {
-       transform: scale(1.3);
-       color: #f9ca24;
-   }
-   .festive-rating-text {
-       color: rgba(255, 255, 255, 0.8);
-       font-size: 16px;
-       font-weight: 600;
-   }
-   .festive-play-btn {
-       background: linear-gradient(135deg, #ff6b6b, #f0932b);
-       color: white;
-       border: none;
-       padding: 18px 40px;
-       border-radius: 50px;
-       font-size: 18px;
-       font-weight: 700;
-       cursor: pointer;
-       box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-       transition: all 0.3s ease;
-       text-transform: uppercase;
-       letter-spacing: 1px;
-   }
-   .festive-play-btn:hover {
-       transform: translateY(-3px) scale(1.05);
-       box-shadow: 0 12px 35px rgba(255, 107, 107, 0.6);
-   }
-   .festive-particles {
-       position: absolute;
-       top: 0;
-       left: 0;
-       right: 0;
-       bottom: 0;
-       pointer-events: none;
-       overflow: hidden;
-   }
-   .festive-particles::before,
-   .festive-particles::after {
-       content: '✨';
-       position: absolute;
-       font-size: 20px;
-       animation: festiveFloat 3s ease-in-out infinite;
-   }
-   .festive-particles::before {
-       top: 20%;
-       left: 10%;
-       animation-delay: 0s;
-   }
-   .festive-particles::after {
-       top: 60%;
-       right: 15%;
-       animation-delay: 1.5s;
-   }
-   @keyframes festiveFloat {
-       0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
-       50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
-   }
-   @media (max-width: 768px) {
-       .festive-game-content {
-           flex-direction: column;
-       }
-       .festive-game-image {
-           width: 100%;
-           max-width: 300px;
-       }
-       .festive-game-title {
-           font-size: 32px;
-       }
-   }
-      .slope-rider-center-container {
-       max-width: 1400px;
-       margin: 30px auto;
-       padding: 0 20px;
-       display: flex !important;
-       justify-content: center;
-       align-items: center;
-       position: relative;
-       z-index: 10;
-       min-height: 400px;
-   }
-   .slope-rider-center-card {
-       width: 280px;
-       height: 380px;
-       margin: 0 auto;
-       position: relative;
-       cursor: pointer;
-       transform: scale(1);
-       transition: transform 0.3s ease;
-   }
-   .slope-rider-center-card:hover {
-       transform: scale(1.05);
-   }
-      .slope-rider-center-card.game-cube,
-   .slope-rider-center-card.festive-game-cube {
-       width: 280px !important;
-       height: 380px !important;
-       aspect-ratio: auto !important;
-   }
-   .slope-rider-center-card .game-cube-inner {
-       width: 100%;
-       height: 100%;
-   }
+/* Game of the Season Container */
+
+.game-of-season-container {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Game of the Season Header */
+
+.game-of-season-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.game-of-season-header h2 {
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #f9ca24 75%, #f0932b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+}
+
+.game-of-season-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+}
+
+/* Main Festive Game Card */
+
+.festive-game-card {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(33, 150, 243, 0.15) 20%, rgba(244, 67, 54, 0.15) 40%, rgba(255, 255, 255, 0.15) 60%, rgba(76, 175, 80, 0.15) 80%, rgba(33, 150, 243, 0.15) 100%);
+    background-size: 400% 400%;
+    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 30px;
+    border: 4px solid transparent;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(76, 175, 80, 0.4),
+        0 0 100px rgba(33, 150, 243, 0.3),
+        0 0 120px rgba(244, 67, 54, 0.3),
+        inset 0 0 60px rgba(255, 255, 255, 0.2);
+    animation: festiveCardGlow 4s ease-in-out infinite, gradientShift 8s ease infinite, cardFloat 6s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+.festive-game-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+}
+
+.festive-game-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #4caf50, #2196f3, #f44336, #ffffff, #4caf50, #2196f3, #f44336, #ffffff, #4caf50);
+    background-size: 400% 400%;
+    border-radius: 30px;
+    z-index: -1;
+    animation: borderGlow 3s linear infinite;
+    filter: blur(8px);
+}
+
+/* Festive Badge */
+
+.festive-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4caf50, #2196f3, #f44336, #ffffff, #4caf50);
+    background-size: 200% 200%;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 
+        0 6px 20px rgba(76, 175, 80, 0.5),
+        0 0 30px rgba(33, 150, 243, 0.4),
+        0 0 35px rgba(244, 67, 54, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation: festiveBadgePulse 2s ease-in-out infinite, badgeGradient 3s ease infinite;
+    z-index: 5;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Game Content Layout */
+
+.festive-game-content {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+/* Game Image */
+
+.festive-game-image {
+    width: 300px;
+    height: 300px;
+    border-radius: 20px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 
+        0 15px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(76, 175, 80, 0.4),
+        0 0 50px rgba(33, 150, 243, 0.3),
+        0 0 60px rgba(244, 67, 54, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.2);
+    border: 4px solid;
+    border-image: linear-gradient(45deg, #4caf50, #2196f3, #f44336, #ffffff, #4caf50) 1;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    animation: imageGlow 3s ease-in-out infinite;
+}
+
+.festive-game-image::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    animation: imageShimmer 4s infinite;
+}
+
+/* Game Info */
+
+.festive-game-info {
+    flex: 1;
+}
+
+.festive-game-title {
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+}
+
+.festive-game-description {
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 25px;
+}
+
+/* Rating Stars */
+
+.festive-game-rating {
+    margin-bottom: 30px;
+}
+
+.festive-game-stars {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.festive-game-stars .fa-star {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.festive-game-stars .fa-star.active {
+    color: #4caf50;
+    filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.8));
+}
+
+.festive-game-stars .fa-star:hover {
+    transform: scale(1.3);
+    color: #4caf50;
+}
+
+.festive-rating-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Play Button */
+
+.festive-play-btn {
+    background: linear-gradient(135deg, #4caf50, #2196f3, #f44336);
+    color: white;
+    border: none;
+    padding: 18px 40px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4), 0 0 20px rgba(33, 150, 243, 0.3);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.festive-play-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 35px rgba(244, 67, 54, 0.6), 0 0 30px rgba(33, 150, 243, 0.4);
+}
+
+/* Festive Particles */
+
+.festive-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.festive-particles::before {
+    content: '✨';
+    position: absolute;
+    font-size: 24px;
+    top: 15%;
+    left: 8%;
+    animation: festiveFloat 3s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 107, 107, 0.6);
+    animation-delay: 0s;
+}
+
+.festive-particles::after {
+    content: '⭐';
+    position: absolute;
+    font-size: 24px;
+    top: 55%;
+    right: 12%;
+    animation: festiveFloat 3s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(78, 205, 196, 0.6);
+    animation-delay: 1.5s;
+}
+
+/* Slope Rider Center Card (Special Game Card) */
+
+.slope-rider-center-container {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    min-height: 400px;
+}
+
+.slope-rider-center-card {
+    width: 280px;
+    height: 380px;
+    margin: 0 auto;
+    position: relative;
+    cursor: pointer;
+    transform: scale(1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: cardPulse 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.3));
+}
+
+.slope-rider-center-card:hover {
+    transform: scale(1.08) rotateY(5deg);
+    filter: drop-shadow(0 0 12px rgba(76, 175, 80, 0.4)) drop-shadow(0 0 16px rgba(33, 150, 243, 0.3)) drop-shadow(0 0 18px rgba(244, 67, 54, 0.3));
+}
+
+.slope-rider-center-card.game-cube,
+.slope-rider-center-card.festive-game-cube {
+    width: 280px !important;
+    height: 380px !important;
+    aspect-ratio: auto !important;
+}
+
+.slope-rider-center-card .game-cube-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.slope-rider-center-card .game-cube-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(33, 150, 243, 0.2), rgba(244, 67, 54, 0.2), rgba(255, 255, 255, 0.2), rgba(76, 175, 80, 0.2));
+    background-size: 400% 400%;
+    border-radius: inherit;
+    opacity: 0.4;
+    z-index: -1;
+    filter: blur(10px);
+    animation: glowPulse 3s ease-in-out infinite, glowGradient 5s ease infinite;
+}
+
+/* Animations */
+
+@keyframes festiveCardGlow {
+    0%, 100% { 
+        box-shadow: 
+            0 25px 80px rgba(0, 0, 0, 0.6),
+            0 0 60px rgba(76, 175, 80, 0.4),
+            0 0 100px rgba(33, 150, 243, 0.3),
+            0 0 120px rgba(244, 67, 54, 0.3),
+            inset 0 0 60px rgba(255, 255, 255, 0.2);
+    }
+    50% { 
+        box-shadow: 
+            0 25px 80px rgba(0, 0, 0, 0.6),
+            0 0 80px rgba(244, 67, 54, 0.6),
+            0 0 120px rgba(33, 150, 243, 0.5),
+            0 0 140px rgba(76, 175, 80, 0.5),
+            0 0 150px rgba(255, 255, 255, 0.3),
+            inset 0 0 80px rgba(33, 150, 243, 0.3);
+    }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes borderGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+@keyframes cardFloat {
+    0%, 100% { transform: translateY(0px) rotateX(0deg); }
+    50% { transform: translateY(-10px) rotateX(2deg); }
+}
+
+@keyframes festiveBadgePulse {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.08) rotate(-2deg); }
+    50% { transform: scale(1.1) rotate(0deg); }
+    75% { transform: scale(1.08) rotate(2deg); }
+}
+
+@keyframes badgeGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes imageGlow {
+    0%, 100% { 
+        box-shadow: 
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            0 0 30px rgba(76, 175, 80, 0.4),
+            0 0 50px rgba(33, 150, 243, 0.3),
+            0 0 60px rgba(244, 67, 54, 0.3);
+    }
+    50% { 
+        box-shadow: 
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            0 0 50px rgba(244, 67, 54, 0.6),
+            0 0 70px rgba(33, 150, 243, 0.5),
+            0 0 80px rgba(76, 175, 80, 0.5),
+            0 0 90px rgba(255, 255, 255, 0.3);
+    }
+}
+
+@keyframes imageShimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+@keyframes festiveFloat {
+    0%, 100% { 
+        transform: translateY(0) rotate(0deg) scale(1); 
+        opacity: 0.8; 
+    }
+    25% { 
+        transform: translateY(-15px) rotate(90deg) scale(1.2); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateY(-25px) rotate(180deg) scale(1); 
+        opacity: 0.9; 
+    }
+    75% { 
+        transform: translateY(-15px) rotate(270deg) scale(1.1); 
+        opacity: 1; 
+    }
+}
+
+@keyframes cardPulse {
+    0%, 100% { 
+        filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.3)) drop-shadow(0 0 10px rgba(33, 150, 243, 0.2)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+    }
+    50% { 
+        filter: drop-shadow(0 0 12px rgba(244, 67, 54, 0.4)) drop-shadow(0 0 14px rgba(33, 150, 243, 0.3)) drop-shadow(0 0 14px rgba(255, 255, 255, 0.3));
+    }
+}
+
+@keyframes glowPulse {
+    0%, 100% { 
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(1);
+        filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.4)) drop-shadow(0 0 12px rgba(244, 67, 54, 0.3)) drop-shadow(0 0 16px rgba(33, 150, 243, 0.2));
+    }
+    50% { 
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.05);
+        filter: drop-shadow(0 0 12px rgba(244, 67, 54, 0.6)) drop-shadow(0 0 18px rgba(33, 150, 243, 0.4)) drop-shadow(0 0 24px rgba(255, 255, 255, 0.3));
+    }
+}
+
+@keyframes glowGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .festive-game-content {
+        flex-direction: column;
+    }
+    .festive-game-image {
+        width: 100%;
+        max-width: 300px;
+    }
+    .festive-game-title {
+        font-size: 32px;
+    }
+}
       #featuredGamesSections {
        max-width: 1400px;
        margin: 30px auto;
@@ -3547,7 +3790,7 @@
    }
    #fullscreenPopup.show { opacity:1; pointer-events:auto; }
    #fullscreenPopup .popupContent {
-       max-width: 900px; width: 90%; padding: 50px 60px;
+       max-width: 900px; width: 90%; padding: 30px 40px;
        background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(0, 50, 100, 0.3));
        backdrop-filter:blur(25px); border-radius: 30px;
        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
@@ -3612,8 +3855,8 @@
        display: none;
    }
    .popup-header h1 {
-       font-size: 42px;
-       margin: 0 0 25px 0;
+       font-size: 36px;
+       margin: 0 0 15px 0;
        font-weight: 800;
        color: #ffffff;
        text-shadow:
@@ -3626,9 +3869,9 @@
        text-align: left;
    }
    .popup-intro {
-       font-size: 22px;
-       margin: 0 0 30px 0;
-       line-height: 1.6;
+       font-size: 18px;
+       margin: 0 0 20px 0;
+       line-height: 1.5;
        color: rgba(255, 255, 255, 0.9);
        font-weight: 500;
        text-align: center;
@@ -3637,12 +3880,12 @@
    .popup-features {
        display: grid;
        grid-template-columns: repeat(2, 1fr);
-       gap: 25px;
-       margin: 30px 0;
+       gap: 15px;
+       margin: 20px 0;
    }
    .popup-feature {
        background: rgba(0, 50, 100, 0.2);
-       padding: 25px;
+       padding: 18px;
        border-radius: 15px;
        border: 2px solid rgba(0, 150, 255, 0.3);
        transition: all 0.3s ease;
@@ -3654,32 +3897,32 @@
        box-shadow: 0 10px 30px rgba(0, 150, 255, 0.3);
    }
    .popup-feature i {
-       font-size: 32px;
+       font-size: 28px;
        color: rgba(0, 150, 255, 0.9);
-       margin-bottom: 15px;
+       margin-bottom: 10px;
        display: block;
        text-shadow: 0 0 15px rgba(0, 150, 255, 0.6);
    }
    .popup-feature h3 {
-       font-size: 20px;
-       margin: 0 0 10px 0;
+       font-size: 18px;
+       margin: 0 0 8px 0;
        color: #ffffff;
        font-weight: 700;
    }
    .popup-feature p {
-       font-size: 15px;
+       font-size: 14px;
        margin: 0;
        color: rgba(255, 255, 255, 0.8);
-       line-height: 1.5;
+       line-height: 1.4;
    }
    .popup-footer {
-       margin-top: 30px;
-       padding-top: 25px;
+       margin-top: 20px;
+       padding-top: 15px;
        border-top: 2px solid rgba(0, 150, 255, 0.3);
        text-align: center;
    }
    .popup-cta {
-       font-size: 18px;
+       font-size: 16px;
        margin: 0;
        color: rgba(255, 255, 255, 0.9);
        font-weight: 600;
@@ -9484,111 +9727,6 @@
       transform: rotate(90deg);
   }
 
-  /* Enhanced festive colors for game of the season */
-  .festive-game-card {
-      background: linear-gradient(135deg, 
-          rgba(255, 107, 107, 0.15) 0%, 
-          rgba(78, 205, 196, 0.15) 25%,
-          rgba(69, 183, 209, 0.15) 50%, 
-          rgba(249, 202, 36, 0.15) 75%,
-          rgba(240, 147, 43, 0.15) 100%);
-      backdrop-filter: blur(30px) saturate(180%);
-      border-radius: 30px;
-      border: 3px solid;
-      border-image: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #eb4d4b) 1;
-      padding: 40px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 
-          0 20px 60px rgba(0, 0, 0, 0.5), 
-          0 0 40px rgba(255, 107, 107, 0.3),
-          0 0 60px rgba(78, 205, 196, 0.2);
-      animation: festiveCardGlow 4s ease-in-out infinite;
-  }
-
-  .festive-badge {
-      background: linear-gradient(135deg, #ff6b6b, #f9ca24);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 25px;
-      font-weight: 700;
-      font-size: 14px;
-      box-shadow: 
-          0 4px 15px rgba(255, 107, 107, 0.4),
-          0 0 20px rgba(249, 202, 36, 0.3);
-      animation: festiveBadgePulse 2s ease-in-out infinite;
-      z-index: 5;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-  }
-
-  .festive-play-btn {
-      background: linear-gradient(135deg, #ff6b6b, #f0932b);
-      color: white;
-      border: none;
-      padding: 18px 40px;
-      border-radius: 50px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 
-          0 8px 25px rgba(255, 107, 107, 0.4),
-          0 0 30px rgba(240, 147, 43, 0.3);
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      position: relative;
-      overflow: hidden;
-  }
-
-  .festive-play-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.5s ease;
-  }
-
-  .festive-play-btn:hover::before {
-      left: 100%;
-  }
-
-  .festive-play-btn:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 
-          0 12px 35px rgba(255, 107, 107, 0.6),
-          0 0 40px rgba(240, 147, 43, 0.4);
-  }
-
-  .festive-game-title {
-      font-size: 48px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
-      background-size: 200% 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 20px;
-      animation: gradientTextShift 3s ease infinite;
-  }
-
-  @keyframes gradientTextShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-  }
-
-  .festive-game-stars .fa-star.active {
-      color: #f9ca24;
-      filter: drop-shadow(0 0 8px rgba(249, 202, 36, 0.8));
-      text-shadow: 
-          0 0 20px rgba(249, 202, 36, 0.8),
-          0 0 40px rgba(249, 202, 36, 0.4);
-  }
-
   /* Game file specific ad blocker styles */
   .premium-game-page .adsbygoogle,
   .premium-game-page ins.adsbygoogle,
@@ -9599,54 +9737,6 @@
       height: 0 !important;
       width: 0 !important;
       overflow: hidden !important;
-  }
-
-  /* Enhanced festive colors for game of the season - updated gradient */
-  .game-of-season-header h2 {
-      background-size: 200% 200%;
-      animation: gradientShift 3s ease infinite;
-  }
-
-  .festive-game-card {
-      background-size: 200% 200%;
-      animation: festiveCardGlow 4s ease-in-out infinite, gradientBackground 5s ease infinite;
-  }
-
-  @keyframes gradientBackground {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-  }
-
-  /* Enhanced festive badge with glow */
-  .festive-badge {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #ff6b6b, #f9ca24);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 25px;
-      font-weight: 700;
-      font-size: 14px;
-      box-shadow: 
-          0 4px 15px rgba(255, 107, 107, 0.4),
-          0 0 20px rgba(249, 202, 36, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      animation: festiveBadgePulse 2s ease-in-out infinite;
-      z-index: 5;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  /* Enhanced slope rider center card colors */
-  .slope-rider-center-card {
-      filter: drop-shadow(0 10px 30px rgba(255, 107, 107, 0.3));
-  }
-
-  .slope-rider-center-card:hover {
-      filter: drop-shadow(0 15px 40px rgba(78, 205, 196, 0.4));
   }
 
   /* Ad blocker notice for game pages */
