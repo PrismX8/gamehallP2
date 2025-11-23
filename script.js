@@ -5224,7 +5224,7 @@
                     renderRequestsTab();
                     break;
                 case 'search':
-                    // Search loads on input
+                    loadAllUsersForSearch();
                     break;
                 case 'blocked':
                     renderBlockedTab();
@@ -5687,6 +5687,60 @@
   const clearSearchBtn = document.getElementById('clearSearchBtn');
   const searchResults = document.getElementById('searchResults');
   
+  // Load all users when search tab is opened
+  function loadAllUsersForSearch() {
+    if (!searchResults) return;
+    
+    // Show loading state
+    searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-spinner fa-spin"></i><h3>Loading Users...</h3><p>Please wait</p></div>';
+    
+    // Use backend API to get all profiles
+    if (backendAPI && backendAPI.request) {
+      Promise.all([
+        backendAPI.request('/friends/profiles/all', { method: 'GET' }).catch(() => []),
+        backendAPI.getOnlineUsers().catch(() => [])
+      ]).then(([profiles, onlineUsers]) => {
+        // Convert profiles array to object format for cache
+        const allProfiles = {};
+        if (Array.isArray(profiles)) {
+          profiles.forEach(profile => {
+            if (profile.user_id) {
+              allProfiles[profile.user_id] = {
+                username: profile.username || 'User',
+                avatar: profile.avatar || '👤',
+                avatarImage: profile.avatarImage || null,
+                color: profile.color || '#007bff',
+                status: profile.status || ''
+              };
+            }
+          });
+        }
+        profilesCache = { ...profilesCache, ...allProfiles }; // Merge, don't replace
+        
+        // Convert online users array to object format
+        onlineCache = {};
+        if (Array.isArray(onlineUsers)) {
+          onlineUsers.forEach(user => {
+            const id = user.visitor_id || user.userId || user.visitorId;
+            if (id) {
+              onlineCache[id] = { online: true, timestamp: user.timestamp || Date.now() };
+            }
+          });
+        }
+        cacheTimestamp = Date.now();
+        
+        // Display all users (no filter)
+        performSearch('');
+      }).catch(err => {
+        console.error('Error loading profiles for search:', err);
+        searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Users</h3><p>Please try again</p></div>';
+      });
+    } else {
+      // Fallback: show message if backend not available
+      searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Backend Not Available</h3><p>Please check your connection</p></div>';
+    }
+  }
+  
   searchFriendsInput?.addEventListener('input', Utils.debounce((e) => {
       const query = e.target.value.toLowerCase().trim();
     
@@ -5694,86 +5748,39 @@
         clearSearchBtn.style.display = query.length > 0 ? 'flex' : 'none';
     }
     
-    if (!searchResults || !db) return;
+    if (!searchResults) return;
     
-    if (query.length === 0) {
-        searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-search"></i><h3>Start Searching</h3><p>Type a username to find friends</p></div>';
-          return;
-      }
-      
-    // Always load all profiles for search (not just cached friends/requests)
-    // This ensures we can find any user, not just ones we've interacted with
-    if (query.length >= 2) {
-      // Use backend API to get all profiles
-      if (backendAPI && backendAPI.request) {
-        Promise.all([
-          backendAPI.request('/friends/profiles/all', { method: 'GET' }).catch(() => []),
-          backendAPI.getOnlineUsers().catch(() => [])
-        ]).then(([profiles, onlineUsers]) => {
-          // Convert profiles array to object format for cache
-          const allProfiles = {};
-          if (Array.isArray(profiles)) {
-            profiles.forEach(profile => {
-              if (profile.user_id) {
-                allProfiles[profile.user_id] = {
-                  username: profile.username || 'User',
-                  avatar: profile.avatar || '👤',
-                  avatarImage: profile.avatarImage || null,
-                  color: profile.color || '#007bff',
-                  status: profile.status || ''
-                };
-              }
-            });
-          }
-          profilesCache = { ...profilesCache, ...allProfiles }; // Merge, don't replace
-          
-          // Convert online users array to object format
-          onlineCache = {};
-          if (Array.isArray(onlineUsers)) {
-            onlineUsers.forEach(user => {
-              const id = user.visitor_id || user.userId || user.visitorId;
-              if (id) {
-                onlineCache[id] = { online: true, timestamp: user.timestamp || Date.now() };
-              }
-            });
-          }
-          cacheTimestamp = Date.now();
-          performSearch(query);
-        }).catch(err => {
-          console.error('Error loading profiles for search:', err);
-          // Use cached data even if reload fails
-          performSearch(query);
-        });
-      } else {
-        // Fallback to cached data if backend not available
-        performSearch(query);
-      }
-    } else {
-        performSearch(query);
-    }
-  }, 400));
+    // Filter the already-loaded users
+    performSearch(query);
+  }, 300));
   
   clearSearchBtn?.addEventListener('click', () => {
     if (searchFriendsInput) {
         searchFriendsInput.value = '';
         clearSearchBtn.style.display = 'none';
-        if (searchResults) {
-            searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-search"></i><h3>Start Searching</h3><p>Type a username to find friends</p></div>';
-        }
+        // Reload all users when search is cleared
+        performSearch('');
     }
   });
   
   function performSearch(query) {
     if (!searchResults) return;
     
+    // Filter users based on query (empty query shows all)
     const matches = Object.entries(profilesCache)
-              .filter(([id, profile]) => 
-                  id !== visitorId && 
-            !friendsData.blocked.includes(id) &&
-                  profile.username && 
-                  profile.username.toLowerCase().includes(query)
-              )
-        .slice(0, 30)
+              .filter(([id, profile]) => {
+                  // Exclude self and blocked users
+                  if (id === visitorId || friendsData.blocked.includes(id)) {
+                      return false;
+                  }
+                  // If no query, show all users
+                  if (!query || query.length === 0) {
+                      return profile.username; // Only show users with usernames
+                  }
+                  // If query exists, filter by username
+                  return profile.username && profile.username.toLowerCase().includes(query);
+              })
+        .slice(0, 100) // Show up to 100 users
               .map(([id, profile]) => {
             const isOnline = !!onlineCache[id];
             const isFriend = friendsData.friends.includes(id);
@@ -5823,7 +5830,11 @@
         });
     
     if (matches.length === 0) {
-        searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-search"></i><h3>No Users Found</h3><p>Try a different search term</p></div>';
+        if (query && query.length > 0) {
+            searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-search"></i><h3>No Users Found</h3><p>Try a different search term</p></div>';
+        } else {
+            searchResults.innerHTML = '<div class="friends-empty-state"><i class="fas fa-users"></i><h3>No Users Available</h3><p>No users found in the system</p></div>';
+        }
     } else {
         searchResults.innerHTML = matches.join('');
     }
