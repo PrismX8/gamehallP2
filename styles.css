@@ -3132,6 +3132,12 @@
        background-clip: text;
        margin-bottom: 10px;
        text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+       animation: gradientShift 3s ease infinite;
+   }
+   @keyframes gradientShift {
+       0% { background-position: 0% 50%; }
+       50% { background-position: 100% 50%; }
+       100% { background-position: 0% 50%; }
    }
    .game-of-season-header p {
        color: rgba(255, 255, 255, 0.7);
@@ -9363,4 +9369,356 @@
       .leaderboardTab {
           min-width: calc(50% - 5px);
       }
+  }
+
+  /* ========== Ad Blocker Detection Styles for Game Files ========== */
+  /* Hide ads when ad blocker is detected */
+  .adsbygoogle,
+  ins.adsbygoogle,
+  iframe[src*="adsbygoogle"],
+  iframe[src*="doubleclick"],
+  iframe[src*="googlesyndication"],
+  div[id*="google_ads"],
+  div[class*="ad-"],
+  div[class*="ads-"],
+  div[id*="ad-"],
+  div[id*="ads-"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+      position: absolute !important;
+      left: -9999px !important;
+  }
+
+  /* Ad blocker detection banner (shown when ads are blocked) */
+  .ad-blocker-notice {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(249, 202, 36, 0.95));
+      backdrop-filter: blur(20px);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      max-width: 350px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      animation: slideInUp 0.5s ease-out;
+  }
+
+  .ad-blocker-notice.show {
+      display: block;
+  }
+
+  @keyframes slideInUp {
+      from {
+          transform: translateY(100px);
+          opacity: 0;
+      }
+      to {
+          transform: translateY(0);
+          opacity: 1;
+      }
+  }
+
+  .ad-blocker-notice h4 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+
+  .ad-blocker-notice p {
+      margin: 0 0 15px 0;
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.95;
+  }
+
+  .ad-blocker-notice button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      width: 100%;
+  }
+
+  .ad-blocker-notice button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateY(-2px);
+  }
+
+  .ad-blocker-notice .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+  }
+
+  .ad-blocker-notice .close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+  }
+
+  /* Enhanced festive colors for game of the season */
+  .festive-game-card {
+      background: linear-gradient(135deg, 
+          rgba(255, 107, 107, 0.15) 0%, 
+          rgba(78, 205, 196, 0.15) 25%,
+          rgba(69, 183, 209, 0.15) 50%, 
+          rgba(249, 202, 36, 0.15) 75%,
+          rgba(240, 147, 43, 0.15) 100%);
+      backdrop-filter: blur(30px) saturate(180%);
+      border-radius: 30px;
+      border: 3px solid;
+      border-image: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #eb4d4b) 1;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+          0 20px 60px rgba(0, 0, 0, 0.5), 
+          0 0 40px rgba(255, 107, 107, 0.3),
+          0 0 60px rgba(78, 205, 196, 0.2);
+      animation: festiveCardGlow 4s ease-in-out infinite;
+  }
+
+  .festive-badge {
+      background: linear-gradient(135deg, #ff6b6b, #f9ca24);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 
+          0 4px 15px rgba(255, 107, 107, 0.4),
+          0 0 20px rgba(249, 202, 36, 0.3);
+      animation: festiveBadgePulse 2s ease-in-out infinite;
+      z-index: 5;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+  }
+
+  .festive-play-btn {
+      background: linear-gradient(135deg, #ff6b6b, #f0932b);
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 
+          0 8px 25px rgba(255, 107, 107, 0.4),
+          0 0 30px rgba(240, 147, 43, 0.3);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+  }
+
+  .festive-play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+  }
+
+  .festive-play-btn:hover::before {
+      left: 100%;
+  }
+
+  .festive-play-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 
+          0 12px 35px rgba(255, 107, 107, 0.6),
+          0 0 40px rgba(240, 147, 43, 0.4);
+  }
+
+  .festive-game-title {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      animation: gradientTextShift 3s ease infinite;
+  }
+
+  @keyframes gradientTextShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+  }
+
+  .festive-game-stars .fa-star.active {
+      color: #f9ca24;
+      filter: drop-shadow(0 0 8px rgba(249, 202, 36, 0.8));
+      text-shadow: 
+          0 0 20px rgba(249, 202, 36, 0.8),
+          0 0 40px rgba(249, 202, 36, 0.4);
+  }
+
+  /* Game file specific ad blocker styles */
+  .premium-game-page .adsbygoogle,
+  .premium-game-page ins.adsbygoogle,
+  .premium-game-page iframe[src*="adsbygoogle"],
+  .premium-game-page div[id*="google_ads"] {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+  }
+
+  /* Enhanced festive colors for game of the season - updated gradient */
+  .game-of-season-header h2 {
+      background-size: 200% 200%;
+      animation: gradientShift 3s ease infinite;
+  }
+
+  .festive-game-card {
+      background-size: 200% 200%;
+      animation: festiveCardGlow 4s ease-in-out infinite, gradientBackground 5s ease infinite;
+  }
+
+  @keyframes gradientBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+  }
+
+  /* Enhanced festive badge with glow */
+  .festive-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ff6b6b, #f9ca24);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 
+          0 4px 15px rgba(255, 107, 107, 0.4),
+          0 0 20px rgba(249, 202, 36, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      animation: festiveBadgePulse 2s ease-in-out infinite;
+      z-index: 5;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Enhanced slope rider center card colors */
+  .slope-rider-center-card {
+      filter: drop-shadow(0 10px 30px rgba(255, 107, 107, 0.3));
+  }
+
+  .slope-rider-center-card:hover {
+      filter: drop-shadow(0 15px 40px rgba(78, 205, 196, 0.4));
+  }
+
+  /* Ad blocker notice for game pages */
+  .game-ad-blocker-notice {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.98), rgba(249, 202, 36, 0.98));
+      backdrop-filter: blur(30px);
+      color: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+      z-index: 10001;
+      max-width: 500px;
+      width: 90%;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+      animation: fadeInScale 0.5s ease-out;
+  }
+
+  .game-ad-blocker-notice.show {
+      display: block;
+  }
+
+  @keyframes fadeInScale {
+      from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.8);
+      }
+      to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+      }
+  }
+
+  .game-ad-blocker-notice h3 {
+      margin: 0 0 15px 0;
+      font-size: 24px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+  }
+
+  .game-ad-blocker-notice p {
+      margin: 0 0 25px 0;
+      font-size: 16px;
+      line-height: 1.6;
+      opacity: 0.95;
+  }
+
+  .game-ad-blocker-notice button {
+      background: rgba(255, 255, 255, 0.25);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+  }
+
+  .game-ad-blocker-notice button:hover {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   }

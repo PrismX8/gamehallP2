@@ -362,7 +362,7 @@
         </button>
         <span id="currentSiteTitle" class="current-site-title"></span>
     </div>
-    <iframe id="embeddedSite" src=""></iframe>
+    <iframe id="embeddedSite" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer-when-downgrade"></iframe>
 </div>
 <div id="tutorialOverlay">
     <div class="tutorialBubble" id="tutorialBubble">Tutorial text here
@@ -720,6 +720,24 @@
         </div>
         <div id="adminChatList" class="admin-list-container">
           <p class="admin-list-empty">Loading chat messages...</p>
+        </div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-header">
+          <h3 class="admin-section-title">
+            <i class="fas fa-poll"></i>
+            Manage Polls
+          </h3>
+          <button id="refreshPollsListBtn" class="admin-refresh-btn">
+            <i class="fas fa-sync-alt"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+        <button id="deleteAllPollsBtn" class="admin-action-btn admin-action-btn-red" style="width:100%; margin-bottom:15px;">
+          <i class="fas fa-trash-alt"></i> Delete All Polls
+        </button>
+        <div id="adminPollsList" class="admin-list-container">
+          <p class="admin-list-empty">Loading polls...</p>
         </div>
       </div>
     </div>
