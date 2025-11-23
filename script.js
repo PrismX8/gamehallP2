@@ -165,45 +165,46 @@
           console.log('✅ Backend API connected');
           db = backendAPI.database(); // Backend API (Firebase-compatible interface)
           
-          // Set up refs now that db is available
-          totalRef = db ? db.ref('totalVisitors') : null;
-          onlineDbRef = db ? db.ref('online') : null;
+          // Set up real-time listeners for visitor counter using direct socket events
+          const updateVisitorCounter = (online, total) => {
+            // Update stored state
+            if (typeof online === 'number') currentOnlineCount = online;
+            if (typeof total === 'number') currentTotalCount = total;
+            
+            const onlineCountEl = document.getElementById('onlineCount');
+            const totalCountEl = document.getElementById('totalCount');
+            if (onlineCountEl) onlineCountEl.textContent = currentOnlineCount;
+            if (totalCountEl) totalCountEl.textContent = currentTotalCount.toLocaleString();
+            if (!onlineCountEl && !totalCountEl && visitorCounter) {
+              visitorCounter.innerText = `${currentOnlineCount} Online | ${currentTotalCount.toLocaleString()} Total Visitors`;
+            }
+          };
           
-          // Set up real-time listeners for visitor counter
-          if (onlineDbRef && totalRef) {
-            // Store last snapshots for both refs
-            let lastOnlineSnapshot = null;
-            let lastTotalSnapshot = null;
-            
-            const updateCounterFromSnapshots = () => {
-              // Update with whatever data we have - don't wait for both
-              const online = lastOnlineSnapshot && lastOnlineSnapshot.numChildren ? lastOnlineSnapshot.numChildren() : 0;
-              const total = lastTotalSnapshot && lastTotalSnapshot.val ? lastTotalSnapshot.val() : INITIAL_VISITOR_COUNT;
-              
-              // Updating counter
-              
-              const onlineCountEl = document.getElementById('onlineCount');
-              const totalCountEl = document.getElementById('totalCount');
-              if (onlineCountEl) onlineCountEl.textContent = online;
-              if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
-              if (!onlineCountEl && !totalCountEl && visitorCounter) {
-                visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
-              }
-            };
-            
-            onlineDbRef.on('value', (snap) => {
-              lastOnlineSnapshot = snap;
-              updateCounterFromSnapshots();
-            });
-            
-            totalRef.on('value', (snap) => {
-              lastTotalSnapshot = snap;
-              updateCounterFromSnapshots();
-            });
-            
-            // Get initial values
-            updateCounter();
-          }
+          // Listen for online users updates
+          backendAPI.on('visitors:online', (users) => {
+            const onlineCount = Array.isArray(users) ? users.length : (users ? Object.keys(users).length : 0);
+            updateVisitorCounter(onlineCount, null); // null means don't update total
+          });
+          
+          // Listen for total visitors updates
+          backendAPI.on('visitors:total', (data) => {
+            const total = data && data.totalVisitors ? data.totalVisitors : INITIAL_VISITOR_COUNT;
+            updateVisitorCounter(null, total); // null means don't update online
+          });
+          
+          // Request initial data using API methods
+          Promise.all([
+            backendAPI.getOnlineUsers().catch(() => []),
+            backendAPI.getTotalVisitors().catch(() => ({ totalVisitors: INITIAL_VISITOR_COUNT }))
+          ]).then(([users, totalData]) => {
+            const onlineCount = Array.isArray(users) ? users.length : 0;
+            const total = totalData && totalData.totalVisitors ? totalData.totalVisitors : INITIAL_VISITOR_COUNT;
+            updateVisitorCounter(onlineCount, total);
+          }).catch(err => {
+            console.warn('Error fetching initial visitor data:', err);
+            // Set defaults
+            updateVisitorCounter(0, INITIAL_VISITOR_COUNT);
+          });
           
           // Set up chat listeners
           if (db && typeof setupChatListeners === 'function') {
@@ -379,9 +380,9 @@
   // Make incrementVisitorCount available globally
   window.incrementVisitorCount = incrementVisitorCount;
   
-  // These will be set up after backend connection is established
-  let totalRef = null;
-  let onlineDbRef = null;
+  // Visitor counter state (no longer using refs)
+  let currentOnlineCount = 0;
+  let currentTotalCount = INITIAL_VISITOR_COUNT;
   
   // Initialize games arrays early to avoid temporal dead zone issues
   let gameSites = [];
@@ -548,42 +549,18 @@
     }
   };
   
-  function updateCounter(onlineSnapshot, totalSnapshot) {
-      let online = 0;
-      let total = INITIAL_VISITOR_COUNT;
-      
-      // Use provided snapshots or fetch if not provided
-      if (onlineSnapshot && totalSnapshot) {
-          online = onlineSnapshot.numChildren ? onlineSnapshot.numChildren() : 0;
-          total = totalSnapshot.val ? totalSnapshot.val() : INITIAL_VISITOR_COUNT;
-          
-          const onlineCountEl = document.getElementById('onlineCount');
-          const totalCountEl = document.getElementById('totalCount');
-          if (onlineCountEl) onlineCountEl.textContent = online;
-          if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
-          if (!onlineCountEl && !totalCountEl && visitorCounter) {
-              visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
-          }
-      } else if (!onlineDbRef || !totalRef) {
-          return;
-      } else {
-          // Fallback: fetch if snapshots not provided
-          onlineDbRef.once('value').then(snap => {
-              const online = snap.numChildren ? snap.numChildren() : 0;
-              totalRef.once('value').then(snap2 => {
-                const total = snap2.val ? snap2.val() : INITIAL_VISITOR_COUNT;
-                const onlineCountEl = document.getElementById('onlineCount');
-                const totalCountEl = document.getElementById('totalCount');
-                if (onlineCountEl) onlineCountEl.textContent = online;
-                if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
-                if (!onlineCountEl && !totalCountEl && visitorCounter) {
-                    visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
-                }
-              });
-          }).catch(error => {
-              console.error('Error updating counter:', error);
-          });
+  // Update visitor counter display
+  function updateVisitorCounterDisplay(online, total) {
+      const onlineCountEl = document.getElementById('onlineCount');
+      const totalCountEl = document.getElementById('totalCount');
+      if (onlineCountEl) onlineCountEl.textContent = online;
+      if (totalCountEl) totalCountEl.textContent = total.toLocaleString();
+      if (!onlineCountEl && !totalCountEl && visitorCounter) {
+          visitorCounter.innerText = `${online} Online | ${total.toLocaleString()} Total Visitors`;
       }
+      // Store current values
+      currentOnlineCount = online;
+      currentTotalCount = total;
   }
   
   // Format number with commas for display
@@ -591,46 +568,7 @@
     return num.toLocaleString();
   }
   
-  // Update counter live when online users change
-  // Throttle updates to prevent excessive calls
-  let counterUpdateThrottle = false;
-  let lastOnlineSnapshot = null;
-  let lastTotalSnapshot = null;
-  
-  function throttledUpdateCounter(snapshot) {
-    if (counterUpdateThrottle) {
-      // Store latest snapshot to use when throttle releases
-      if (snapshot) {
-        if (snapshot.path && snapshot.path.includes('total')) {
-          lastTotalSnapshot = snapshot;
-        } else {
-          lastOnlineSnapshot = snapshot;
-        }
-      }
-      return;
-    }
-    counterUpdateThrottle = true;
-    
-    // Use stored snapshots if available
-    if (snapshot) {
-      if (snapshot.path && snapshot.path.includes('total')) {
-        lastTotalSnapshot = snapshot;
-      } else {
-        lastOnlineSnapshot = snapshot;
-      }
-    }
-    
-    // Update counter with both snapshots
-    updateCounter(lastOnlineSnapshot, lastTotalSnapshot);
-    
-    setTimeout(() => { 
-      counterUpdateThrottle = false;
-      // Update again with any snapshots that arrived during throttle
-      if (lastOnlineSnapshot || lastTotalSnapshot) {
-        updateCounter(lastOnlineSnapshot, lastTotalSnapshot);
-      }
-    }, 1000); // Update max once per second
-  }
+  // Old throttling code removed - using direct socket events now
   
   // Listeners will be set up after backend connection (see connectBackend function above)
   
@@ -1286,10 +1224,21 @@
   
   resetVisitorsBtn.addEventListener('click', () => {
   if(confirm('Reset total visitors count to 127,349?')) {
-    db.ref('totalVisitors').set(INITIAL_VISITOR_COUNT).then(() => {
-      alert('Visitors count reset to 127,349');
-      updateCounter(); // Refresh the display
-      }).catch(err => alert('Error: ' + err.message));
+    if (backendAPI && backendAPI.request) {
+      backendAPI.request('/visitors/set', {
+        method: 'POST',
+        body: { count: INITIAL_VISITOR_COUNT }
+      }).then(() => {
+        alert('Visitors count reset to 127,349');
+        // Refresh the display
+        backendAPI.getTotalVisitors().then(data => {
+          const total = data && data.totalVisitors ? data.totalVisitors : INITIAL_VISITOR_COUNT;
+          updateVisitorCounterDisplay(currentOnlineCount, total);
+        });
+      }).catch(err => alert('Error: ' + (err.message || err)));
+    } else {
+      alert('Backend not connected');
+    }
     }
   });
   
@@ -5755,21 +5704,50 @@
     // Always load all profiles for search (not just cached friends/requests)
     // This ensures we can find any user, not just ones we've interacted with
     if (query.length >= 2) {
-      Promise.all([
-          db.ref('profiles').once('value'),
-          db.ref('online').once('value')
-      ]).then(([profilesSnap, onlineSnap]) => {
-        // Update cache with all profiles for search
-        const allProfiles = profilesSnap.val() || {};
-        profilesCache = { ...profilesCache, ...allProfiles }; // Merge, don't replace
-        onlineCache = onlineSnap.val() || {};
-        cacheTimestamp = Date.now();
-        performSearch(query);
-      }).catch(err => {
+      // Use backend API to get all profiles
+      if (backendAPI && backendAPI.request) {
+        Promise.all([
+          backendAPI.request('/friends/profiles/all', { method: 'GET' }).catch(() => []),
+          backendAPI.getOnlineUsers().catch(() => [])
+        ]).then(([profiles, onlineUsers]) => {
+          // Convert profiles array to object format for cache
+          const allProfiles = {};
+          if (Array.isArray(profiles)) {
+            profiles.forEach(profile => {
+              if (profile.user_id) {
+                allProfiles[profile.user_id] = {
+                  username: profile.username || 'User',
+                  avatar: profile.avatar || '👤',
+                  avatarImage: profile.avatarImage || null,
+                  color: profile.color || '#007bff',
+                  status: profile.status || ''
+                };
+              }
+            });
+          }
+          profilesCache = { ...profilesCache, ...allProfiles }; // Merge, don't replace
+          
+          // Convert online users array to object format
+          onlineCache = {};
+          if (Array.isArray(onlineUsers)) {
+            onlineUsers.forEach(user => {
+              const id = user.visitor_id || user.userId || user.visitorId;
+              if (id) {
+                onlineCache[id] = { online: true, timestamp: user.timestamp || Date.now() };
+              }
+            });
+          }
+          cacheTimestamp = Date.now();
+          performSearch(query);
+        }).catch(err => {
           console.error('Error loading profiles for search:', err);
           // Use cached data even if reload fails
           performSearch(query);
-      });
+        });
+      } else {
+        // Fallback to cached data if backend not available
+        performSearch(query);
+      }
     } else {
         performSearch(query);
     }

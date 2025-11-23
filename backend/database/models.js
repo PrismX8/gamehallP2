@@ -403,12 +403,22 @@ const UserProfile = {
     });
   },
   
+  getAll: () => {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT * FROM user_profiles ORDER BY updated_at DESC`;
+      db.getDb().all(sql, [], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  },
+  
   set: (userId, profile) => {
     return new Promise((resolve, reject) => {
-      const { username, avatar, avatarImage, color } = profile;
-      const sql = `INSERT OR REPLACE INTO user_profiles (user_id, username, avatar, avatarImage, color, updated_at) 
-                   VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`;
-      db.getDb().run(sql, [userId, username, avatar, avatarImage, color], function(err) {
+      const { username, avatar, avatarImage, color, status } = profile;
+      const sql = `INSERT OR REPLACE INTO user_profiles (user_id, username, avatar, avatarImage, color, status, updated_at) 
+                   VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`;
+      db.getDb().run(sql, [userId, username, avatar, avatarImage, color, status || null], function(err) {
         if (err) reject(err);
         else resolve();
       });

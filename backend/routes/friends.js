@@ -112,5 +112,16 @@ router.post('/profile', async (req, res) => {
   }
 });
 
+// Get all profiles (for search)
+router.get('/profiles/all', async (req, res) => {
+  try {
+    const profiles = await UserProfile.getAll();
+    res.json(profiles);
+  } catch (error) {
+    console.error('Error fetching all profiles:', error);
+    res.status(500).json({ error: 'Failed to fetch profiles' });
+  }
+});
+
 module.exports = { router, setIO };
 

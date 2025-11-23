@@ -123,6 +123,7 @@ function createTables() {
         avatar TEXT,
         avatarImage TEXT,
         color TEXT,
+        status TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`,
@@ -162,6 +163,11 @@ function createTables() {
         }
         completed++;
         if (completed === total) {
+          // Add status column to user_profiles if it doesn't exist (migration)
+          db.run(`ALTER TABLE user_profiles ADD COLUMN status TEXT`, (err) => {
+            // Ignore error if column already exists
+          });
+          
           // Initialize visitor stats if empty
           db.get('SELECT * FROM visitor_stats LIMIT 1', (err, row) => {
             if (!row) {
