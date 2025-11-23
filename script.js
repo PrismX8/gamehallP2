@@ -2767,21 +2767,30 @@
             onlineUsersCount.textContent = onlineIds.length;
         }
         
-        // Load profiles
-        db.ref('profiles').once('value').then(profilesSnap => {
-            const profiles = profilesSnap.val() || {};
-            const users = onlineIds.map(id => ({
-                id,
-                profile: profiles[id] || {},
-                timestamp: online[id]?.timestamp || Date.now()
-            })).sort((a, b) => b.timestamp - a.timestamp);
+        // Only load profiles for online users (not all profiles)
+        if (onlineIds.length > 0) {
+            const profilePromises = onlineIds.map(userId => 
+                db.ref(`profiles/${userId}`).once('value').then(profileSnap => ({ id: userId, data: profileSnap.val() }))
+            );
             
-            if (users.length === 0) {
-                fullscreenChatOnlineUsers.innerHTML = '<div class="empty-state">No users online</div>';
-                return;
-            }
-            
-            fullscreenChatOnlineUsers.innerHTML = users.map(({id, profile}) => {
+            Promise.all(profilePromises).then(profileResults => {
+                const profiles = {};
+                profileResults.forEach(({ id, data }) => {
+                    if (data) profiles[id] = data;
+                });
+                
+                const users = onlineIds.map(id => ({
+                    id,
+                    profile: profiles[id] || {},
+                    timestamp: online[id]?.timestamp || Date.now()
+                })).sort((a, b) => b.timestamp - a.timestamp);
+                
+                if (users.length === 0) {
+                    fullscreenChatOnlineUsers.innerHTML = '<div class="empty-state">No users online</div>';
+                    return;
+                }
+                
+                fullscreenChatOnlineUsers.innerHTML = users.map(({id, profile}) => {
                 const avatarStyle = profile.avatarImage 
                     ? `background-image: url(${profile.avatarImage}); background-size: cover; background-position: center;`
                     : `background: linear-gradient(135deg, #FFD700, #FFA500);`;
@@ -2799,8 +2808,32 @@
                         </div>
                     </div>
                 `;
-            }).join('');
-        });
+                }).join('');
+            }).catch(err => {
+                console.error('Error loading profiles:', err);
+                // Display without profile data if profile load fails
+                const users = onlineIds.map(id => ({
+                    id,
+                    profile: {},
+                    timestamp: online[id]?.timestamp || Date.now()
+                })).sort((a, b) => b.timestamp - a.timestamp);
+                
+                fullscreenChatOnlineUsers.innerHTML = users.map(({id, profile}) => `
+                    <div class="online-user-item">
+                        <div class="online-user-avatar" style="background: linear-gradient(135deg, #FFD700, #FFA500); display:flex; align-items:center; justify-content:center; font-size:24px;">
+                            👤
+                            <div class="online-user-status-dot"></div>
+                        </div>
+                        <div class="online-user-info">
+                            <div class="online-user-name">User</div>
+                            <div class="online-user-status">🟢 Online</div>
+                        </div>
+                    </div>
+                `).join('');
+            });
+        } else {
+            fullscreenChatOnlineUsers.innerHTML = '<div class="empty-state">No users online</div>';
+        }
     }).catch(err => {
         console.error('Error loading online users:', err);
     });
@@ -4251,16 +4284,13 @@
       
       if(type === 'chatters') {
           // Load only recent messages (last 500) instead of all for better performance
-          Promise.all([
-              db.ref('chat').limitToLast(500).once('value'),
-              db.ref('profiles').once('value')
-          ]).then(([chatSnap, profilesSnap]) => {
+          // Don't load all profiles - use avatar data from messages instead
+          db.ref('chat').limitToLast(500).once('value').then(chatSnap => {
               const messages = chatSnap.val() || {};
-              const profiles = profilesSnap.val() || {};
               const userCounts = {};
               const userProfiles = {}; // Store profile data for each user
               
-              // Count messages and get profiles from messages
+              // Count messages and get profiles from messages (no need to load all profiles)
               Object.values(messages).forEach(msg => {
                   if(msg && msg.user) {
                       userCounts[msg.user] = (userCounts[msg.user] || 0) + 1;
@@ -4270,16 +4300,6 @@
                               avatarImage: msg.avatarImage || null
                           };
                       }
-                  }
-              });
-              
-              // Get profiles from profiles collection
-              Object.values(profiles).forEach(profile => {
-                  if(profile && profile.username && !userProfiles[profile.username]) {
-                      userProfiles[profile.username] = {
-                          avatar: profile.avatar || '👤',
-                          avatarImage: profile.avatarImage || null
-                      };
                   }
               });
               
@@ -4297,26 +4317,50 @@
               leaderboardContent.innerHTML = '<p style="text-align:center; color:rgba(255,0,0,0.7);">Error loading leaderboard.</p>';
           });
       } else if(type === 'active') {
-          // Load both in parallel for faster loading
-          Promise.all([
-              db.ref('online').once('value'),
-              db.ref('profiles').once('value')
-          ]).then(([onlineSnap, profilesSnap]) => {
+          // Load only online users, then load profiles for top 10 only
+          db.ref('online').once('value').then(onlineSnap => {
               const online = onlineSnap.val() || {};
-              const profiles = profilesSnap.val() || {};
               const sorted = Object.entries(online).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).slice(0, 10);
+              const topUserIds = sorted.map(([id]) => id);
               
-              displayLeaderboard(sorted.map(([id, data], i) => {
-                  const profile = profiles[id] || Object.values(profiles).find(p => p.username === (data.username || 'User')) || {};
-                  return {
-                      rank: i + 1,
-                      name: data.username || profile.username || 'User',
-                      value: Math.floor((Date.now() - (data.timestamp || Date.now())) / 60000),
-                      label: 'min online',
-                      avatar: profile.avatar || '👤',
-                      avatarImage: profile.avatarImage || null
-                  };
-              }));
+              // Only load profiles for top 10 users
+              if (topUserIds.length > 0) {
+                  const profilePromises = topUserIds.map(userId => 
+                      db.ref(`profiles/${userId}`).once('value').then(snap => ({ id: userId, data: snap.val() }))
+                  );
+                  
+                  Promise.all(profilePromises).then(profileResults => {
+                      const profiles = {};
+                      profileResults.forEach(({ id, data }) => {
+                          if (data) profiles[id] = data;
+                      });
+                      
+                      displayLeaderboard(sorted.map(([id, data], i) => {
+                          const profile = profiles[id] || {};
+                          return {
+                              rank: i + 1,
+                              name: data.username || profile.username || 'User',
+                              value: Math.floor((Date.now() - (data.timestamp || Date.now())) / 60000),
+                              label: 'min online',
+                              avatar: profile.avatar || '👤',
+                              avatarImage: profile.avatarImage || null
+                          };
+                      }));
+                  }).catch(err => {
+                      console.error('Error loading profiles:', err);
+                      // Display without profile data if profile load fails
+                      displayLeaderboard(sorted.map(([id, data], i) => ({
+                          rank: i + 1,
+                          name: data.username || 'User',
+                          value: Math.floor((Date.now() - (data.timestamp || Date.now())) / 60000),
+                          label: 'min online',
+                          avatar: '👤',
+                          avatarImage: null
+                      })));
+                  });
+              } else {
+                  displayLeaderboard([]);
+              }
           }).catch(err => {
               console.error('Error loading active leaderboard:', err);
               leaderboardContent.innerHTML = '<p style="text-align:center; color:rgba(255,0,0,0.7);">Error loading leaderboard.</p>';
@@ -4412,9 +4456,8 @@
         db.ref(`friends/${visitorId}`).once('value'),
         db.ref(`friendRequests/${visitorId}`).once('value'),
         db.ref(`blocked/${visitorId}`).once('value'),
-          db.ref('profiles').once('value'),
           db.ref('online').once('value')
-    ]).then(([friendsSnap, requestsSnap, blockedSnap, profilesSnap, onlineSnap]) => {
+    ]).then(([friendsSnap, requestsSnap, blockedSnap, onlineSnap]) => {
         // Load friends
         const firebaseFriends = friendsSnap.val();
         if (firebaseFriends) {
@@ -4441,12 +4484,38 @@
             localStorage.setItem('blockedUsers', JSON.stringify(friendsData.blocked));
         }
         
-        // Cache profiles and online status
-        profilesCache = profilesSnap.val() || {};
+        // Cache online status
         onlineCache = onlineSnap.val() || {};
-        cacheTimestamp = Date.now();
         
-        updateAllDisplays();
+        // Only load profiles for friends, requests, and blocked users (not all profiles)
+        const userIdsToLoad = new Set([
+            ...friendsData.friends,
+            ...friendsData.requests.sent,
+            ...friendsData.requests.received,
+            ...friendsData.blocked
+        ]);
+        
+        if (userIdsToLoad.size > 0) {
+            // Load only specific user profiles
+            const profilePromises = Array.from(userIdsToLoad).map(userId => 
+                db.ref(`profiles/${userId}`).once('value').then(snap => ({ id: userId, data: snap.val() }))
+            );
+            
+            Promise.all(profilePromises).then(profileResults => {
+                profileResults.forEach(({ id, data }) => {
+                    if (data) {
+                        profilesCache[id] = data;
+                    }
+                });
+                cacheTimestamp = Date.now();
+                updateAllDisplays();
+            }).catch(err => {
+                console.error('Error loading specific profiles:', err);
+                updateAllDisplays();
+            });
+        } else {
+            updateAllDisplays();
+        }
     }).catch(err => {
         console.error('Error loading friends from Firebase:', err);
         updateAllDisplays();
@@ -4911,26 +4980,48 @@
     updateCountBadges();
   }
   
-  // Helper function to load user profiles
+  // Helper function to load user profiles - optimized to only load specific profiles
   function loadUserProfiles(userIds) {
-    if (!db) {
+    if (!db || !userIds || userIds.length === 0) {
         return Promise.resolve(userIds.map(id => ({
             id,
             profile: profilesCache[id] || {}
         })));
     }
     
-    const now = Date.now();
-    if (now - cacheTimestamp < CACHE_DURATION && Object.keys(profilesCache).length > 0) {
+    // Filter out user IDs we already have cached
+    const userIdsToLoad = userIds.filter(id => !profilesCache[id]);
+    
+    // If we have all profiles cached, return from cache
+    if (userIdsToLoad.length === 0) {
         return Promise.resolve(userIds.map(id => ({
             id,
             profile: profilesCache[id] || {}
         })));
     }
     
-    return db.ref('profiles').once('value').then(snap => {
-        profilesCache = snap.val() || {};
-        cacheTimestamp = now;
+    // Only load profiles we don't have cached
+    const profilePromises = userIdsToLoad.map(userId => 
+        db.ref(`profiles/${userId}`).once('value').then(snap => ({ id: userId, data: snap.val() }))
+    );
+    
+    return Promise.all(profilePromises).then(profileResults => {
+        // Update cache with new profiles
+        profileResults.forEach(({ id, data }) => {
+            if (data) {
+                profilesCache[id] = data;
+            }
+        });
+        cacheTimestamp = Date.now();
+        
+        // Return all requested profiles (from cache or newly loaded)
+        return userIds.map(id => ({
+            id,
+            profile: profilesCache[id] || {}
+        }));
+    }).catch(err => {
+        console.error('Error loading user profiles:', err);
+        // Return what we have in cache even if there's an error
         return userIds.map(id => ({
             id,
             profile: profilesCache[id] || {}
@@ -5129,9 +5220,12 @@
           return;
       }
       
-    // Load profiles if cache is stale
+    // Use cached profiles if available (don't reload all profiles on every search)
+    // Only reload if cache is very stale (5 minutes) or completely empty
     const now = Date.now();
-    if (now - cacheTimestamp > CACHE_DURATION || Object.keys(profilesCache).length === 0) {
+    const LONG_CACHE_DURATION = 300000; // 5 minutes instead of 10 seconds
+    if ((now - cacheTimestamp > LONG_CACHE_DURATION || Object.keys(profilesCache).length === 0) && query.length >= 2) {
+          // Only reload if user has typed at least 2 characters (showing intent to search)
           Promise.all([
               db.ref('profiles').once('value'),
               db.ref('online').once('value')
@@ -5139,6 +5233,10 @@
             profilesCache = profilesSnap.val() || {};
             onlineCache = onlineSnap.val() || {};
             cacheTimestamp = now;
+            performSearch(query);
+        }).catch(err => {
+            console.error('Error loading profiles for search:', err);
+            // Use cached data even if reload fails
             performSearch(query);
         });
     } else {
@@ -5274,16 +5372,12 @@
     friendsModal.style.opacity = '1';
     
     // Load fresh data
+    // Don't load all profiles here - profiles are loaded on-demand in loadFriendsFromFirebase
     if (db) {
-        Promise.all([
-            db.ref('profiles').once('value'),
-            db.ref('online').once('value')
-        ]).then(([profilesSnap, onlineSnap]) => {
-            profilesCache = profilesSnap.val() || {};
+        db.ref('online').once('value').then(onlineSnap => {
             onlineCache = onlineSnap.val() || {};
-            cacheTimestamp = Date.now();
         }).catch(err => {
-            console.error('Error loading friends data:', err);
+            console.error('Error loading online data:', err);
         });
     }
     
