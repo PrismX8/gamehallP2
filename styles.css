@@ -8371,10 +8371,6 @@
       color: rgba(255, 255, 255, 0.5);
       margin: 0;
   }
-  /* Fix for mask property compatibility */
-  .moderation-stat-value[style*="color"] {
-      /* Color styles are applied inline for dynamic values */
-  }
 
   /* ========== Drawing Modal Styles ========== */
   .canvas-toolbar {
@@ -9313,6 +9309,20 @@
   }
   .emoji-option:hover {
       background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* ========== Friends Modal Styles ========== */
+  .friends-full-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.96);
+      backdrop-filter: blur(20px);
+      z-index: 16000;
+      overflow-y: auto;
   }
 
   /* ========== Responsive Styles ========== */
