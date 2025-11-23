@@ -596,78 +596,78 @@
     </div>
 </div>
 <!-- Credits Modal -->
-<div id="creditsModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(15px); z-index:20002; align-items:center; justify-content:center; overflow-y:auto; padding:20px;">
-  <div style="width:min(900px, 96%); max-width:900px; background:rgba(15,15,25,0.98); backdrop-filter:blur(40px); border:2px solid rgba(255,215,0,0.3); border-radius:30px; padding:40px; box-shadow:0 30px 80px rgba(0,0,0,0.7), 0 0 60px rgba(255,215,0,0.2); color:rgba(255,255,255,0.9); margin:20px auto;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding-bottom:25px; border-bottom:2px solid rgba(255,215,0,0.3);">
-      <h2 style="margin:0; color:#FFD700; font-weight:700; font-size:32px; text-shadow:0 2px 15px rgba(255,215,0,0.5); letter-spacing:2px; display:flex; align-items:center; gap:15px;">
-        <i class="fas fa-star" style="font-size:28px; filter:drop-shadow(0 2px 8px rgba(255,215,0,0.6));"></i>
+<div id="creditsModal">
+  <div class="credits-modal-content">
+    <div class="credits-modal-header">
+      <h2 class="credits-modal-title">
+        <i class="fas fa-star"></i>
         Credits
       </h2>
-      <button id="closeCreditsBtn" style="border:none; background:rgba(255,215,0,0.15); color:#FFD700; font-size:28px; cursor:pointer; width:45px; height:45px; border-radius:12px; transition:all 0.3s ease; border:2px solid rgba(255,215,0,0.4); display:flex; align-items:center; justify-content:center; font-weight:bold;">&times;</button>
+      <button id="closeCreditsBtn" class="credits-close-btn">&times;</button>
     </div>
-    <div style="display:grid; gap:30px;">
+    <div class="credits-content-grid">
       <!-- Development Team -->
       <div>
-        <h3 style="color:#FFD700; font-size:22px; margin:0 0 20px 0; font-weight:700; display:flex; align-items:center; gap:12px; text-shadow:0 2px 10px rgba(255,215,0,0.4);">
+        <h3 class="credits-section-title">
           <i class="fas fa-code"></i>
           Development Team
         </h3>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
-          <div style="background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.2); border-radius:12px; padding:15px; text-align:center;">
-            <div style="font-size:18px; font-weight:600; color:#FFD700; margin-bottom:5px;">Lead Developer</div>
-            <div style="color:rgba(255,255,255,0.9);">???</div>
+        <div class="credits-team-grid">
+          <div class="credits-team-card">
+            <div class="credits-team-role">Lead Developer</div>
+            <div class="credits-team-name">???</div>
           </div>
-          <div style="background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.2); border-radius:12px; padding:15px; text-align:center;">
-            <div style="font-size:18px; font-weight:600; color:#FFD700; margin-bottom:5px;">UI/UX Designer</div>
-            <div style="color:rgba(255,255,255,0.9);">Design Team</div>
+          <div class="credits-team-card">
+            <div class="credits-team-role">UI/UX Designer</div>
+            <div class="credits-team-name">Design Team</div>
           </div>
-          <div style="background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.2); border-radius:12px; padding:15px; text-align:center;">
-            <div style="font-size:18px; font-weight:600; color:#FFD700; margin-bottom:5px;">Backend Developer</div>
-            <div style="color:rgba(255,255,255,0.9);">???</div>
+          <div class="credits-team-card">
+            <div class="credits-team-role">Backend Developer</div>
+            <div class="credits-team-name">???</div>
           </div>
         </div>
 </div>
       <!-- Special Thanks -->
       <div>
-        <h3 style="color:#FFD700; font-size:22px; margin:0 0 20px 0; font-weight:700; display:flex; align-items:center; gap:12px; text-shadow:0 2px 10px rgba(255,215,0,0.4);">
+        <h3 class="credits-section-title">
           <i class="fas fa-heart"></i>
           Special Thanks
         </h3>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;">
-          <div style="background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.15); border-radius:10px; padding:12px; text-align:center; color:rgba(255,255,255,0.85);">Beta Testers</div>
-          <div style="background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.15); border-radius:10px; padding:12px; text-align:center; color:rgba(255,255,255,0.85);">Community</div>
-          <div style="background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.15); border-radius:10px; padding:12px; text-align:center; color:rgba(255,255,255,0.85);">Contributors</div>
-          <div style="background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.15); border-radius:10px; padding:12px; text-align:center; color:rgba(255,255,255,0.85);">Supporters</div>
+        <div class="credits-thanks-grid">
+          <div class="credits-thanks-item">Beta Testers</div>
+          <div class="credits-thanks-item">Community</div>
+          <div class="credits-thanks-item">Contributors</div>
+          <div class="credits-thanks-item">Supporters</div>
         </div>
       </div>
       <!-- Technologies -->
       <div>
-        <h3 style="color:#FFD700; font-size:22px; margin:0 0 20px 0; font-weight:700; display:flex; align-items:center; gap:12px; text-shadow:0 2px 10px rgba(255,215,0,0.4);">
+        <h3 class="credits-section-title">
           <i class="fas fa-tools"></i>
           Technologies Used
         </h3>
-        <div style="display:flex; flex-wrap:wrap; gap:10px;">
-          <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">HTML5</span>
-          <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">CSS3</span>
-          <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">JavaScript</span>
-          <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">Socket.io</span>
-          <span style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.15)); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:8px 16px; color:#FFD700; font-size:14px; font-weight:500;">Font Awesome</span>
+        <div class="credits-tech-tags">
+          <span class="credits-tech-tag">HTML5</span>
+          <span class="credits-tech-tag">CSS3</span>
+          <span class="credits-tech-tag">JavaScript</span>
+          <span class="credits-tech-tag">Socket.io</span>
+          <span class="credits-tech-tag">Font Awesome</span>
         </div>
       </div>
       <!-- Version Info -->
-      <div style="border-top:1px solid rgba(255,215,0,0.2); padding-top:25px; margin-top:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
-          <div>
-            <div style="color:#FFD700; font-weight:600; font-size:16px; margin-bottom:5px;">Version</div>
-            <div style="color:rgba(255,255,255,0.8);">1.0.0</div>
+      <div class="credits-version-section">
+        <div class="credits-version-grid">
+          <div class="credits-version-item">
+            <div class="credits-version-label">Version</div>
+            <div class="credits-version-value">1.0.0</div>
           </div>
-          <div>
-            <div style="color:#FFD700; font-weight:600; font-size:16px; margin-bottom:5px;">Release Date</div>
-            <div style="color:rgba(255,255,255,0.8);">2024</div>
+          <div class="credits-version-item">
+            <div class="credits-version-label">Release Date</div>
+            <div class="credits-version-value">2024</div>
           </div>
-          <div>
-            <div style="color:#FFD700; font-weight:600; font-size:16px; margin-bottom:5px;">License</div>
-            <div style="color:rgba(255,255,255,0.8);">All Rights Reserved</div>
+          <div class="credits-version-item">
+            <div class="credits-version-label">License</div>
+            <div class="credits-version-value">All Rights Reserved</div>
           </div>
         </div>
       </div>
@@ -675,135 +675,135 @@
   </div>
 </div>
 <!-- Admin Panel -->
-<div id="adminModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:20001; align-items:center; justify-content:center;">
-  <div style="width:min(800px, 96%); max-height:90vh; overflow-y:auto; background:rgba(15,15,25,0.95); backdrop-filter:blur(30px); border:1px solid rgba(255,215,0,0.2); border-radius:24px; padding:30px; box-shadow:0 25px 60px rgba(0,0,0,0.5); color:rgba(255,255,255,0.9);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:20px; border-bottom:2px solid rgba(255,215,0,0.2);">
-      <h2 style="margin:0; color:#FFD700; font-weight:700; font-size:24px; text-shadow:0 2px 10px rgba(255,215,0,0.3); letter-spacing:1px; display:flex; align-items:center; gap:12px;">
-        <i class="fas fa-shield-alt" style="font-size:22px; filter:drop-shadow(0 2px 4px rgba(255,215,0,0.4));"></i>
+<div id="adminModal">
+  <div class="admin-modal-content">
+    <div class="admin-modal-header">
+      <h2 class="admin-modal-title">
+        <i class="fas fa-shield-alt"></i>
         Admin Panel
       </h2>
-      <button id="closeAdminBtn" style="border:none; background:rgba(255,215,0,0.1); color:#FFD700; font-size:24px; cursor:pointer; width:42px; height:42px; border-radius:12px; transition:all 0.3s ease; border:2px solid rgba(255,215,0,0.3); display:flex; align-items:center; justify-content:center; font-weight:bold;">&times;</button>
+      <button id="closeAdminBtn" class="admin-close-btn">&times;</button>
     </div>
     <div id="adminContent" style="display:none;">
-      <div style="display:grid; gap:12px; margin-bottom:24px;">
-        <button id="openModerationPanelBtn" style="padding:14px 20px; background:linear-gradient(135deg, #9c27b0, #7b1fa2); border:2px solid rgba(156,39,176,0.5); color:#ffffff; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(156,39,176,0.4);">
+      <div class="admin-actions-grid">
+        <button id="openModerationPanelBtn" class="admin-action-btn admin-action-btn-purple">
           <i class="fas fa-shield-alt"></i>
           <span>Chat Moderation Panel</span>
         </button>
-        <button id="deleteChatHistoryBtn" style="padding:14px 20px; background:#dc3545; border:2px solid #dc3545; color:#ffffff; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(220,53,69,0.3);">
+        <button id="deleteChatHistoryBtn" class="admin-action-btn admin-action-btn-red">
           <i class="fas fa-trash-alt"></i>
           <span>Delete All Chat History</span>
         </button>
-        <button id="clearCanvasAdminBtn" style="padding:14px 20px; background:#ffc107; border:2px solid #ffc107; color:#000; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(255,193,7,0.3);">
+        <button id="clearCanvasAdminBtn" class="admin-action-btn admin-action-btn-yellow">
           <i class="fas fa-eraser"></i>
           <span>Clear Canvas</span>
         </button>
-        <button id="resetVisitorsBtn" style="padding:14px 20px; background:#007bff; border:2px solid #007bff; color:#ffffff; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(0,123,255,0.3);">
+        <button id="resetVisitorsBtn" class="admin-action-btn admin-action-btn-blue">
           <i class="fas fa-redo"></i>
           <span>Reset Total Visitors Count</span>
         </button>
-        <button id="logoutAdminBtn" style="padding:14px 20px; background:#6c757d; border:2px solid #6c757d; color:#ffffff; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(108,117,125,0.3);">
+        <button id="logoutAdminBtn" class="admin-action-btn admin-action-btn-gray">
           <i class="fas fa-sign-out-alt"></i>
           <span>Logout</span>
         </button>
       </div>
-      <div style="border-top:1px solid rgba(255,215,0,0.1); padding-top:20px; margin-top:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-          <h3 style="color:#FFD700; font-size:18px; margin:0; font-weight:700; display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-comments" style="font-size:16px;"></i>
+      <div class="admin-section">
+        <div class="admin-section-header">
+          <h3 class="admin-section-title">
+            <i class="fas fa-comments"></i>
             Manage Chat Messages
           </h3>
-          <button id="refreshChatListBtn" style="padding:10px 16px; background:rgba(255,215,0,0.15); border:2px solid rgba(255,215,0,0.4); color:#FFD700; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; transition:all 0.3s ease;">
+          <button id="refreshChatListBtn" class="admin-refresh-btn">
             <i class="fas fa-sync-alt"></i>
             <span>Refresh</span>
           </button>
         </div>
-        <div id="adminChatList" style="max-height:400px; overflow-y:auto; background:rgba(255,255,255,0.05); border-radius:8px; padding:10px;">
-          <p style="text-align:center; color:rgba(255,255,255,0.5);">Loading chat messages...</p>
+        <div id="adminChatList" class="admin-list-container">
+          <p class="admin-list-empty">Loading chat messages...</p>
         </div>
       </div>
     </div>
     <!-- Moderation Panel Modal -->
-    <div id="moderationPanelModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:10002; overflow-y:auto; padding:20px; box-sizing:border-box;">
-      <div style="max-width:1400px; margin:0 auto; margin-bottom:20px; background:linear-gradient(135deg, rgba(26,26,26,0.98), rgba(40,40,50,0.98)); border-radius:20px; border:2px solid rgba(156,39,176,0.3); box-shadow:0 20px 60px rgba(0,0,0,0.5); overflow:visible;">
+    <div id="moderationPanelModal">
+      <div class="moderation-panel-container">
         <!-- Header -->
-        <div style="background:linear-gradient(135deg, #9c27b0, #7b1fa2); padding:25px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid rgba(255,255,255,0.1);">
-          <h2 style="margin:0; color:#ffffff; font-size:24px; font-weight:700; display:flex; align-items:center; gap:12px;">
+        <div class="moderation-panel-header">
+          <h2 class="moderation-panel-title">
             <i class="fas fa-shield-alt"></i>
             <span>Chat Moderation Control Panel</span>
           </h2>
-          <button id="closeModerationPanelBtn" style="background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.3); color:#ffffff; width:40px; height:40px; border-radius:10px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; transition:all 0.3s ease;">
+          <button id="closeModerationPanelBtn" class="moderation-close-btn">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <!-- Content -->
-        <div style="padding:30px; padding-bottom:40px; display:grid; grid-template-columns:1fr 1fr; gap:25px; overflow-y:auto; max-height:calc(100vh - 150px);">
+        <div class="moderation-panel-content">
           <!-- Left Column -->
           <div style="display:flex; flex-direction:column; gap:25px;">
             <!-- Profanity Filter -->
-            <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
-              <h3 style="margin:0 0 15px 0; color:#FFD700; font-size:18px; font-weight:600; display:flex; align-items:center; gap:10px;">
+            <div class="moderation-section">
+              <h3 class="moderation-section-title">
                 <i class="fas fa-ban"></i>
                 <span>Profanity Filter</span>
-                <label style="margin-left:auto; display:flex; align-items:center; gap:8px; cursor:pointer;">
-                  <input type="checkbox" id="profanityFilterToggle" checked style="width:18px; height:18px; cursor:pointer;">
-                  <span style="color:rgba(255,255,255,0.8); font-size:14px;">Enabled</span>
+                <label class="moderation-toggle-label">
+                  <input type="checkbox" id="profanityFilterToggle" checked>
+                  <span>Enabled</span>
                 </label>
               </h3>
-              <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <div class="moderation-input-group">
                 <label for="addProfanityWordInput" class="sr-only">Add word to filter</label>
-                <input type="text" id="addProfanityWordInput" name="profanityWord" placeholder="Add word to filter..." autocomplete="off" aria-label="Add word to filter" style="flex:1; padding:12px 15px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#ffffff; font-size:14px;">
-                <button id="addProfanityWordBtn" style="padding:12px 20px; background:#9c27b0; border:none; color:#ffffff; border-radius:10px; cursor:pointer; font-weight:600; font-size:14px;">
+                <input type="text" id="addProfanityWordInput" name="profanityWord" placeholder="Add word to filter..." autocomplete="off" aria-label="Add word to filter" class="moderation-input">
+                <button id="addProfanityWordBtn" class="moderation-add-btn">
                   <i class="fas fa-plus"></i> Add
                 </button>
               </div>
-              <div id="profanityWordsList" style="max-height:200px; overflow-y:auto; display:flex; flex-wrap:wrap; gap:8px; padding:10px; background:rgba(0,0,0,0.3); border-radius:10px;">
+              <div id="profanityWordsList" class="moderation-list-container">
                 <!-- Profanity words will be listed here -->
               </div>
             </div>
             <!-- Spam Detection Settings -->
-            <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
-              <h3 style="margin:0 0 15px 0; color:#FFD700; font-size:18px; font-weight:600; display:flex; align-items:center; gap:10px;">
+            <div class="moderation-section">
+              <h3 class="moderation-section-title">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>Spam Detection</span>
-                <label style="margin-left:auto; display:flex; align-items:center; gap:8px; cursor:pointer;">
-                  <input type="checkbox" id="spamDetectionToggle" checked style="width:18px; height:18px; cursor:pointer;">
-                  <span style="color:rgba(255,255,255,0.8); font-size:14px;">Enabled</span>
+                <label class="moderation-toggle-label">
+                  <input type="checkbox" id="spamDetectionToggle" checked>
+                  <span>Enabled</span>
                 </label>
               </h3>
-              <div style="display:flex; flex-direction:column; gap:15px;">
+              <div class="moderation-slider-group">
                 <div>
-                  <label style="display:block; color:rgba(255,255,255,0.8); font-size:13px; margin-bottom:8px;">Max Caps Ratio: <span id="capsRatioValue">70</span>%</label>
-                  <input type="range" id="capsRatioSlider" min="50" max="100" value="70" style="width:100%;">
+                  <label class="moderation-slider-label">Max Caps Ratio: <span id="capsRatioValue">70</span>%</label>
+                  <input type="range" id="capsRatioSlider" min="50" max="100" value="70" class="moderation-slider">
                 </div>
                 <div>
-                  <label style="display:block; color:rgba(255,255,255,0.8); font-size:13px; margin-bottom:8px;">Max Links per Message: <span id="maxLinksValue">2</span></label>
-                  <input type="range" id="maxLinksSlider" min="1" max="5" value="2" style="width:100%;">
+                  <label class="moderation-slider-label">Max Links per Message: <span id="maxLinksValue">2</span></label>
+                  <input type="range" id="maxLinksSlider" min="1" max="5" value="2" class="moderation-slider">
                 </div>
                 <div>
-                  <label style="display:block; color:rgba(255,255,255,0.8); font-size:13px; margin-bottom:8px;">Max Repeated Characters: <span id="maxRepeatsValue">4</span></label>
-                  <input type="range" id="maxRepeatsSlider" min="3" max="10" value="4" style="width:100%;">
+                  <label class="moderation-slider-label">Max Repeated Characters: <span id="maxRepeatsValue">4</span></label>
+                  <input type="range" id="maxRepeatsSlider" min="3" max="10" value="4" class="moderation-slider">
                 </div>
               </div>
             </div>
             <!-- Rate Limiting -->
-            <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
-              <h3 style="margin:0 0 15px 0; color:#FFD700; font-size:18px; font-weight:600; display:flex; align-items:center; gap:10px;">
+            <div class="moderation-section">
+              <h3 class="moderation-section-title">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Rate Limiting</span>
-                <label style="margin-left:auto; display:flex; align-items:center; gap:8px; cursor:pointer;">
-                  <input type="checkbox" id="rateLimitToggle" checked style="width:18px; height:18px; cursor:pointer;">
-                  <span style="color:rgba(255,255,255,0.8); font-size:14px;">Enabled</span>
+                <label class="moderation-toggle-label">
+                  <input type="checkbox" id="rateLimitToggle" checked>
+                  <span>Enabled</span>
                 </label>
               </h3>
-              <div style="display:flex; flex-direction:column; gap:15px;">
+              <div class="moderation-slider-group">
                 <div>
-                  <label style="display:block; color:rgba(255,255,255,0.8); font-size:13px; margin-bottom:8px;">Messages per Minute: <span id="messagesPerMinValue">5</span></label>
-                  <input type="range" id="messagesPerMinSlider" min="1" max="20" value="5" style="width:100%;">
+                  <label class="moderation-slider-label">Messages per Minute: <span id="messagesPerMinValue">5</span></label>
+                  <input type="range" id="messagesPerMinSlider" min="1" max="20" value="5" class="moderation-slider">
                 </div>
                 <div>
-                  <label style="display:block; color:rgba(255,255,255,0.8); font-size:13px; margin-bottom:8px;">Min Time Between Messages: <span id="minTimeValue">2</span>s</label>
-                  <input type="range" id="minTimeSlider" min="1" max="10" value="2" style="width:100%;">
+                  <label class="moderation-slider-label">Min Time Between Messages: <span id="minTimeValue">2</span>s</label>
+                  <input type="range" id="minTimeSlider" min="1" max="10" value="2" class="moderation-slider">
                 </div>
               </div>
             </div>
@@ -811,48 +811,48 @@
           <!-- Right Column -->
           <div style="display:flex; flex-direction:column; gap:25px;">
             <!-- Banned Users -->
-            <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
-              <h3 style="margin:0 0 15px 0; color:#FFD700; font-size:18px; font-weight:600; display:flex; align-items:center; gap:10px;">
+            <div class="moderation-section">
+              <h3 class="moderation-section-title">
                 <i class="fas fa-user-slash"></i>
                 <span>Banned Users (<span id="bannedUsersCount">0</span>)</span>
               </h3>
-              <div id="bannedUsersList" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+              <div id="bannedUsersList" class="moderation-banned-list">
                 <!-- Banned users will be listed here -->
               </div>
             </div>
             <!-- Real-time Chat Monitor -->
-            <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
-              <h3 style="margin:0 0 15px 0; color:#FFD700; font-size:18px; font-weight:600; display:flex; align-items:center; gap:10px;">
+            <div class="moderation-section">
+              <h3 class="moderation-section-title">
                 <i class="fas fa-eye"></i>
                 <span>Live Chat Monitor</span>
               </h3>
-              <div id="liveChatMonitor" style="max-height:250px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:10px; padding:15px; display:flex; flex-direction:column; gap:8px; font-size:13px;">
+              <div id="liveChatMonitor" class="moderation-chat-monitor">
                 <!-- Live messages will appear here -->
-                <p style="text-align:center; color:rgba(255,255,255,0.5); margin:0;">Monitoring chat in real-time...</p>
+                <p class="moderation-chat-monitor-empty">Monitoring chat in real-time...</p>
               </div>
             </div>
             <!-- Moderation Stats -->
-            <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
-              <h3 style="margin:0 0 15px 0; color:#FFD700; font-size:18px; font-weight:600; display:flex; align-items:center; gap:10px;">
+            <div class="moderation-section">
+              <h3 class="moderation-section-title">
                 <i class="fas fa-chart-bar"></i>
                 <span>Moderation Statistics</span>
               </h3>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align:center;">
-                  <div style="font-size:28px; font-weight:700; color:#9c27b0; margin-bottom:5px;" id="blockedMessagesCount">0</div>
-                  <div style="font-size:12px; color:rgba(255,255,255,0.7);">Messages Blocked</div>
+              <div class="moderation-stats-grid">
+                <div class="moderation-stat-card">
+                  <div class="moderation-stat-value" style="color:#9c27b0;" id="blockedMessagesCount">0</div>
+                  <div class="moderation-stat-label">Messages Blocked</div>
                 </div>
-                <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align:center;">
-                  <div style="font-size:28px; font-weight:700; color:#dc3545; margin-bottom:5px;" id="totalBansCount">0</div>
-                  <div style="font-size:12px; color:rgba(255,255,255,0.7);">Total Bans</div>
+                <div class="moderation-stat-card">
+                  <div class="moderation-stat-value" style="color:#dc3545;" id="totalBansCount">0</div>
+                  <div class="moderation-stat-label">Total Bans</div>
                 </div>
-                <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align:center;">
-                  <div style="font-size:28px; font-weight:700; color:#ffc107; margin-bottom:5px;" id="spamDetectedCount">0</div>
-                  <div style="font-size:12px; color:rgba(255,255,255,0.7);">Spam Detected</div>
+                <div class="moderation-stat-card">
+                  <div class="moderation-stat-value" style="color:#ffc107;" id="spamDetectedCount">0</div>
+                  <div class="moderation-stat-label">Spam Detected</div>
                 </div>
-                <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; text-align:center;">
-                  <div style="font-size:28px; font-weight:700; color:#28a745; margin-bottom:5px;" id="activeUsersCount">0</div>
-                  <div style="font-size:12px; color:rgba(255,255,255,0.7);">Active Users</div>
+                <div class="moderation-stat-card">
+                  <div class="moderation-stat-value" style="color:#28a745;" id="activeUsersCount">0</div>
+                  <div class="moderation-stat-label">Active Users</div>
                 </div>
               </div>
             </div>
@@ -860,14 +860,14 @@
         </div>
       </div>
     </div>
-    <div id="adminPassword">
-      <label style="display:block; margin-bottom:12px; color:#FFD700; font-weight:600; font-size:16px; display:flex; align-items:center; gap:10px;">
-        <i class="fas fa-lock" style="font-size:14px;"></i>
+    <div id="adminPassword" class="admin-password-section">
+      <label class="admin-password-label">
+        <i class="fas fa-lock"></i>
         Enter Admin Password
       </label>
-      <label for="adminPasswordInput" style="display:none;">Admin Password</label>
-      <input type="password" id="adminPasswordInput" name="adminPassword" placeholder="Enter your admin password..." autocomplete="current-password" aria-label="Enter your admin password" style="width:100%; padding:14px 18px; border:2px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); border-radius:12px; box-sizing:border-box; margin-bottom:16px; color:rgba(255,255,255,0.9); font-size:15px; transition:all 0.3s ease;">
-      <button id="adminLoginBtn" style="width:100%; padding:14px; background:linear-gradient(135deg, #007bff, #0056b3); border:2px solid rgba(0,123,255,0.5); color:#ffffff; border-radius:12px; cursor:pointer; font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 15px rgba(0,123,255,0.3); display:flex; align-items:center; justify-content:center; gap:10px; position:relative; overflow:hidden;">
+      <label for="adminPasswordInput" class="sr-only">Admin Password</label>
+      <input type="password" id="adminPasswordInput" name="adminPassword" placeholder="Enter your admin password..." autocomplete="current-password" aria-label="Enter your admin password" class="admin-password-input">
+      <button id="adminLoginBtn" class="admin-login-btn">
         <i class="fas fa-sign-in-alt"></i>
         <span>Login</span>
       </button>
@@ -1154,46 +1154,46 @@
 </div>
 <!-- ====================================================================== -->
 <!-- ================ User Profile Modal ================ -->
-<div id="profileModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:16000; align-items:center; justify-content:center;">
-  <div style="width:min(600px, 95%); max-height:80%; overflow-y:auto; background:rgba(15,15,25,0.95); backdrop-filter:blur(30px); border-radius:24px; padding:30px; box-shadow:0 25px 60px rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.2); color:rgba(255,255,255,0.9);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(255,215,0,0.1);">
-      <h2 style="margin:0; color:#FFD700; font-weight:600; font-size:20px;"><i class="fas fa-user-circle"></i> <span id="profileModalTitle">My Profile</span></h2>
-      <button id="closeProfileBtn" style="border:none; background:rgba(255,215,0,0.1); color:#FFD700; font-size:20px; cursor:pointer; width:38px; height:38px; border-radius:12px; transition:all 0.3s ease; border:1px solid rgba(255,215,0,0.2);">&times;</button>
+<div id="profileModal">
+  <div class="profile-modal-content">
+    <div class="profile-modal-header">
+      <h2 class="profile-modal-title"><i class="fas fa-user-circle"></i> <span id="profileModalTitle">My Profile</span></h2>
+      <button id="closeProfileBtn" class="profile-close-btn">&times;</button>
     </div>
     <div style="text-align:center; margin-bottom:20px;">
-      <div id="profileAvatarContainer" style="position:relative; display:inline-block; margin-bottom:15px;">
-        <div id="profileAvatar" style="width:120px; height:120px; border-radius:50%; background:linear-gradient(135deg, #FFD700, #FFA500); margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:48px; cursor:pointer; border:3px solid rgba(255,215,0,0.5); background-size:cover; background-position:center; background-repeat:no-repeat; position:relative;" title="Click to upload profile picture">
+      <div id="profileAvatarContainer" class="profile-avatar-container">
+        <div id="profileAvatar" title="Click to upload profile picture">
           <span id="profileAvatarEmoji" style="display:block;">👤</span>
-          <button id="removePfpBtn" style="display:none; position:absolute; top:-5px; right:-5px; width:28px; height:28px; border-radius:50%; background:rgba(255,0,0,0.8); border:2px solid rgba(255,255,255,0.9); color:white; cursor:pointer; font-size:14px; font-weight:bold; z-index:10;" title="Remove photo">&times;</button>
+          <button id="removePfpBtn" title="Remove photo">&times;</button>
         </div>
         <input type="file" id="profilePictureInput" accept="image/*" style="display:none;">
-        <div style="display:flex; gap:8px; justify-content:center; margin-top:10px;">
-          <button id="uploadPfpBtn" style="padding:8px 16px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer; font-size:12px;"><i class="fas fa-camera"></i> Upload Photo</button>
+        <div class="profile-upload-buttons">
+          <button id="uploadPfpBtn" class="profile-upload-btn"><i class="fas fa-camera"></i> Upload Photo</button>
         </div>
       </div>
       <label for="profileUsername" class="sr-only">Enter your username</label>
-      <input type="text" id="profileUsername" name="username" placeholder="Enter your username..." autocomplete="username" aria-label="Enter your username" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px; font-size:16px; font-weight:500;" required>
-      <input type="text" id="profileStatus" name="profileStatus" placeholder="Set your status message (optional)..." autocomplete="off" aria-label="Profile Status" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px;">
-      <button id="saveProfileBtn" style="width:100%; padding:12px; background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.4); border-radius:8px; color:#FFD700; cursor:pointer; font-weight:500; margin-bottom:15px;"><i class="fas fa-save"></i> Save Profile</button>
-      <div id="activityHistory" style="margin-top:20px; text-align:left;">
-        <h3 style="color:#FFD700; margin-bottom:15px;">Activity History</h3>
-        <div id="activityList" style="max-height:200px; overflow-y:auto;"></div>
+      <input type="text" id="profileUsername" name="username" placeholder="Enter your username..." autocomplete="username" aria-label="Enter your username" class="profile-input" required>
+      <input type="text" id="profileStatus" name="profileStatus" placeholder="Set your status message (optional)..." autocomplete="off" aria-label="Profile Status" class="profile-input">
+      <button id="saveProfileBtn" class="profile-save-btn"><i class="fas fa-save"></i> Save Profile</button>
+      <div id="activityHistory" class="activity-history">
+        <h3>Activity History</h3>
+        <div id="activityList"></div>
       </div>
     </div>
   </div>
 </div>
 <!-- ================ Leaderboard Modal ================ -->
-<div id="leaderboardModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:16000; align-items:center; justify-content:center;">
-  <div style="width:min(800px, 95%); max-height:80%; overflow-y:auto; background:rgba(15,15,25,0.95); backdrop-filter:blur(30px); border-radius:24px; padding:30px; box-shadow:0 25px 60px rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.2); color:rgba(255,255,255,0.9);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(255,215,0,0.1);">
-      <h2 style="margin:0; color:#FFD700; font-weight:600; font-size:20px;"><i class="fas fa-medal"></i> Leaderboard</h2>
-      <button id="closeLeaderboardBtn" style="border:none; background:rgba(255,215,0,0.1); color:#FFD700; font-size:20px; cursor:pointer; width:38px; height:38px; border-radius:12px; transition:all 0.3s ease; border:1px solid rgba(255,215,0,0.2);">&times;</button>
+<div id="leaderboardModal">
+  <div class="leaderboard-modal-content">
+    <div class="leaderboard-modal-header">
+      <h2 class="leaderboard-modal-title"><i class="fas fa-medal"></i> Leaderboard</h2>
+      <button id="closeLeaderboardBtn" class="leaderboard-close-btn">&times;</button>
     </div>
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-      <button class="leaderboardTab" data-tab="chatters" style="flex:1; padding:10px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer;">Top Chatters</button>
-      <button class="leaderboardTab" data-tab="active" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); border-radius:8px; color:rgba(255,255,255,0.7); cursor:pointer;">Most Active</button>
-      <button class="leaderboardTab" data-tab="achievements" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); border-radius:8px; color:rgba(255,255,255,0.7); cursor:pointer;">Achievements</button>
-      <button class="leaderboardTab" data-tab="stats" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); border-radius:8px; color:rgba(255,255,255,0.7); cursor:pointer;">Daily/Weekly</button>
+    <div class="leaderboard-tabs">
+      <button class="leaderboardTab active" data-tab="chatters">Top Chatters</button>
+      <button class="leaderboardTab" data-tab="active">Most Active</button>
+      <button class="leaderboardTab" data-tab="achievements">Achievements</button>
+      <button class="leaderboardTab" data-tab="stats">Daily/Weekly</button>
     </div>
     <div id="leaderboardContent"></div>
   </div>
@@ -1297,57 +1297,57 @@
   </div>
 </div>
 <!-- ================ Polls Modal ================ -->
-<div id="pollsModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:16000; align-items:center; justify-content:center;">
-  <div style="width:min(700px, 95%); max-height:80%; overflow-y:auto; background:rgba(15,15,25,0.95); backdrop-filter:blur(30px); border-radius:24px; padding:30px; box-shadow:0 25px 60px rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.2); color:rgba(255,255,255,0.9);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(255,215,0,0.1);">
-      <h2 style="margin:0; color:#FFD700; font-weight:600; font-size:20px;"><i class="fas fa-poll"></i> Polls</h2>
-      <button id="closePollsBtn" style="border:none; background:rgba(255,215,0,0.1); color:#FFD700; font-size:20px; cursor:pointer; width:38px; height:38px; border-radius:12px; transition:all 0.3s ease; border:1px solid rgba(255,215,0,0.2);">&times;</button>
+<div id="pollsModal">
+  <div class="polls-modal-content">
+    <div class="polls-modal-header">
+      <h2 class="polls-modal-title"><i class="fas fa-poll"></i> Polls</h2>
+      <button id="closePollsBtn" class="polls-close-btn">&times;</button>
     </div>
-    <button id="createPollBtn" style="width:100%; padding:12px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer; margin-bottom:20px; font-weight:500;"><i class="fas fa-plus"></i> Create New Poll</button>
+    <button id="createPollBtn" class="polls-create-btn"><i class="fas fa-plus"></i> Create New Poll</button>
     <div id="pollsList"></div>
-    <div id="createPollForm" style="display:none; margin-top:20px; padding:20px; background:rgba(255,255,255,0.05); border-radius:12px;">
-      <input type="text" id="pollQuestion" name="pollQuestion" placeholder="Poll question..." autocomplete="off" aria-label="Poll Question" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:10px;">
+    <div id="createPollForm" class="polls-form">
+      <input type="text" id="pollQuestion" name="pollQuestion" placeholder="Poll question..." autocomplete="off" aria-label="Poll Question" class="polls-input">
       <div id="pollOptions">
-        <input type="text" class="pollOption" name="pollOption" placeholder="Option 1" autocomplete="off" aria-label="Poll Option 1" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;">
-        <input type="text" class="pollOption" name="pollOption" placeholder="Option 2" autocomplete="off" aria-label="Poll Option 2" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,215,0,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); margin-bottom:8px;">
+        <input type="text" class="pollOption" name="pollOption" placeholder="Option 1" autocomplete="off" aria-label="Poll Option 1">
+        <input type="text" class="pollOption" name="pollOption" placeholder="Option 2" autocomplete="off" aria-label="Poll Option 2">
       </div>
-      <button id="addPollOptionBtn" style="padding:8px 15px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:6px; color:#FFD700; cursor:pointer; margin-bottom:10px;"><i class="fas fa-plus"></i> Add Option</button>
-      <div style="display:flex; gap:10px;">
-        <button id="submitPollBtn" style="flex:1; padding:10px; background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.4); border-radius:8px; color:#FFD700; cursor:pointer; font-weight:500;">Create Poll</button>
-        <button id="cancelPollBtn" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); border-radius:8px; color:rgba(255,255,255,0.7); cursor:pointer;">Cancel</button>
+      <button id="addPollOptionBtn" class="polls-add-option-btn"><i class="fas fa-plus"></i> Add Option</button>
+      <div class="polls-form-actions">
+        <button id="submitPollBtn" class="polls-submit-btn">Create Poll</button>
+        <button id="cancelPollBtn" class="polls-cancel-btn">Cancel</button>
       </div>
     </div>
   </div>
 </div>
 <!-- ================ YouTube Video Watcher Modal ================ -->
-<div id="youtubeWatcherModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(15px); z-index:17000; align-items:center; justify-content:center;">
-  <div class="youtube-modal-content" style="width:min(600px, 95%); background:rgba(15,15,25,0.98); backdrop-filter:blur(30px); border-radius:24px; padding:40px; box-shadow:0 25px 60px rgba(0,0,0,0.7); border:2px solid rgba(255,0,0,0.3); color:rgba(255,255,255,0.9); position:relative;">
-    <button id="closeYoutubeWatcherBtn" style="position:absolute; top:15px; right:15px; border:none; background:rgba(255,0,0,0.2); color:#ff0000; font-size:24px; cursor:pointer; width:40px; height:40px; border-radius:12px; transition:all 0.3s ease; border:1px solid rgba(255,0,0,0.3); display:flex; align-items:center; justify-content:center;">&times;</button>
-    <div style="text-align:center; margin-bottom:30px;">
-      <i class="fab fa-youtube" style="font-size:64px; color:#ff0000; margin-bottom:15px; display:block; text-shadow:0 0 20px rgba(255,0,0,0.5);"></i>
-      <h2 style="margin:0; color:#ffffff; font-weight:700; font-size:28px; text-shadow:0 2px 10px rgba(0,0,0,0.5); letter-spacing:1px;">YouTube Video Watcher</h2>
-      <p style="margin:10px 0 0 0; color:rgba(255,255,255,0.7); font-size:16px;">Watch any YouTube video unblocked</p>
-            </div>
-    <div style="margin-bottom:25px;">
-      <label style="display:block; margin-bottom:12px; color:#FFD700; font-weight:600; font-size:16px;">
-        <i class="fas fa-link" style="margin-right:8px;"></i>Enter YouTube URL
+<div id="youtubeWatcherModal">
+  <div class="youtube-modal-content">
+    <button id="closeYoutubeWatcherBtn" class="youtube-close-btn">&times;</button>
+    <div class="youtube-header">
+      <i class="fab fa-youtube youtube-icon"></i>
+      <h2 class="youtube-title">YouTube Video Watcher</h2>
+      <p class="youtube-subtitle">Watch any YouTube video unblocked</p>
+    </div>
+    <div class="youtube-input-group">
+      <label class="youtube-input-label">
+        <i class="fas fa-link"></i>Enter YouTube URL
       </label>
-      <input type="url" id="youtubeUrlInput" name="youtubeUrl" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" autocomplete="url" aria-label="YouTube URL" style="width:100%; padding:16px 20px; border-radius:12px; border:2px solid rgba(255,0,0,0.3); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.9); font-size:16px; transition:all 0.3s ease; box-sizing:border-box; font-family:'Inter', sans-serif;">
-      <p style="margin:10px 0 0 0; font-size:13px; color:rgba(255,255,255,0.5); font-style:italic;">
-        <i class="fas fa-info-circle" style="margin-right:6px;"></i>Example: https://www.youtube.com/watch?v=VIDEO_ID
+      <input type="url" id="youtubeUrlInput" name="youtubeUrl" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" autocomplete="url" aria-label="YouTube URL" class="youtube-url-input">
+      <p class="youtube-input-hint">
+        <i class="fas fa-info-circle"></i>Example: https://www.youtube.com/watch?v=VIDEO_ID
       </p>
-  </div>
-    <button id="watchYoutubeBtn" style="width:100%; padding:16px; background:linear-gradient(135deg, #ff0000, #cc0000); border:none; border-radius:12px; color:#ffffff; cursor:pointer; font-weight:700; font-size:18px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(255,0,0,0.4); text-transform:uppercase; letter-spacing:1px;">
-      <i class="fas fa-play" style="margin-right:10px;"></i>Watch Video
-            </button>
-    <div style="margin-top:20px; padding:15px; background:rgba(255,0,0,0.1); border-radius:10px; border-left:4px solid #ff0000;">
-      <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.7); line-height:1.6;">
-        <i class="fas fa-shield-alt" style="margin-right:8px; color:#ff0000;"></i>
+    </div>
+    <button id="watchYoutubeBtn" class="youtube-watch-btn">
+      <i class="fas fa-play"></i>Watch Video
+    </button>
+    <div class="youtube-privacy-note">
+      <p>
+        <i class="fas fa-shield-alt"></i>
         <strong>Privacy Note:</strong> Videos will open in a new tab using an unblocked domain for your convenience.
       </p>
-                        </div>
-                            </div>
-                        </div>
+    </div>
+  </div>
+</div>
 <!-- ====================================================================== -->
 <!-- Back to Top Button -->
 <button id="backToTopBtn" class="back-to-top-btn" title="Back to top">
