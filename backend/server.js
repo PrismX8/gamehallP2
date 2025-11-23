@@ -13,6 +13,7 @@ const moderationRoutes = require('./routes/moderation');
 const visitorRoutes = require('./routes/visitors');
 const friendsRoutes = require('./routes/friends');
 const canvasRoutes = require('./routes/canvas');
+const adminRoutes = require('./routes/admin');
 
 // Import database
 const db = require('./database/db');
@@ -63,6 +64,7 @@ app.use('/api/moderation', moderationRoutes);
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/friends', friendsRoutes.router);
 app.use('/api/canvas', canvasRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Pass io instance to friends routes for socket events
 friendsRoutes.setIO(io);
@@ -78,7 +80,8 @@ app.get('/', (req, res) => {
       moderation: '/api/moderation',
       visitors: '/api/visitors',
       friends: '/api/friends',
-      canvas: '/api/canvas'
+      canvas: '/api/canvas',
+      admin: '/api/admin?password=YOUR_PASSWORD'
     },
     websocket: 'Socket.io is available for real-time connections'
   });
