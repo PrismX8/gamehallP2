@@ -831,63 +831,6 @@
           onPrivacy=false;
       }
   });
-  const steps = [
-      {text:"Welcome! This tutorial guides you through the buttons.", target:null},
-      {text:"Reload: Reloads the embedded site.", target:document.getElementById('reloadBtn')},
-      {text:"Fullscreen: Make the site fullscreen.", target:document.getElementById('fullscreenBtn')},
-      {text:"Zoom: Scale the site for better view.", target:document.getElementById('zoomInBtn')},
-      {text:"Hide/Show: Hide or show the embedded site.", target:document.getElementById('hideIframeBtn')},
-      {text:"Extra Site: Open a fun game site.", target:extraBtn},
-      {text:"Browser: Browse Privately!", target:privacyBtn}
-  ];
-  let currentStep = 0;
-  const overlay = document.getElementById('tutorialOverlay');
-  const bubble = document.getElementById('tutorialBubble');
-  const arrow = document.getElementById('tutorialArrow');
-  
-  function showStep(step){
-      overlay.style.display='block';
-      const s = steps[step];
-      bubble.innerHTML = s.text + '<br>' +
-          '<button id="nextTutorialBtn">Next</button> ' +
-          '<button id="skipTutorialBtn">Skip</button>';
-  
-      // Next button
-      document.getElementById('nextTutorialBtn').addEventListener('click', ()=>{
-          currentStep++;
-          if(currentStep >= steps.length){
-              overlay.style.display='none';
-              arrow.style.display='none';
-              showPopup();
-          } else showStep(currentStep);
-      });
-  
-      // Skip button
-      document.getElementById('skipTutorialBtn').addEventListener('click', ()=>{
-          overlay.style.display='none';
-          arrow.style.display='none';
-          localStorage.setItem('tutorialShown','true'); // mark tutorial as seen
-          showPopup();
-      });
-  
-      if(s.target){
-          const rect = s.target.getBoundingClientRect();
-          bubble.style.top = (rect.bottom + 20 + window.scrollY) + 'px';
-          bubble.style.left = (rect.left + rect.width/2) + 'px';
-          arrow.style.display='block';
-          arrow.style.top = (rect.bottom + window.scrollY) + 'px';
-          arrow.style.left = (rect.left + rect.width/2 - 12) + 'px';
-      } else {
-          bubble.style.top='30%';
-          bubble.style.left='50%';
-          arrow.style.display='none';
-      }
-  
-      setTimeout(()=>bubble.classList.add('show'),50);
-  }
-  
-  function startTutorial(){ currentStep=0; showStep(currentStep); localStorage.setItem('tutorialShown','true'); }
-  document.getElementById('replayTutorialBtn').addEventListener('click', startTutorial);
   
   // YouTube Video Watcher
   const youtubeWatcherBtn = document.getElementById('youtubeWatcherBtn');
@@ -1652,6 +1595,12 @@
   }
   
   // ---------------- Enhanced Sparkles ----------------
+  // Performance detection
+  const isLowPerformance = navigator.hardwareConcurrency <= 2 || 
+                          (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+                          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isTabVisible = () => !document.hidden;
+  
   function initSparkles() {
       const canvas = document.getElementById('sparkleCanvas');
       if (!canvas) return; // Sparkle canvas is in popup, may not exist yet
@@ -1659,6 +1608,7 @@
       const ctx = canvas.getContext('2d');
       let sparkles = [];
       let ripples = [];
+      let animationRunning = true;
   
       function resizeCanvas() { 
           canvas.width = canvas.offsetWidth; 
@@ -1682,9 +1632,15 @@
   }
   
   // Reduced particle count for better performance
-  for(let i = 0; i < 50; i++) {
+  const sparkleCount = isLowPerformance ? 25 : 35;
+  for(let i = 0; i < sparkleCount; i++) {
       sparkles.push(createSparkle());
   }
+  
+  // Pause animations when tab is hidden
+  document.addEventListener('visibilitychange', () => {
+      animationRunning = isTabVisible();
+  });
   
   // Add ripple effect on mouse move (throttled and limited)
   let lastRippleTime = 0;
@@ -1709,11 +1665,17 @@
   let sparkleFrameSkip = 0;
   
   function animateSparkles() {
+    if (!animationRunning || !isTabVisible()) {
+        requestAnimationFrame(animateSparkles);
+        return;
+    }
+    
     const now = performance.now();
     const deltaTime = now - lastSparkleFrame;
     
-    // Throttle to ~30fps for sparkles (less critical animation)
-    if (deltaTime < 33) {
+    // Throttle to ~20fps for sparkles on low-end, 30fps otherwise
+    const targetFPS = isLowPerformance ? 50 : 33;
+    if (deltaTime < targetFPS) {
         requestAnimationFrame(animateSparkles);
         return;
     }
@@ -1815,17 +1777,23 @@
     let mouseMoved = false;
     let lastBgFrame = 0;
     let animationRunning = true;
+    const maxTrailLengthOptimized = isLowPerformance ? 10 : 15;
   
     const handleMouseMove = (e) => {
           mouseX = e.clientX;
           mouseY = e.clientY;
         mouseMoved = true;
           mouseTrail.push({ x: mouseX, y: mouseY, time: Date.now() });
-          if (mouseTrail.length > maxTrailLength) {
+          if (mouseTrail.length > maxTrailLengthOptimized) {
               mouseTrail.shift();
           }
     };
     document.addEventListener('mousemove', handleMouseMove, { passive: true, capture: true });
+    
+    // Pause animations when tab is hidden
+    document.addEventListener('visibilitychange', () => {
+        animationRunning = isTabVisible();
+    });
     
     const handleClick = (e) => {
         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('button') || e.target.closest('input')) {
@@ -1845,11 +1813,15 @@
     document.addEventListener('click', handleClick, { passive: true, capture: true });
   
       function animateInteractiveBg() {
-        if (!animationRunning) return;
+        if (!animationRunning || !isTabVisible()) {
+            requestAnimationFrame(animateInteractiveBg);
+            return;
+        }
         
         const now = performance.now();
-        // Throttle to ~30fps for background
-        if (now - lastBgFrame < 33) {
+        // Throttle to ~20fps on low-end, 30fps otherwise
+        const targetFPS = isLowPerformance ? 50 : 33;
+        if (now - lastBgFrame < targetFPS) {
             requestAnimationFrame(animateInteractiveBg);
             return;
         }
@@ -1870,7 +1842,7 @@
             }
           
             // Limit trail length and optimize drawing
-            const trailLimit = Math.min(mouseTrail.length, 15);
+            const trailLimit = Math.min(mouseTrail.length, maxTrailLengthOptimized);
             for (let i = 0; i < trailLimit; i++) {
               const point = mouseTrail[i];
               const age = Date.now() - point.time;
@@ -1931,7 +1903,7 @@
     const maxConnectionDistance = 150;
     const mouseRepelRadius = 150;
     const mouseRepelStrength = 2.5;
-              const particleCount = 60; // Reduced for better performance
+              const particleCount = isLowPerformance ? 35 : 50; // Reduced for better performance
   
       function resizeStarCanvas() {
         const oldWidth = starCanvas.width;
@@ -2042,9 +2014,10 @@
             }
         }
         
-        // Update connections - only check every other frame for performance
+        // Update connections - check less frequently for better performance
         connectionFrame++;
-        if (connectionFrame % 2 === 0) {
+        const connectionUpdateInterval = isLowPerformance ? 4 : 2;
+        if (connectionFrame % connectionUpdateInterval === 0) {
             for (let i = 0; i < particles.length; i++) {
                 const p1 = particles[i];
                 p1.connections = [];
@@ -2066,13 +2039,22 @@
   
     let lastStarFrame = 0;
     let animationRunning = true;
+    
+    // Pause animations when tab is hidden
+    document.addEventListener('visibilitychange', () => {
+        animationRunning = isTabVisible();
+    });
   
       function animateStars() {
-        if (!animationRunning || !starCanvas || !starCtx) return;
+        if (!animationRunning || !starCanvas || !starCtx || !isTabVisible()) {
+            requestAnimationFrame(animateStars);
+            return;
+        }
         
         const now = performance.now();
-        // Throttle to ~20fps for better performance
-        if (now - lastStarFrame < 50) {
+        // Throttle to ~15fps on low-end, 20fps otherwise
+        const targetFPS = isLowPerformance ? 66 : 50;
+        if (now - lastStarFrame < targetFPS) {
             requestAnimationFrame(animateStars);
             return;
         }
@@ -2194,7 +2176,13 @@
       
       const ctx = snowCanvas.getContext('2d');
       let snowflakes = [];
-      const snowflakeCount = 40; // Reduced for better performance
+      let animationRunning = true;
+      const snowflakeCount = isLowPerformance ? 20 : 30; // Reduced for better performance
+      
+      // Pause animations when tab is hidden
+      document.addEventListener('visibilitychange', () => {
+          animationRunning = isTabVisible();
+      });
       
       function resizeSnowCanvas() {
           snowCanvas.width = window.innerWidth;
@@ -2219,11 +2207,15 @@
       
       let lastSnowFrame = 0;
       function animateSnow() {
-          if (!snowCanvas || !ctx) return;
+          if (!snowCanvas || !ctx || !animationRunning || !isTabVisible()) {
+              requestAnimationFrame(animateSnow);
+              return;
+          }
           
           const now = performance.now();
-          // Throttle to ~20fps for better performance
-          if (now - lastSnowFrame < 50) {
+          // Throttle to ~15fps on low-end, 20fps otherwise
+          const targetFPS = isLowPerformance ? 66 : 50;
+          if (now - lastSnowFrame < targetFPS) {
               requestAnimationFrame(animateSnow);
               return;
           }
@@ -3946,7 +3938,7 @@
   // Loading screen removal is now handled at the top of the script
   
   // ================= Page Initialization =================
-  // Initialize tutorial/popup when page loads
+  // Initialize popup when page loads
   window.addEventListener('load', function() {
       console.log('Page fully loaded');
       
@@ -3962,11 +3954,7 @@
           return;
       }
       
-      if(!localStorage.getItem('tutorialShown')) {
-          startTutorial();
-      } else {
-          showPopup();
-      }
+      showPopup();
   });
   
   // ================= Intro Screen Particles =================

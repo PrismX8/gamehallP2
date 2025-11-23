@@ -144,7 +144,7 @@
        }
        to {
            opacity: 1;
-           backdrop-filter: blur(15px);
+           backdrop-filter: blur(8px);
        }
    }
    #adminModal > div {
@@ -375,7 +375,7 @@
    }
    .friend-card {
        background: rgba(15, 15, 25, 0.8);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid rgba(255, 215, 0, 0.2);
        border-radius: 16px;
        padding: 20px;
@@ -588,7 +588,7 @@
        }
        to {
            opacity: 1;
-           backdrop-filter: blur(20px);
+           backdrop-filter: blur(10px);
        }
    }
    .friends-container {
@@ -599,7 +599,7 @@
    }
       .friends-header-section {
        background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        border: 2px solid rgba(255, 215, 0, 0.3);
        border-radius: 24px;
        padding: 35px 40px;
@@ -695,7 +695,7 @@
        gap: 12px;
        margin-bottom: 30px;
        background: rgba(15, 15, 25, 0.6);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        padding: 10px;
        border-radius: 18px;
        border: 1px solid rgba(255, 215, 0, 0.15);
@@ -917,7 +917,7 @@
    }
       .friend-card-modern {
        background: rgba(15, 15, 25, 0.8);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid rgba(255, 215, 0, 0.2);
        border-radius: 20px;
        padding: 24px;
@@ -1116,7 +1116,7 @@
    }
    .requests-column {
        background: rgba(15, 15, 25, 0.6);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid rgba(255, 215, 0, 0.2);
        border-radius: 20px;
        padding: 25px;
@@ -1275,7 +1275,7 @@
        width: 100%;
        text-align: center;
        background: var(--bg-glass-strong);
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        padding: var(--spacing-md) 0;
        font-size: var(--font-size-sm);
        color: var(--text-secondary);
@@ -1298,7 +1298,7 @@
    }
       header {
        background: var(--bg-glass-strong);
-       backdrop-filter: blur(40px) saturate(180%);
+       backdrop-filter: blur(12px) saturate(180%);
        color: var(--text-primary);
        padding: var(--spacing-lg) var(--spacing-2xl);
        text-align: center;
@@ -1385,7 +1385,6 @@
    }
       .header-icon-btn,
    #adminBtn,
-   #replayTutorialBtn,
    #creditsBtn,
    #notificationBellBtn {
        position: absolute;
@@ -1405,13 +1404,12 @@
        display: flex;
        align-items: center;
        justify-content: center;
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        box-shadow: var(--shadow-md);
        overflow: hidden;
    }
    .header-icon-btn::before,
    #adminBtn::before,
-   #replayTutorialBtn::before,
    #creditsBtn::before,
    #notificationBellBtn::before {
        content: '';
@@ -1423,7 +1421,6 @@
    }
    .header-icon-btn:hover::before,
    #adminBtn:hover::before,
-   #replayTutorialBtn:hover::before,
    #creditsBtn:hover::before,
    #notificationBellBtn:hover::before {
        opacity: 1;
@@ -1431,19 +1428,14 @@
    #adminBtn {
        left: 20px;
    }
-   #replayTutorialBtn {
-       right: 20px;
-   }
    .header-icon-btn i,
    #adminBtn i,
-   #replayTutorialBtn i,
    #notificationBellBtn i {
        filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
        transition: transform 0.3s ease;
    }
    .header-icon-btn:hover,
    #adminBtn:hover,
-   #replayTutorialBtn:hover,
    #creditsBtn:hover,
    #notificationBellBtn:hover {
        background: var(--bg-card-hover);
@@ -1454,13 +1446,11 @@
    }
    .header-icon-btn:hover i,
    #adminBtn:hover i,
-   #replayTutorialBtn:hover i,
    #notificationBellBtn:hover i {
        transform: rotate(15deg) scale(1.1);
    }
    .header-icon-btn:active,
    #adminBtn:active,
-   #replayTutorialBtn:active,
    #notificationBellBtn:active {
        transform: translateY(-50%) scale(0.95);
        box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
@@ -1865,7 +1855,7 @@
        border-radius: var(--radius-lg);
        border: 2px solid var(--border-color);
        background: var(--bg-glass);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        color: var(--color-primary);
        text-decoration: none;
        font-size: var(--font-size-sm);
@@ -1899,7 +1889,7 @@
        border-radius: var(--radius-lg);
        border: 2px solid rgba(255, 0, 0, 0.4);
        background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(200, 0, 0, 0.15));
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        color: #ff0000;
        font-weight: var(--font-weight-bold);
        font-size: var(--font-size-sm);
@@ -2029,7 +2019,7 @@
        width: 380px;
        max-height: 500px;
        background: rgba(15, 15, 25, 0.98);
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        border-radius: 20px;
        border: 2px solid rgba(255, 215, 0, 0.3);
        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.15);
@@ -2109,7 +2099,7 @@
        transform: translateX(-50%) translateY(5px);
        padding: 8px 12px;
        background: linear-gradient(135deg, rgba(15, 15, 25, 0.98), rgba(20, 20, 30, 0.98));
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        color: #FFD700;
        font-size: 12px;
        font-weight: 600;
@@ -2265,9 +2255,6 @@
        #notificationBellBtn {
            right: 70px;
        }
-       #replayTutorialBtn {
-           right: 20px;
-       }
        .notification-dropdown {
            right: 20px;
            left: 20px;
@@ -2335,10 +2322,6 @@
            transform: scale(1.1);
            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.7), 0 0 20px rgba(255, 68, 68, 0.5);
        }
-   }
-   #replayTutorialBtn,
-   .header-icon-btn#replayTutorialBtn {
-       right: 20px;
    }
       .controls {
        background: var(--bg-glass);
@@ -2454,7 +2437,7 @@
        font-weight: var(--font-weight-medium);
        position: relative;
        overflow: hidden;
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        letter-spacing: 0.4px;
        font-family: var(--font-primary);
    }
@@ -2574,7 +2557,7 @@
        width: 100%;
        padding: var(--spacing-md) var(--spacing-2xl) var(--spacing-md) 55px;
        background: var(--bg-glass);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid var(--border-color);
        border-radius: var(--radius-lg);
        color: var(--color-primary);
@@ -2624,7 +2607,7 @@
    .default-game-btn {
        padding: var(--spacing-md) var(--spacing-xl);
        background: var(--bg-glass);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid var(--border-color);
        border-radius: var(--radius-lg);
        color: var(--color-primary);
@@ -2674,7 +2657,7 @@
    .category-btn {
        padding: var(--spacing-md) var(--spacing-xl);
        background: var(--bg-glass);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid var(--border-color);
        border-radius: var(--radius-lg);
        color: var(--text-tertiary);
@@ -3309,20 +3292,6 @@
        background: #ffffff;
        display: block;
    }
-      #tutorialOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); backdrop-filter:blur(3px); z-index:9999; display:none; }
-   .tutorialBubble {
-       position: absolute; max-width:350px; background: rgba(255, 255, 255, 0.95); backdrop-filter:blur(15px); color:#333;
-       padding:25px; border-radius: 15px; border: 1px solid rgba(255, 215, 0, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-       text-align:center; font-size:16px; opacity:0;
-       transform: translate(-50%, -20px); transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-   }
-   .tutorialBubble.show { opacity:1; transform: translate(-50%,0); }
-   .tutorialBubble button { margin-top:15px; padding:10px 20px; border: none; background: rgba(255, 215, 0, 0.8); color:#000000; border-radius: 10px; cursor:pointer; font-weight: 600; backdrop-filter:blur(10px); }
-   .tutorialBubble button:hover { background: rgba(255, 215, 0, 1); }
-   #tutorialArrow {
-       position:absolute; width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent;
-       border-bottom:18px solid #ffffff; z-index:10000; transition: all 0.4s ease;
-   }
       @keyframes neonPulse {
        0%, 100% {
            box-shadow:
@@ -3621,7 +3590,7 @@
        max-height: 600px;
        overflow: hidden;
        background: rgba(15, 15, 25, 0.98);
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        border-radius: 24px;
        border: 2px solid rgba(255, 215, 0, 0.3);
        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.1);
@@ -3822,7 +3791,7 @@
        bottom: 80px;
        right: 24px;
        background: rgba(15, 15, 25, 0.98);
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        border: 2px solid rgba(255, 215, 0, 0.3);
        border-radius: 16px;
        padding: 20px;
@@ -3855,7 +3824,7 @@
        bottom: 80px;
        left: 24px;
        background: rgba(220, 53, 69, 0.95);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        color: white;
        padding: 12px 18px;
        border-radius: 12px;
@@ -3873,7 +3842,7 @@
        left: 50%;
        transform: translateX(-50%);
        background: rgba(220, 53, 69, 0.95);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        color: white;
        padding: 16px 24px;
        border-radius: 16px;
@@ -3896,7 +3865,7 @@
        right: 0;
        bottom: 0;
        background: rgba(0, 0, 0, 0.98);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        z-index: 20000;
        display: none;
        animation: fullscreenChatFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3908,7 +3877,7 @@
        }
        to {
            opacity: 1;
-           backdrop-filter: blur(20px);
+           backdrop-filter: blur(10px);
        }
    }
    .fullscreen-chat-container {
@@ -3926,7 +3895,7 @@
        align-items: center;
        border-bottom: 2px solid rgba(255, 215, 0, 0.2);
        background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        position: relative;
        overflow: hidden;
    }
@@ -4022,7 +3991,7 @@
    .fullscreen-chat-sidebar {
        width: 300px;
        background: rgba(15, 15, 25, 0.8);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border-right: 2px solid rgba(255, 215, 0, 0.2);
        display: flex;
        flex-direction: column;
@@ -4313,7 +4282,7 @@
       overflow: auto;
       border-radius: 24px;
       background: rgba(15, 15, 25, 0.95);
-      backdrop-filter: blur(30px);
+      backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 215, 0, 0.2);
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
       padding: 30px;
@@ -4329,7 +4298,7 @@
    #sharedCanvasContainer {
      width: 100%;
      background: rgba(15, 15, 25, 0.4);
-     backdrop-filter: blur(20px);
+     backdrop-filter: blur(10px);
      border-radius: 16px;
      padding:20px;
      box-sizing:border-box;
@@ -4638,8 +4607,7 @@
        font-size: 11px;
      }
      .header-icon-btn,
-     #adminBtn,
-     #replayTutorialBtn {
+     #adminBtn {
        width: 42px;
        height: 42px;
        font-size: 16px;
@@ -4647,10 +4615,6 @@
      #adminBtn,
      .header-icon-btn#adminBtn {
        left: 12px;
-     }
-     #replayTutorialBtn,
-     .header-icon-btn#replayTutorialBtn {
-       right: 12px;
      }
      #sharedCanvas { height: 400px; }
    }
@@ -4858,7 +4822,7 @@
        width: 50px;
        height: 50px;
        background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.8));
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid rgba(255, 215, 0, 0.5);
        border-radius: 50%;
        color: #fff;
@@ -5025,7 +4989,7 @@
        position: fixed;
        padding: 10px 16px;
        background: linear-gradient(135deg, rgba(15, 15, 25, 0.98), rgba(20, 20, 30, 0.98));
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        color: #FFD700;
        font-size: 13px;
        font-weight: 600;
@@ -5091,7 +5055,7 @@
        right: 30px;
        width: 340px;
        background: rgba(15, 15, 25, 0.98);
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        border-radius: 20px;
        border: 2px solid rgba(255, 215, 0, 0.3);
        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.15);
@@ -5237,7 +5201,7 @@
        right: 0;
        bottom: 0;
        background: rgba(0, 0, 0, 0.95);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        z-index: 25000;
        display: none;
        align-items: center;
@@ -5251,13 +5215,13 @@
        }
        to {
            opacity: 1;
-           backdrop-filter: blur(20px);
+           backdrop-filter: blur(10px);
        }
    }
    .chat-settings-content {
        width: min(500px, 90%);
        background: rgba(15, 15, 25, 0.98);
-       backdrop-filter: blur(30px);
+       backdrop-filter: blur(12px);
        border-radius: 24px;
        border: 2px solid rgba(255, 215, 0, 0.3);
        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.15);
@@ -5370,7 +5334,7 @@
        right: 20px;
        padding: 16px 24px;
        background: rgba(15, 15, 25, 0.95);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 1px solid rgba(255, 215, 0, 0.3);
        border-radius: 12px;
        color: white;
@@ -5443,7 +5407,7 @@
    }
       .card {
        background: rgba(255, 255, 255, 0.05);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 1px solid rgba(255, 215, 0, 0.1);
        border-radius: 16px;
        padding: 24px;
@@ -5559,7 +5523,7 @@
        left: 0;
        margin-top: 8px;
        background: rgba(15, 15, 25, 0.95);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 1px solid rgba(255, 215, 0, 0.2);
        border-radius: 12px;
        padding: 8px;
@@ -5830,9 +5794,9 @@
    .shadow-md { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
    .shadow-lg { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); }
    .shadow-xl { box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4); }
-      .backdrop-blur { backdrop-filter: blur(20px); }
+      .backdrop-blur { backdrop-filter: blur(10px); }
    .backdrop-blur-sm { backdrop-filter: blur(10px); }
-   .backdrop-blur-lg { backdrop-filter: blur(30px); }
+   .backdrop-blur-lg { backdrop-filter: blur(12px); }
       .transition { transition: all 0.3s ease; }
    .transition-fast { transition: all 0.15s ease; }
    .transition-slow { transition: all 0.5s ease; }
@@ -6302,7 +6266,7 @@
    }
       .site-footer {
        background: var(--bg-glass);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border-top: 1px solid var(--border-color);
        padding: var(--spacing-sm) var(--spacing-md);
        margin-top: var(--spacing-xl);
@@ -6506,7 +6470,7 @@
        width: 100%;
        padding: var(--spacing-md);
        background: var(--bg-glass);
-       backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
        border: 2px solid var(--border-color);
        border-radius: var(--radius-lg);
        color: var(--text-primary);
@@ -7092,8 +7056,8 @@
        width: 100%;
        margin: 0 auto;
        background: var(--bg-glass-strong);
-       backdrop-filter: blur(20px);
-       -webkit-backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
+       -webkit-backdrop-filter: blur(10px);
        border: 2px solid var(--border-color);
        border-radius: var(--radius-lg);
        padding: var(--spacing-lg);
@@ -7253,8 +7217,8 @@
    }
    .cookie-modal-content {
        background: var(--bg-glass-strong);
-       backdrop-filter: blur(20px);
-       -webkit-backdrop-filter: blur(20px);
+       backdrop-filter: blur(10px);
+       -webkit-backdrop-filter: blur(10px);
        border: 2px solid var(--border-color);
        border-radius: var(--radius-xl);
        max-width: 700px;
