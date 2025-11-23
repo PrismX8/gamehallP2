@@ -321,7 +321,7 @@
             <button id="leaderboardBtn" class="control-btn"><i class="fas fa-medal"></i> Leaderboard</button>
             <button id="friendsBtn" class="control-btn"><i class="fas fa-user-friends"></i> Friends</button>
             <button id="pollsBtn"><i class="fas fa-poll"></i> Polls</button>
-            <button id="filesBtn"><i class="fas fa-folder-open"></i> Files</button>
+            <button id="contactBtn" class="control-btn"><i class="fas fa-envelope"></i> Contact</button>
         </div>
     </div>
 </div>
@@ -443,14 +443,8 @@
             <button id="emojiBtn" class="chat-toolbar-btn" title="Emoji Picker">
                 <i class="fas fa-smile"></i>
             </button>
-            <button id="voiceChatBtn" class="chat-toolbar-btn" title="Hold to record voice message">
-                <i class="fas fa-microphone"></i>
-            </button>
             <button id="attachLinkBtn" class="chat-toolbar-btn" title="Attach Link">
                 <i class="fas fa-link"></i>
-            </button>
-            <button id="sendFileBtn" class="chat-toolbar-btn" title="Send File">
-                <i class="fas fa-paperclip"></i>
             </button>
             <button id="changeNameBtn" class="chat-toolbar-btn" title="Change Name/Color">
                 <i class="fas fa-user-edit"></i>
@@ -484,13 +478,6 @@
             <span class="emoji-option">✨</span>
         </div>
     </div>
-    <div id="voiceIndicator" class="voice-indicator" style="display:none;">
-        <i class="fas fa-microphone"></i> Recording... (Release to send)
-    </div>
-</div>
-<!-- Fullscreen Voice Indicator -->
-<div id="fullscreenVoiceIndicator" class="fullscreen-voice-indicator" style="display:none;">
-    <i class="fas fa-microphone"></i> Recording... (Release to send)
 </div>
 <!-- ================= Full-Screen Chat Modal ================= -->
 <div id="fullScreenChatModal" class="fullscreen-chat-modal" style="display:none;">
@@ -552,14 +539,8 @@
                         <button id="fullscreenEmojiBtn" class="fullscreen-chat-toolbar-btn" title="Emoji">
                             <i class="fas fa-smile"></i>
                         </button>
-                        <button id="fullscreenVoiceBtn" class="fullscreen-chat-toolbar-btn" title="Voice Message">
-                            <i class="fas fa-microphone"></i>
-                        </button>
                         <button id="fullscreenLinkBtn" class="fullscreen-chat-toolbar-btn" title="Attach Link">
                             <i class="fas fa-link"></i>
-                        </button>
-                        <button id="fullscreenFileBtn" class="fullscreen-chat-toolbar-btn" title="Send File">
-                            <i class="fas fa-paperclip"></i>
                         </button>
                         <button id="fullscreenNameBtn" class="fullscreen-chat-toolbar-btn" title="Change Name/Color">
                             <i class="fas fa-user-edit"></i>
@@ -1331,21 +1312,6 @@
         <button id="cancelPollBtn" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); border-radius:8px; color:rgba(255,255,255,0.7); cursor:pointer;">Cancel</button>
       </div>
     </div>
-  </div>
-</div>
-<!-- ================ File Sharing Modal ================ -->
-<div id="filesModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:16000; align-items:center; justify-content:center;">
-  <div style="width:min(800px, 95%); max-height:80%; overflow-y:auto; background:rgba(15,15,25,0.95); backdrop-filter:blur(30px); border-radius:24px; padding:30px; box-shadow:0 25px 60px rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.2); color:rgba(255,255,255,0.9);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(255,215,0,0.1);">
-      <h2 style="margin:0; color:#FFD700; font-weight:600; font-size:20px;"><i class="fas fa-folder-open"></i> File Sharing</h2>
-      <button id="closeFilesBtn" style="border:none; background:rgba(255,215,0,0.1); color:#FFD700; font-size:20px; cursor:pointer; width:38px; height:38px; border-radius:12px; transition:all 0.3s ease; border:1px solid rgba(255,215,0,0.2);">&times;</button>
-    </div>
-    <div style="margin-bottom:20px; padding:20px; background:rgba(255,255,255,0.05); border-radius:12px; border:2px dashed rgba(255,215,0,0.3); text-align:center;">
-      <input type="file" id="fileUploadInput" multiple style="display:none;">
-      <button id="uploadFileBtn" style="padding:12px 24px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:8px; color:#FFD700; cursor:pointer; font-weight:500;"><i class="fas fa-upload"></i> Upload Files</button>
-      <p style="margin:10px 0 0 0; font-size:12px; color:rgba(255,255,255,0.6);">Drag and drop files here or click to browse</p>
-    </div>
-    <div id="filesList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:15px;"></div>
   </div>
 </div>
 <!-- ================ YouTube Video Watcher Modal ================ -->

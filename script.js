@@ -1084,13 +1084,9 @@
     
     adminChatList.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5);">Loading chat messages...</p>';
     
-    // Load both regular chat messages and voice messages
-    Promise.all([
-      db.ref('chat').limitToLast(50).once('value'),
-      db.ref('voiceMessages').limitToLast(50).once('value')
-    ]).then(([chatSnap, voiceSnap]) => {
+    // Load chat messages
+    db.ref('chat').limitToLast(50).once('value').then(chatSnap => {
       const chatMessages = chatSnap.val() || {};
-      const voiceMessages = voiceSnap.val() || {};
       
       // Combine all messages into one array
       const allMessages = [];
@@ -1109,20 +1105,6 @@
         }
       });
       
-      // Add voice messages
-      Object.entries(voiceMessages).forEach(([id, msg]) => {
-        if(msg && msg.audio) {
-          allMessages.push({
-            id,
-            type: 'voice',
-            user: msg.user || 'Unknown',
-            text: '🎤 Voice Message',
-            time: msg.time || Date.now(),
-            data: msg
-          });
-        }
-      });
-      
       // Sort by time (newest first)
       allMessages.sort((a, b) => b.time - a.time);
       
@@ -1135,10 +1117,9 @@
         const time = new Date(item.time).toLocaleString();
         const user = item.user;
         const uid = item.data?.uid || 'unknown';
-        const isVoice = item.type === 'voice';
-        const preview = isVoice ? '🎤 Voice Message' : (item.text.length > 50 ? item.text.substring(0, 50) + '...' : item.text);
-        const borderColor = isVoice ? 'rgba(0,150,255,0.5)' : 'rgba(255,215,0,0.5)';
-        const refPath = isVoice ? 'voiceMessages' : 'chat';
+        const preview = item.text.length > 50 ? item.text.substring(0, 50) + '...' : item.text;
+        const borderColor = 'rgba(255,215,0,0.5)';
+        const refPath = 'chat';
         const isBanned = bannedUsers[uid] ? ' (BANNED)' : '';
         
         return `
@@ -2337,9 +2318,7 @@
   
   // Fullscreen chat buttons
   const fullscreenEmojiBtn = document.getElementById('fullscreenEmojiBtn');
-  const fullscreenVoiceBtn = document.getElementById('fullscreenVoiceBtn');
   const fullscreenLinkBtn = document.getElementById('fullscreenLinkBtn');
-  const fullscreenFileBtn = document.getElementById('fullscreenFileBtn');
   const fullscreenNameBtn = document.getElementById('fullscreenNameBtn');
   
   // Connect fullscreen name button now that it's declared
@@ -5390,6 +5369,12 @@
       loadPolls();
   });
   
+  // Contact button
+  const contactBtn = document.getElementById('contactBtn');
+  contactBtn?.addEventListener('click', () => {
+      window.location.href = 'pages/contact-us.html';
+  });
+  
   closePollsBtn?.addEventListener('click', () => {
       pollsModal.style.display = 'none';
   });
@@ -5502,86 +5487,6 @@
       });
   }
   
-  // ---------------- File Sharing ----------------
-  const filesBtn = document.getElementById('filesBtn');
-  const filesModal = document.getElementById('filesModal');
-  const closeFilesBtn = document.getElementById('closeFilesBtn');
-  const filesList = document.getElementById('filesList');
-  const fileUploadInput = document.getElementById('fileUploadInput');
-  const uploadFileBtn = document.getElementById('uploadFileBtn');
-  
-  filesBtn?.addEventListener('click', () => {
-      filesModal.style.display = 'flex';
-      loadFiles();
-  });
-  
-  closeFilesBtn?.addEventListener('click', () => {
-      filesModal.style.display = 'none';
-  });
-  
-  filesModal?.addEventListener('click', (e) => {
-      if(e.target === filesModal) filesModal.style.display = 'none';
-  });
-  
-  uploadFileBtn?.addEventListener('click', () => {
-      fileUploadInput.click();
-  });
-  
-  fileUploadInput?.addEventListener('change', (e) => {
-      Array.from(e.target.files).forEach(file => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-              if(db) {
-                  const fileData = {
-                      name: file.name,
-                      type: file.type,
-                      size: file.size,
-                      data: event.target.result,
-                      uploadedBy: username,
-                      uploadedAt: Date.now()
-                  };
-                  db.ref('files').push(fileData);
-                  loadFiles();
-              }
-          };
-          if(file.type.startsWith('image/')) {
-              reader.readAsDataURL(file);
-          } else {
-              reader.readAsText(file);
-          }
-      });
-  });
-  
-  function loadFiles() {
-      if(!db || !filesList) return;
-      db.ref('files').limitToLast(20).once('value').then(snap => {
-          const files = snap.val() || {};
-          filesList.innerHTML = Object.entries(files).reverse().map(([id, file]) => {
-              const isImage = file.type && file.type.startsWith('image/');
-              return `
-                  <div style="padding:15px; background:rgba(255,255,255,0.05); border-radius:12px; text-align:center;">
-                      ${isImage ? `<img src="${file.data}" style="max-width:100%; max-height:150px; border-radius:8px; margin-bottom:10px;" />` : '<div style="font-size:48px; margin-bottom:10px;">📄</div>'}
-                      <div style="font-size:12px; color:rgba(255,255,255,0.9); margin-bottom:5px; word-break:break-word;">${file.name}</div>
-                      <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-bottom:10px;">${(file.size / 1024).toFixed(1)} KB</div>
-                      <button class="downloadFileBtn" data-id="${id}" style="padding:6px 12px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); border-radius:6px; color:#FFD700; cursor:pointer; font-size:12px;">Download</button>
-                  </div>
-              `;
-          }).join('');
-          document.querySelectorAll('.downloadFileBtn').forEach(btn => {
-              btn.addEventListener('click', () => {
-                  const fileId = btn.dataset.id;
-                  db.ref(`files/${fileId}`).once('value').then(snap => {
-                      const file = snap.val();
-                      const a = document.createElement('a');
-                      a.href = file.data;
-                      a.download = file.name;
-                      a.click();
-                  });
-              });
-          });
-      });
-  }
-  
   // ---------------- Emoji Reactions ----------------
   const emojiBtn = document.getElementById('emojiBtn');
   const emojiPicker = document.getElementById('emojiPicker');
@@ -5647,51 +5552,6 @@
     }
   });
   
-  
-  // File send button (works for both regular and fullscreen)
-  const sendFileBtn = document.getElementById('sendFileBtn');
-  const chatFileInput = document.createElement('input');
-  chatFileInput.type = 'file';
-  chatFileInput.style.display = 'none';
-  document.body.appendChild(chatFileInput);
-  
-  sendFileBtn?.addEventListener('click', () => {
-      chatFileInput.click();
-  });
-  
-  fullscreenFileBtn?.addEventListener('click', () => {
-    chatFileInput.click();
-  });
-  
-  chatFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if(file && db) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-              db.ref('chat').push({
-                  user: username,
-                  text: `📎 ${file.name}`,
-                  color: userColor,
-                  time: Date.now(),
-                  uid: visitorId,
-                  avatar: userProfile.avatar || '👤',
-                  avatarImage: userProfile.avatarImage || null,
-                  file: {
-                      name: file.name,
-                      type: file.type,
-                      data: event.target.result
-                  }
-              });
-          };
-          if(file.type.startsWith('image/')) {
-              reader.readAsDataURL(file);
-          } else {
-              reader.readAsText(file);
-          }
-          chatFileInput.value = ''; // Reset input
-      }
-  });
-  
   // ---------------- Attach Link (works for both regular and fullscreen) ----------------
   function attachLink() {
       const url = prompt('Enter a URL to share:');
@@ -5727,215 +5587,6 @@
   
   attachLinkBtn?.addEventListener('click', attachLink);
   fullscreenLinkBtn?.addEventListener('click', attachLink);
-  
-  // ---------------- Voice Chat ----------------
-  const voiceChatBtn = document.getElementById('voiceChatBtn');
-  const voiceIndicator = document.getElementById('voiceIndicator');
-  let mediaRecorder = null;
-  let audioChunks = [];
-  
-  let isRecording = false;
-  let recordingStream = null;
-  
-  async function startRecording(indicatorId = 'voiceIndicator') {
-      if(isRecording) return;
-      try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          recordingStream = stream;
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-          isRecording = true;
-          
-          mediaRecorder.ondataavailable = (e) => {
-              if(e.data.size > 0) {
-                  audioChunks.push(e.data);
-              }
-          };
-          
-          mediaRecorder.onstop = () => {
-              if(audioChunks.length > 0) {
-                  const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                      if(db) {
-                          db.ref('voiceMessages').push({
-                              audio: reader.result,
-                              user: username,
-                              time: Date.now(),
-                              uid: visitorId,
-                              avatar: userProfile.avatar || '👤',
-                              avatarImage: userProfile.avatarImage || null
-                          });
-                      }
-                  };
-                  reader.readAsDataURL(audioBlob);
-              }
-            stopRecording(); // Use the centralized stop function
-          };
-          
-          mediaRecorder.onerror = (e) => {
-              console.error('MediaRecorder error:', e);
-            stopRecording(); // Use the centralized stop function
-          };
-          
-          mediaRecorder.start();
-        
-        // Show indicator (check both regular and fullscreen)
-        const indicator = document.getElementById(indicatorId);
-        const fullscreenIndicator = document.getElementById('fullscreenVoiceIndicator');
-        if (indicator) indicator.style.display = 'flex';
-        if (fullscreenIndicator && fullScreenChatModal && fullScreenChatModal.style.display !== 'none') {
-            fullscreenIndicator.style.display = 'flex';
-        }
-      } catch(err) {
-          console.error('Microphone access error:', err);
-        notifications.show('Microphone access denied. Please allow microphone access to use voice chat.', 'error', 3000);
-        stopRecording(); // Ensure state is reset
-      }
-  }
-  
-  function stopRecording() {
-      if(mediaRecorder && mediaRecorder.state !== 'inactive' && isRecording) {
-          mediaRecorder.stop();
-    }
-    // Always ensure recording state is reset and indicator is hidden
-          isRecording = false;
-    if(recordingStream) {
-        recordingStream.getTracks().forEach(track => track.stop());
-        recordingStream = null;
-    }
-    // Hide indicator in both regular and fullscreen modes
-    const regularIndicator = document.getElementById('voiceIndicator');
-    const fullscreenIndicator = document.getElementById('fullscreenVoiceIndicator');
-    if(regularIndicator) regularIndicator.style.display = 'none';
-    if(fullscreenIndicator) fullscreenIndicator.style.display = 'none';
-    // Reset media recorder
-    if(mediaRecorder) {
-        mediaRecorder = null;
-    }
-    audioChunks = [];
-  }
-  
-  // Voice recording handlers (works for both regular and fullscreen)
-  function setupVoiceButton(button, indicatorId) {
-    if (!button) return;
-    
-    button.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-        startRecording(indicatorId);
-  });
-  
-    button.addEventListener('mouseup', (e) => {
-      e.preventDefault();
-      stopRecording();
-  });
-  
-    button.addEventListener('mouseleave', (e) => {
-      e.preventDefault();
-      stopRecording();
-  });
-  
-    button.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-        startRecording(indicatorId);
-  });
-  
-    button.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      stopRecording();
-  });
-  
-    button.addEventListener('touchcancel', (e) => {
-      e.preventDefault();
-      stopRecording();
-  });
-  }
-  
-  // Setup both voice buttons
-  setupVoiceButton(voiceChatBtn, 'voiceIndicator');
-  setupVoiceButton(fullscreenVoiceBtn, 'fullscreenVoiceIndicator');
-  
-  // Listen for voice messages
-  if(db) {
-      db.ref('voiceMessages').limitToLast(10).on('child_added', snapshot => {
-          const voiceMsg = snapshot.val();
-          if(!voiceMsg || !voiceMsg.audio) return;
-          
-          const msgDiv = document.createElement('div');
-          msgDiv.setAttribute('data-voice-msg-id', snapshot.key);
-          msgDiv.style.cssText = 'display:flex; gap:10px; align-items:flex-start; padding:10px; background:rgba(255,215,0,0.1); border-radius:8px; margin-bottom:10px; position:relative;';
-          
-          // Profile picture
-          const avatarDiv = document.createElement('div');
-          avatarDiv.style.width='32px';
-          avatarDiv.style.height='32px';
-          avatarDiv.style.borderRadius='50%';
-          avatarDiv.style.flexShrink='0';
-          avatarDiv.style.overflow='hidden';
-          avatarDiv.style.display='flex';
-          avatarDiv.style.alignItems='center';
-          avatarDiv.style.justifyContent='center';
-          avatarDiv.style.fontSize='20px';
-          avatarDiv.style.background='linear-gradient(135deg, #FFD700, #FFA500)';
-          if(voiceMsg.avatarImage) {
-              avatarDiv.style.backgroundImage = `url(${voiceMsg.avatarImage})`;
-              avatarDiv.style.backgroundSize = 'cover';
-              avatarDiv.style.backgroundPosition = 'center';
-              avatarDiv.textContent = '';
-          } else {
-              avatarDiv.textContent = voiceMsg.avatar || '👤';
-          }
-          msgDiv.appendChild(avatarDiv);
-          
-          const contentDiv = document.createElement('div');
-          contentDiv.style.flex='1';
-          contentDiv.innerHTML = `
-              <div style="font-weight:600; color:#FFD700; margin-bottom:5px;">${voiceMsg.user || 'User'} <i class="fas fa-microphone"></i></div>
-              <audio controls style="width:100%;"></audio>
-          `;
-          const audioEl = contentDiv.querySelector('audio');
-          audioEl.src = voiceMsg.audio;
-          msgDiv.appendChild(contentDiv);
-          
-          // Delete button if owner
-          if(voiceMsg.uid === visitorId) {
-              const delBtn = document.createElement('button');
-              delBtn.innerHTML='✖';
-              delBtn.style.border='none';
-              delBtn.style.background='transparent';
-              delBtn.style.color='rgba(255,255,255,0.5)';
-              delBtn.style.cursor='pointer';
-              delBtn.style.position='absolute';
-              delBtn.style.top='5px';
-              delBtn.style.right='5px';
-              delBtn.style.fontSize='16px';
-              delBtn.style.padding='4px 8px';
-              delBtn.title='Delete voice message';
-              delBtn.onclick = () => {
-                  if(confirm('Delete this voice message?')) {
-                      snapshot.ref.remove();
-                      msgDiv.remove();
-                  }
-              };
-              msgDiv.appendChild(delBtn);
-          }
-          
-          chatMessages.appendChild(msgDiv);
-          
-          // Auto-scroll if near bottom
-          if(chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 50){
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-          }
-      });
-      
-      // Handle voice message removal
-      db.ref('voiceMessages').on('child_removed', snapshot => {
-          const msgDiv = document.querySelector(`[data-voice-msg-id="${snapshot.key}"]`);
-          if(msgDiv) {
-              msgDiv.remove();
-          }
-      });
-  }
   
   // Initialize profile on load
   if(document.readyState === 'loading') {
