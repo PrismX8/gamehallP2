@@ -7952,7 +7952,24 @@
       categorizedGames.shooting.sort((a, b) => b.clicks - a.clicks);
       categorizedGames.sports.sort((a, b) => (b.rating * b.ratingCount) - (a.rating * a.ratingCount));
       categorizedGames.simulation.sort((a, b) => b.clicks - a.clicks);
-      categorizedGames.new.sort((a, b) => b.index - a.index); // Newest first
+      // Sort new games: prioritize Tap Road, Color Rush, and Retro Bowl, then by index (newest first)
+      categorizedGames.new.sort((a, b) => {
+          // Priority games to show first
+          const priorityGames = [
+              'https://azgames.io/tap-road.embed',
+              'https://game.azgame.io/color-rush/',
+              'https://azgames.io/retro-bowl.embed'
+          ];
+          const aIsPriority = priorityGames.includes(a.embed);
+          const bIsPriority = priorityGames.includes(b.embed);
+          
+          // If one is priority and the other isn't, priority comes first
+          if (aIsPriority && !bIsPriority) return -1;
+          if (!aIsPriority && bIsPriority) return 1;
+          
+          // If both are priority or both are not, sort by index (newest first)
+          return b.index - a.index;
+      });
   }
   
   function renderFeaturedSections() {
@@ -7964,7 +7981,7 @@
           {
               title: '⭐ New This Week',
               icon: 'fa-star',
-              games: categorizedGames.new.slice(0, 6),
+              games: categorizedGames.new.slice(0, 12),
               category: 'new',
               link: 'pages/games-new.html'
           },

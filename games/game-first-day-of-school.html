@@ -600,25 +600,48 @@
             return null;
         }
         // Fullscreen functionality - target the container div, not the iframe
-        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+        function initFullscreen() {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
             const container = document.querySelector('.premium-game-embed');
-            if (!container) return;
-            if (container.requestFullscreen) {
-                container.requestFullscreen();
-            } else if (container.webkitRequestFullscreen) {
-                container.webkitRequestFullscreen();
-            } else if (container.mozRequestFullScreen) {
-                container.mozRequestFullScreen();
-            } else if (container.msRequestFullscreen) {
-                container.msRequestFullscreen();
-            } else {
-                // Fallback: try to make iframe fullscreen (may not work in all browsers)
-                const iframe = document.getElementById('gameEmbed');
-                if (iframe && iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
+            
+            if (!fullscreenBtn || !container) return;
+            
+            fullscreenBtn.addEventListener('click', () => {
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.mozRequestFullScreen) {
+                    container.mozRequestFullScreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                } else {
+                    // Fallback: try to make iframe fullscreen (may not work in all browsers)
+                    const iframe = document.getElementById('gameEmbed');
+                    if (iframe && iframe.requestFullscreen) {
+                        iframe.requestFullscreen();
+                    }
+                }
+                // Hide button when entering fullscreen
+                fullscreenBtn.style.display = 'none';
+            });
+            
+            // Show button when exiting fullscreen (ESC key or other methods)
+            function handleFullscreenChange() {
+                if (!document.fullscreenElement && 
+                    !document.webkitFullscreenElement && 
+                    !document.mozFullScreenElement && 
+                    !document.msFullscreenElement) {
+                    // Exited fullscreen, show button again
+                    fullscreenBtn.style.display = 'flex';
                 }
             }
-        });
+            
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        }
         // Rating stars
         let selectedRating = 0;
         const ratingStars = document.querySelectorAll('#ratingStars .star');
@@ -811,6 +834,8 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('gameTitle').textContent = gameTitle;
+            // Initialize fullscreen functionality
+            initFullscreen();
             // Wait a bit for script.js to fully load and initialize db
             setTimeout(() => {
                 loadRatings();
@@ -819,4 +844,4 @@
         });
     </script>
 </body>
-</html>
+</html>

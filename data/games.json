@@ -1629,5 +1629,26 @@
       "image": "https://azgames.io/upload/cache/upload/imgs/sloperider4-m180x180.png",
       "tags": "racing,arcade,skill,endless,3d,free,html5,mobile,action",
       "description": "Slope Rider is an exhilarating 3D endless racing game that challenges your reflexes and precision. Navigate a ball down a treacherous slope filled with obstacles, gaps, and sharp turns. The game features stunning graphics, smooth controls, and increasingly difficult levels that will test your skills. Master the art of balance and speed as you try to achieve the highest score possible. With its addictive gameplay and challenging mechanics, Slope Rider offers hours of entertainment for players of all skill levels."
+    },
+    {
+      "title": "Tap Road",
+      "embed": "https://azgames.io/tap-road.embed",
+      "image": "https://azgames.io/upload/cache/upload/imgs/taproad-m180x180.jpg",
+      "tags": "racing,arcade,skill,endless,2d,free,html5,mobile,action,tap",
+      "description": "Tap Road is an exciting endless racing game where you tap to control your vehicle. Navigate through traffic, avoid obstacles, and see how far you can go. With simple tap controls and addictive gameplay, Tap Road offers hours of fun for players of all ages. Test your reflexes and reaction time as you race down the road!"
+    },
+    {
+      "title": "Color Rush",
+      "embed": "https://game.azgame.io/color-rush/",
+      "image": "https://azgames.io/upload/cache/upload/imgs/colorrush2-m180x180.png",
+      "tags": "puzzle,arcade,skill,color,matching,free,html5,mobile,action",
+      "description": "Color Rush is a fast-paced puzzle game that challenges your color matching skills. Match colors quickly and accurately to progress through levels. With vibrant graphics and engaging gameplay, Color Rush will test your reflexes and pattern recognition abilities. Perfect for quick gaming sessions or extended play!"
+    },
+    {
+      "title": "Retro Bowl",
+      "embed": "https://azgames.io/retro-bowl.embed",
+      "image": "https://azgames.io/upload/cache/upload/imgs/retro-bowl-m180x180.jpg",
+      "tags": "sports,football,strategy,retro,arcade,free,html5,mobile,action",
+      "description": "Retro Bowl is a classic-style football game that brings back the nostalgia of retro gaming. Build your team, manage your roster, and lead them to victory in this pixel-perfect football experience. With strategic gameplay and simple controls, Retro Bowl offers an authentic football gaming experience that will keep you coming back for more."
     }
 ]
