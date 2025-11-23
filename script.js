@@ -4496,6 +4496,20 @@
               userProfile.avatarImage = event.target.result;
               userProfile.avatar = '👤'; // Set default emoji
               updateProfileDisplay();
+              // Save to backend if profile is created
+              if (userProfile.profileCreated && userProfile.username && backendAPI && backendAPI.setUserProfile) {
+                  const profileData = {
+                      username: userProfile.username,
+                      status: userProfile.status || '',
+                      avatar: userProfile.avatar || '👤',
+                      avatarImage: userProfile.avatarImage,
+                      color: userProfile.color || userColor || '#007bff'
+                  };
+                  backendAPI.setUserProfile(visitorId, profileData).catch(err => {
+                      console.error('Error saving profile avatar:', err);
+                  });
+              }
+              saveProfile();
           };
           reader.readAsDataURL(file);
       }
@@ -4507,6 +4521,20 @@
       userProfile.avatarImage = null;
       userProfile.avatar = '👤';
       updateProfileDisplay();
+      // Save to backend if profile is created
+      if (userProfile.profileCreated && userProfile.username && backendAPI && backendAPI.setUserProfile) {
+          const profileData = {
+              username: userProfile.username,
+              status: userProfile.status || '',
+              avatar: userProfile.avatar || '👤',
+              avatarImage: null,
+              color: userProfile.color || userColor || '#007bff'
+          };
+          backendAPI.setUserProfile(visitorId, profileData).catch(err => {
+              console.error('Error saving profile avatar removal:', err);
+          });
+      }
+      saveProfile();
   });
   
   // Allow clicking avatar to upload
@@ -4532,16 +4560,20 @@
           chatPopupUsername.value = usernameValue;
       }
       
-      // Save to Backend
-      if(db) {
+      // Save to Backend API
+      if (backendAPI && backendAPI.setUserProfile) {
           const profileData = {
               username: userProfile.username,
-              status: userProfile.status,
-              avatar: userProfile.avatar,
-              avatarImage: userProfile.avatarImage,
-              lastSeen: Date.now()
+              status: userProfile.status || '',
+              avatar: userProfile.avatar || '👤',
+              avatarImage: userProfile.avatarImage || null,
+              color: userProfile.color || userColor || '#007bff'
           };
-          db.ref('profiles/' + visitorId).update(profileData);
+          backendAPI.setUserProfile(visitorId, profileData).then(() => {
+              console.log('Profile saved to backend');
+          }).catch(err => {
+              console.error('Error saving profile to backend:', err);
+          });
       }
       
       saveProfile();
@@ -4559,13 +4591,16 @@
   
   profileStatus?.addEventListener('change', () => {
       userProfile.status = profileStatus.value;
-      if(db && userProfile.profileCreated) {
-          db.ref('profiles/' + visitorId).update({
-              status: userProfile.status,
-              avatar: userProfile.avatar,
-              avatarImage: userProfile.avatarImage,
+      if(backendAPI && backendAPI.setUserProfile && userProfile.profileCreated && userProfile.username) {
+          const profileData = {
               username: userProfile.username,
-              lastSeen: Date.now()
+              status: userProfile.status || '',
+              avatar: userProfile.avatar || '👤',
+              avatarImage: userProfile.avatarImage || null,
+              color: userProfile.color || userColor || '#007bff'
+          };
+          backendAPI.setUserProfile(visitorId, profileData).catch(err => {
+              console.error('Error saving profile status:', err);
           });
       }
       saveProfile();
@@ -4579,10 +4614,16 @@
           if (chatPopupUsername) {
               chatPopupUsername.value = userProfile.username;
           }
-          if(db) {
-              db.ref('profiles/' + visitorId).update({
+          if(backendAPI && backendAPI.setUserProfile) {
+              const profileData = {
                   username: userProfile.username,
-                  lastSeen: Date.now()
+                  status: userProfile.status || '',
+                  avatar: userProfile.avatar || '👤',
+                  avatarImage: userProfile.avatarImage || null,
+                  color: userProfile.color || userColor || '#007bff'
+              };
+              backendAPI.setUserProfile(visitorId, profileData).catch(err => {
+                  console.error('Error saving profile username:', err);
               });
           }
           saveProfile();
@@ -6202,30 +6243,34 @@
   attachLinkBtn?.addEventListener('click', attachLink);
   fullscreenLinkBtn?.addEventListener('click', attachLink);
   
-  // Initialize profile on load
+  // Initialize profile on load - sync to backend
   if(document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-          if(db && userProfile.profileCreated) {
+          if(backendAPI && backendAPI.setUserProfile && userProfile.profileCreated && userProfile.username) {
               const profileData = {
-                  avatar: userProfile.avatar,
-                  avatarImage: userProfile.avatarImage,
-                  status: userProfile.status,
                   username: userProfile.username || username,
-                  lastSeen: Date.now()
+                  status: userProfile.status || '',
+                  avatar: userProfile.avatar || '👤',
+                  avatarImage: userProfile.avatarImage || null,
+                  color: userProfile.color || userColor || '#007bff'
               };
-              db.ref('profiles/' + visitorId).update(profileData);
+              backendAPI.setUserProfile(visitorId, profileData).catch(err => {
+                  console.error('Error syncing profile to backend:', err);
+              });
           }
       });
   } else {
-      if(db && userProfile.profileCreated) {
+      if(backendAPI && backendAPI.setUserProfile && userProfile.profileCreated && userProfile.username) {
           const profileData = {
-              avatar: userProfile.avatar,
-              avatarImage: userProfile.avatarImage,
-              status: userProfile.status,
               username: userProfile.username || username,
-              lastSeen: Date.now()
+              status: userProfile.status || '',
+              avatar: userProfile.avatar || '👤',
+              avatarImage: userProfile.avatarImage || null,
+              color: userProfile.color || userColor || '#007bff'
           };
-          db.ref('profiles/' + visitorId).update(profileData);
+          backendAPI.setUserProfile(visitorId, profileData).catch(err => {
+              console.error('Error syncing profile to backend:', err);
+          });
       }
   }
   
